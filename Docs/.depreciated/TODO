@@ -1,0 +1,97 @@
+# TODO
+
+## ✅ **What IS Compatible with Obsidian:**
+
+1. **CodeBlock Processors** - The core approach of using `registerMarkdownCodeBlockProcessor()` is correct
+2. **CSS Styling** - Using styles.css for visual effects is standard
+3. **Settings Tab** - Adding settings through `addSettingTab()` is correct
+4. **Markdown Processing** - The approach to process markdown content is valid
+5. **Plugin Structure** - The basic file structure (main.js, manifest.json, styles.css) is correct
+
+## ❌ **What Needs Adjustment:**
+
+1. **Parameters After Language** - Obsidian ignores changes made on the same line after the language name with a separated space, so our flag system (`camoblackout--blur`) needs to be handled differently
+
+2. **Inline Metadata** - The camoMetaData syntax inside codeblocks would work, but it needs to be parsed as content, not as parameters
+
+3. **Performance Concerns** - The processor fires constantly with each character entry as the user types, so we need debouncing
+
+4. **No Direct DOM Manipulation** - We should use Obsidian's API methods rather than direct DOM manipulation
+
+### **Revised Implementation Approach:**
+
+```typescript
+// CORRECTED: Obsidian-compliant implementation
+class CamoPlugin extends Plugin {
+  async onload() {
+    // Register base camo processor
+    this.registerMarkdownCodeBlockProcessor('camo', (source, el, ctx) => {
+      // Parse flags from FIRST LINE of content, not from language line
+      const lines = source.split('\n');
+      let flags = [];
+      let metadata = [];
+      let content = source;
+      
+      // Check if first line contains flags
+      if (lines[0].startsWith('--')) {
+        flags = lines[0].split('--').filter(f => f);
+        content = lines.slice(1).join('\n');
+      }
+      
+      // Parse camoMetaData from content
+      const metadataEnd = this.findMetadataEnd(lines);
+      if (metadataEnd > -1) {
+        metadata = lines.slice(0, metadataEnd);
+        content = lines.slice(metadataEnd).join('\n');
+      }
+      
+      this.renderCamoBlock(content, flags, metadata, el, ctx);
+    });
+    
+    // Register each preset as separate language
+    ['blackout', 'blueprint', 'modern95', 'ghost', 'matrix', 'classified'].forEach(preset => {
+      this.registerMarkdownCodeBlockProcessor(`camo-${preset}`, (source, el, ctx) => {
+        this.renderPresetBlock(preset, source, el, ctx);
+      });
+    });
+  }
+}
+```
+
+### **Key Adjustments for Obsidian Compliance:**
+
+1. **Use Separate Language Codes**: Instead of `camoblackout`, use `camo-blackout` (hyphen is allowed)
+
+2. **Parse Flags from Content**: Put flags in the first line of content:
+
+   ````markdown
+   ```camo-blackout
+   --blur --hover --timer:5
+   Your content here
+   ```
+   ````
+
+3. **Debounce Processing**: Add debouncing to prevent constant re-rendering:
+
+   ```typescript
+   private debounce(func: Function, wait: number) {
+     let timeout: NodeJS.Timeout;
+     return function(...args: any[]) {
+       clearTimeout(timeout);
+       timeout = setTimeout(() => func.apply(this, args), wait);
+     };
+   }
+   ```
+
+4. **Use Obsidian's CSS Variables**: Leverage existing theme variables for consistency
+
+5. **State Persistence**: Use Obsidian's data.json for settings, not custom storage
+
+### **The Design IS Valid With These Adjustments:**
+
+- The three-tier system (preset/flag/metadata) works perfectly
+- The visual effects can all be implemented with CSS
+- The preset system is ideal for Obsidian users
+- The marketplace concept could work through GitHub/community sharing
+
+**In summary**: The core design is excellent for Obsidian, but implementation details need to respect Obsidian's API limitations, particularly around codeblock parameter parsing and DOM manipulation. The architecture and user experience design remain fully valid!

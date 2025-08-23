@@ -1,0 +1,3 @@
+# TODO
+
+- [ ] "language-agnostic-support": meaning different languages can be compiled to camo IR, enabling sharing of optimization passes and back-ends.

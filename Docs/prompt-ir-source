@@ -1,0 +1,433 @@
+# REVISIONS
+
+FOR:
+
+```text
+1. Security Layer Implementation 🔴 Critical
+  > Encryption Implementation:
+  > Key Management:
+  > Password Protection:
+  > Content Sanitization:
+```
+
+> This entire section is a redundant, Remove it all.
+    > If a user required encryption that bad they wouldnt use obsidian code block plugins
+
+```text
+ 1. camoMetaData Execution Engine 🔴 Critical:
+    > Order of Operation
+    > Conditional Logic
+    > Variable Scope
+    > Error Recovery
+```
+
+> At its core, camo is an IR
+> camo-plugin source code (ts, js, css) interacts with Obsidian-API
+
+## Intermediate Representation (IR)
+
+* `camo` is an IR that acts as a bridge between:
+
+> JSON representation of the IR:
+
+```json
+{
+  "camo-obsidian": {
+    "metadata": {
+      "id": "camo-obsidian-plugin",
+      "name": "CAMO - Camouflage for Obsidian Codeblocks",
+      "version": "1.0.0",
+      "type": "intermediate-representation",
+      "description": "IR bridge between Obsidian API and fenced codeblocks for visual camouflage effects",
+      "architecture": "COMS (Comprehensive Organized Modular Structure)",
+      "minObsidianVersion": "0.15.0"
+    },
+
+    "core": {
+      "camo": {
+        "id": "camo-core",
+        "type": "ir-engine",
+        "name": "CAMO Core Engine",
+        "description": "Intermediate Representation that bridges Obsidian source and target codeblocks",
+        "components": {
+          "parser": {
+            "id": "camo-parser",
+            "type": "content-parser",
+            "description": "Parses content-based configuration from codeblocks",
+            "functions": [
+              "parseFlags",
+              "parseMetadata",
+              "detectType",
+              "hashContent"
+            ]
+          },
+          "renderer": {
+            "id": "camo-renderer",
+            "type": "css-renderer",
+            "description": "Renders visual effects using CSS classes only",
+            "debounce": 500,
+            "functions": [
+              "render",
+              "applyState",
+              "createContainer",
+              "injectStyles"
+            ]
+          },
+          "stateManager": {
+            "id": "camo-state-manager",
+            "type": "persistence-layer",
+            "description": "Manages block states using Obsidian data.json",
+            "storage": ".obsidian/plugins/camo/data.json",
+            "functions": [
+              "loadState",
+              "saveState",
+              "getBlockState",
+              "cleanupOldStates"
+            ]
+          }
+        }
+      }
+    },
+
+    "modules": {
+      "visualCamouflage": {
+        "id": "visual-camouflage",
+        "type": "effect-module",
+        "path": "/src/camo/modules/VisualCamouflage.ts",
+        "description": "CSS-based visual effects engine",
+        "effects": [
+          "blur",
+          "pixelate",
+          "scramble",
+          "glitch",
+          "redact",
+          "matrix"
+        ],
+        "implementation": "css-only",
+        "functions": [
+          "applyEffect",
+          "removeEffect",
+          "getEffectStyles",
+          "setupRevealTrigger"
+        ]
+      },
+
+      "camoDictionary": {
+        "id": "camo-dictionary",
+        "type": "preset-registry",
+        "path": "/src/camo/modules/CamoDictionary.ts",
+        "description": "Registry and compiler for preset configurations",
+        "presets": {
+          "blackout": {
+            "id": "blackout",
+            "language": "camo-blackout",
+            "category": "privacy",
+            "cssClass": "camo-preset-blackout",
+            "defaultMetadata": [
+              ":: set[background] // content[all] % {color}(#000000) -> {visual[blackout]}",
+              ":: set[opacity] // text[all] % {value}(0) -> {text[hidden]}",
+              ":: set[reveal] // trigger[click] % {animation}(fade) -> {interaction[ready]}"
+            ]
+          },
+          "blueprint": {
+            "id": "blueprint",
+            "language": "camo-blueprint",
+            "category": "aesthetic",
+            "cssClass": "camo-preset-blueprint",
+            "defaultMetadata": [
+              ":: set[background] // content[all] % {color}(#0D1F2D) -> {visual[blueprint]}",
+              ":: apply[grid] // overlay % {spacing}(20px) -> {grid[applied]}",
+              ":: set[text] // color % {value}(#4FC3F7) -> {text[cyan]}"
+            ]
+          },
+          "modern95": {
+            "id": "modern95",
+            "language": "camo-modern95",
+            "category": "aesthetic",
+            "cssClass": "camo-preset-modern95",
+            "defaultMetadata": [
+              ":: set[background] // content[all] % {color}(#2B2B2B) -> {visual[charcoal]}",
+              ":: set[text] // color % {value}(#00FF41) -> {text[terminal_green]}",
+              ":: apply[border] // style % {type}(solid) -> {border[retro]}"
+            ]
+          },
+          "ghost": {
+            "id": "ghost",
+            "language": "camo-ghost",
+            "category": "aesthetic",
+            "cssClass": "camo-preset-ghost",
+            "defaultMetadata": [
+              ":: set[opacity] // content[all] % {value}(0.15) -> {visual[translucent]}",
+              ":: apply[blur] // backdrop % {intensity}(4px) -> {effect[blurred_bg]}",
+              ":: reveal[hover] // opacity % {target}(1.0) -> {interaction[hover_reveal]}"
+            ]
+          },
+          "matrix": {
+            "id": "matrix",
+            "language": "camo-matrix",
+            "category": "aesthetic",
+            "cssClass": "camo-preset-matrix",
+            "defaultMetadata": [
+              ":: set[background] // content[all] % {color}(#000000) -> {visual[black]}",
+              ":: apply[rain] // effect % {characters}(katakana) -> {animation[rain]}",
+              ":: reveal[click] // animation % {type}(digital_fade) -> {ready}"
+            ]
+          },
+          "classified": {
+            "id": "classified",
+            "language": "camo-classified",
+            "category": "privacy",
+            "cssClass": "camo-preset-classified",
+            "defaultMetadata": [
+              ":: set[background] // content[all] % {color}(#F5F5DC) -> {visual[document]}",
+              ":: apply[redaction] // bars % {coverage}(70%) -> {redacted[partial]}",
+              ":: add[stamps] // watermark % {text}(CLASSIFIED) -> {stamps[added]}"
+            ]
+          }
+        },
+        "functions": [
+          "getPreset",
+          "registerCustomPreset",
+          "compilePreset",
+          "getAllPresetStyles"
+        ]
+      },
+
+      "backendCamouflage": {
+        "id": "backend-camouflage",
+        "type": "state-module",
+        "path": "/src/camo/modules/BackendCamouflage.ts",
+        "description": "State management and persistence layer",
+        "features": {
+          "stateManagement": "Map-based block states",
+          "persistence": "Obsidian data.json API",
+          "integrity": "Merkle tree verification",
+          "transactions": "ACID compliance"
+        },
+        "functions": [
+          "saveState",
+          "loadState",
+          "verifyIntegrity",
+          "beginTransaction",
+          "commitTransaction",
+          "rollbackTransaction"
+        ]
+      },
+
+      "camoCoordinateSystem": {
+        "id": "camo-coordinate-system",
+        "type": "navigation-module",
+        "path": "/src/camo/modules/CamoCoordinateSystem.ts",
+        "description": "Spatial positioning and block relationships",
+        "algorithms": {
+          "pathfinding": "Dijkstra with caching",
+          "positioning": "Gravitational optimization",
+          "distanceMetrics": ["euclidean", "manhattan", "chebyshev"]
+        },
+        "functions": [
+          "assignPosition",
+          "findShortestPath",
+          "getNeighborhood",
+          "detectCollisions"
+        ]
+      }
+    },
+
+    "syntaxLayers": {
+      "camoMetaData": {
+        "id": "camo-metadata",
+        "type": "inline-syntax",
+        "name": "camoMetaData",
+        "description": "CSS-like inline customization syntax for camo blocks",
+        "pattern": "[DECLARATION] // [TARGET] % [EFFECT] -> [OUTCOME]",
+        "operators": {
+          "::": "new statement",
+          ":^:": "hierarchical reference",
+          "//": "target relation",
+          "%": "effect operator",
+          "->": "outcome trigger"
+        },
+        "keywords": [
+          "set", "apply", "protect", "reveal",
+          "hide", "mask", "redact", "select",
+          "filter", "transform", "link", "navigate",
+          "group", "coordinate", "store", "retrieve",
+          "reset", "snapshot"
+        ],
+        "execution": {
+          "order": ["declaration", "target", "effect", "outcome"],
+          "scope": "block-local",
+          "errorHandling": "graceful-fallback"
+        }
+      },
+
+      "presetFlags": {
+        "id": "preset-flags",
+        "type": "content-modifiers",
+        "name": "presetFlags",
+        "description": "Quick modification flags parsed from first content line",
+        "syntax": "--[modifier]:[value]",
+        "categories": {
+          "visual": ["blur", "peek", "flash", "fade", "glitch", "scan"],
+          "interaction": ["hover", "click", "focus", "timer", "password"],
+          "layout": ["compact", "wide", "centered", "bordered"]
+        },
+        "chaining": {
+          "enabled": true,
+          "separator": " ",
+          "priority": ["visual", "interaction", "layout"],
+          "example": "--blur --hover --timer:5"
+        }
+      }
+    },
+
+    "userExperience": {
+      "complexityTiers": {
+        "tier1": {
+          "name": "camoPreset",
+          "target": "casual-users",
+          "syntax": "```camo-[preset]",
+          "configuration": "zero",
+          "examples": ["camo-blackout", "camo-blueprint", "camo-ghost"]
+        },
+        "tier2": {
+          "name": "presetFlag",
+          "target": "intermediate-users",
+          "syntax": "```camo-[preset]\\n--[flags]",
+          "configuration": "minimal",
+          "examples": ["--blur --hover", "--timer:5 --fade"]
+        },
+        "tier3": {
+          "name": "camoMetaData",
+          "target": "power-users",
+          "syntax": "```camo\\n::[metadata]",
+          "configuration": "full",
+          "examples": [":: set[blur] // content[all] % {intensity}(60) -> {visual[blurred]}"]
+        }
+      }
+    },
+
+    "obsidianIntegration": {
+      "api": {
+        "id": "obsidian-api",
+        "type": "plugin-interface",
+        "description": "Interface with Obsidian Plugin API",
+        "methods": {
+          "registration": "registerMarkdownCodeBlockProcessor",
+          "storage": "loadData/saveData",
+          "dom": "createDiv/createEl",
+          "settings": "addSettingTab",
+          "commands": "addCommand"
+        },
+        "constraints": {
+          "noParamsAfterLanguage": true,
+          "processorDebouncing": true,
+          "noDirect DOMManipulation": true,
+          "noLocalStorage": true
+        }
+      },
+
+      "codeblockProcessors": {
+        "base": {
+          "language": "camo",
+          "processor": "processCAMOBlock",
+          "debounce": 500
+        },
+        "presets": {
+          "languages": [
+            "camo-blackout",
+            "camo-blueprint",
+            "camo-modern95",
+            "camo-ghost",
+            "camo-matrix",
+            "camo-classified"
+          ],
+          "processor": "processPresetBlock",
+          "debounce": 500
+        }
+      }
+    },
+
+    "qualityOfLife": {
+      "features": {
+        "intelligentDefaults": {
+          "contentTypeDetection": true,
+          "autoPresetSuggestion": true,
+          "performanceOptimization": true
+        },
+        "presetBuilder": {
+          "type": "modal-ui",
+          "realTimePreview": true,
+          "exportFormat": "json",
+          "shareVia": "github-gist"
+        },
+        "contextAwareness": {
+          "themeDetection": "light/dark",
+          "deviceAdaptation": "mobile/desktop",
+          "performanceMode": "auto",
+          "batterySaver": true
+        }
+      }
+    },
+
+    "performance": {
+      "targets": {
+        "parseTime": "10ms",
+        "renderTime": "50ms",
+        "animationFPS": 60,
+        "memoryPerBlock": "1MB",
+        "debounceDelay": "500ms"
+      },
+      "optimizations": {
+        "lazyLoading": true,
+        "virtualScrolling": true,
+        "cssOnlyEffects": true,
+        "gpuAcceleration": true,
+        "caching": "content-hash"
+      }
+    },
+
+    "futureevelopment": {
+      "postLaunch": {
+        "languageAgnostic": {
+          "description": "Different languages can compile to CAMO IR",
+          "benefits": "Shared optimization passes and backends",
+          "targetLanguages": ["markdown", "html", "latex"],
+          "timeline": "v2.0"
+        },
+        "marketplace": {
+          "presetSharing": "github-based",
+          "communityVoting": true,
+          "categories": ["privacy", "aesthetic", "functional"]
+        },
+        "advancedFeatures": {
+          "aiPresetSuggestions": "ML-based recommendations",
+          "crossVaultSync": "Settings synchronization",
+          "collaborativeHiding": "Shared reveal states"
+        }
+      }
+    },
+
+    "fileStructure": {
+      "root": "camo-obsidian-plugin/",
+      "src": {
+        "main.ts": "Plugin entry point",
+        "camo": {
+          "core": ["CamoCore.ts", "CamoParser.ts", "CamoRenderer.ts"],
+          "modules": ["VisualCamouflage.ts", "CamoDictionary.ts", "BackendCamouflage.ts", "CamoCoordinateSystem.ts"],
+          "metadata": ["MetaDataParser.ts", "MetaDataExecutor.ts"],
+          "presets": ["blackout.ts", "blueprint.ts", "modern95.ts", "ghost.ts", "matrix.ts", "classified.ts"],
+          "flags": ["FlagParser.ts", "ModifierChain.ts"]
+        },
+        "ui": ["PresetBuilder.ts", "SettingsTab.ts"],
+        "styles.css": "All CSS effects and presets"
+      },
+      "dist": {
+        "main.js": "Compiled plugin",
+        "manifest.json": "Plugin manifest",
+        "styles.css": "Plugin styles"
+      }
+    }
+  }
+}
+```
