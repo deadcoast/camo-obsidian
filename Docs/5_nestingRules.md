@@ -1,6 +1,13 @@
-# `camoMetaData` nestingRules Examples
+# nestingRules Examples
 
-`nestingRules`
+> [**INDEX**](./0_INDEX.md)
+
+> [!NOTE]
+> [**LAST-PAGE**](./4_camoMetaData.md)
+>
+> [**CURRENT-PAGE:** `nestingRules`](./5_nestingRules.md)
+>
+> [**NEXT-PAGE:**](./6_userExperience.md)
 
 ## Basic Visual Camouflage Example
 

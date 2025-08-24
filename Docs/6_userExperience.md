@@ -1,6 +1,13 @@
 # Quality of Life & User Experience Design
 
----
+> [**INDEX**](./0_INDEX.md)
+
+> [!NOTE]
+> [**LAST-PAGE**](./5_nestingRules.md)
+>
+> [**CURRENT-PAGE:** `userExperience`](./6_userExperience.md)
+>
+> [**NEXT-PAGE:**](./7_systemArchitecture.md)
 
 ## Executive Summary
 
@@ -72,8 +79,8 @@ Reveals on interaction
 ````markdown
 ```camoblueprint
 :::
- :: 
-  
+ ::
+
 Technical blueprint aesthetic with grid patterns
 Professional engineering look
 ````
@@ -230,26 +237,26 @@ Combines: blur effect + hover reveal + 3-second auto-reveal
 camoMetaData:
   version: 1.0.0
   target: "camo-block-id"
-  
+
   appearance:
     background:
       color: "#1a1a1a"
       gradient: "linear-gradient(45deg, #1a1a1a, #2d2d2d)"
       image: "url(pattern.svg)"
       blend-mode: "multiply"
-    
+
     text:
       color: "#00ff00"
       font-family: "Fira Code, monospace"
       font-size: "14px"
       text-shadow: "0 0 10px rgba(0,255,0,0.5)"
-    
+
     effects:
       blur: "0px"
       opacity: 1
       transform: "none"
       filter: "none"
-  
+
   animations:
     - type: "entrance"
       duration: "0.5s"
@@ -257,7 +264,7 @@ camoMetaData:
       keyframes:
         from: {opacity: 0, transform: "translateY(-20px)"}
         to: {opacity: 1, transform: "translateY(0)"}
-    
+
     - type: "idle"
       duration: "2s"
       repeat: "infinite"
@@ -265,20 +272,20 @@ camoMetaData:
         0%: {filter: "brightness(1)"}
         50%: {filter: "brightness(1.1)"}
         100%: {filter: "brightness(1)"}
-  
+
   interactions:
     hover:
       transform: "scale(1.02)"
       box-shadow: "0 5px 15px rgba(0,0,0,0.3)"
-    
+
     click:
       action: "reveal"
       transition: "all 0.3s ease"
-    
+
     keyboard:
       "Ctrl+Shift+R": "reveal"
       "Escape": "hide"
-  
+
   accessibility:
     aria-label: "Hidden code block"
     role: "region"
@@ -297,11 +304,11 @@ class CamoIntelligence {
   detectContentType(): ContentType {
     // Automatically selects best preset based on content
   }
-  
+
   suggestPreset(): CamoPreset {
     // ML-based preset recommendation
   }
-  
+
   autoOptimize(): OptimizationResult {
     // Performance optimization based on viewport
   }
@@ -358,7 +365,7 @@ class CamoSafeguard {
     this.tryMinimalStyle,
     this.renderPlaintext
   ];
-  
+
   async renderSafe(content: string, preset: string): Promise<void> {
     for (const handler of this.fallbackChain) {
       try {

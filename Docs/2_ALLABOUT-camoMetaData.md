@@ -1,5 +1,14 @@
 # ALLABOUT-camoMetaData
 
+> [**INDEX**](./0_INDEX.md)
+
+> [!NOTE]
+> [**LAST-PAGE**](./1_OVERVIEW.md)
+>
+> [**CURRENT-PAGE:** `ALLABOUT-camoMetaData`](./2_ALLABOUT-camoMetaData.md)
+>
+> [**NEXT-PAGE:**](./3_camoIR.md)
+
 ## What is camoMetaData?
 
 Think of camoMetaData as the **CSS for your CAMO codeblocks**. While `camo` is the structure (like HTML), `camoMetaData` is the styling and behavior layer that makes your hidden content look and act exactly how you want it to.
@@ -220,9 +229,9 @@ If something isn't working, verify:
 
 ### Common Mistakes
 
-❌ `:: set(blur)` - Wrong brackets (should be `[blur]`)  
-❌ `:: blur // content[all]` - Missing keyword (should be `set[blur]`)  
-❌ `:: set[blur] content[all]` - Missing `//` operator  
+❌ `:: set(blur)` - Wrong brackets (should be `[blur]`)
+❌ `:: blur // content[all]` - Missing keyword (should be `set[blur]`)
+❌ `:: set[blur] content[all]` - Missing `//` operator
 ✅ `:: set[blur] // content[all] % {intensity}(60) -> {visual[blurred]}`
 
 ---
@@ -329,19 +338,19 @@ Use meaningful names and consistent indentation:
 
 ## FAQ
 
-**Q: Can I use camoMetaData without understanding code?**  
+**Q: Can I use camoMetaData without understanding code?**
 A: Yes! Start with presets and simple commands. You don't need programming knowledge.
 
-**Q: What happens if I make a syntax error?**  
+**Q: What happens if I make a syntax error?**
 A: CAMO will fall back to default behavior and show an error message. Your content remains safe.
 
-**Q: Can I save my custom camoMetaData as a preset?**  
+**Q: Can I save my custom camoMetaData as a preset?**
 A: Yes! Save frequently-used camoMetaData patterns as custom presets for reuse.
 
-**Q: Does camoMetaData work on mobile?**  
+**Q: Does camoMetaData work on mobile?**
 A: Yes, but some visual effects may be simplified for performance.
 
-**Q: Can I combine multiple presets?**  
+**Q: Can I combine multiple presets?**
 A: Not directly, but you can use one preset and add camoMetaData to modify it.
 
 ---

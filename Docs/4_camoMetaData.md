@@ -1,4 +1,13 @@
-# CamoMetaData Syntax - Enhanced Technical Specification v2.0
+# camoMetaData
+
+> [**INDEX**](./0_INDEX.md)
+
+> [!NOTE]
+> [**LAST-PAGE**](./3_camoIR.md)
+>
+> [**CURRENT-PAGE:** `camoMetaData`](./4_camoMetaData.md)
+>
+> [**NEXT-PAGE:**](./5_nestingRules.md)
 
 ## Diagram TODO
 

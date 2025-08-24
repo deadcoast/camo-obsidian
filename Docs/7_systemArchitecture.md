@@ -1,11 +1,20 @@
 # CAMO systemArchitecture - Technical Overview v2.0
 
+> [**INDEX**](./0_INDEX.md)
+
+> [!NOTE]
+> [**LAST-PAGE**](./6_userExperience.md)
+>
+> [**CURRENT-PAGE:** `systemArchitecture`](./7_systemArchitecture.md)
+>
+> [**NEXT-PAGE:**](./8_userExperience.md)
+
 ## Executive Summary
 
-**Application:** CAMO  
-**Core Purpose:** A sophisticated Obsidian plugin providing renderable codeblocks with advanced camouflage capabilities for sensitive content protection  
-**Platform:** Obsidian.md v0.15.0+  
-**Architecture:** Modular TypeScript with reactive rendering pipeline  
+**Application:** CAMO
+**Core Purpose:** A sophisticated Obsidian plugin providing renderable codeblocks with advanced camouflage capabilities for sensitive content protection
+**Platform:** Obsidian.md v0.15.0+
+**Architecture:** Modular TypeScript with reactive rendering pipeline
 **Development Complexity:** 25/100 (increased due to real-time parsing requirements)
 
 ---
@@ -38,8 +47,8 @@ interface CamoEngine {
 
 ### 1. CamoMetaDataParser
 
-**Purpose:** Parse and interpret the camoMetaData syntax within codeblocks  
-**Path:** `/src/camo/modules/CamoMetaDataParser.ts`  
+**Purpose:** Parse and interpret the camoMetaData syntax within codeblocks
+**Path:** `/src/camo/modules/CamoMetaDataParser.ts`
 **Development Difficulty:** 35/100
 
 #### Core Components
@@ -113,8 +122,8 @@ class CamoGrammar {
 
 ### 2. VisualCamouflage (Enhanced)
 
-**Purpose:** Real-time visual transformation engine  
-**Path:** `/src/camo/modules/VisualCamouflage.ts`  
+**Purpose:** Real-time visual transformation engine
+**Path:** `/src/camo/modules/VisualCamouflage.ts`
 **Development Difficulty:** 30/100
 
 #### Rendering Strategies
@@ -137,13 +146,13 @@ interface RenderStrategy {
 ```typescript
 class EffectCompositor {
   private effectStack: VisualEffect[] = [];
-  
+
   addEffect(effect: VisualEffect, priority: number) {
     // Layer effects based on priority
     // Handle effect conflicts
     // Optimize rendering performance
   }
-  
+
   composite(content: HTMLElement): void {
     // Apply CSS transforms
     // Canvas-based effects for complex visuals
@@ -163,8 +172,8 @@ class EffectCompositor {
 
 ### 3. CamoSecurityLayer (New Module)
 
-**Purpose:** Handle encryption, authentication, and access control  
-**Path:** `/src/camo/modules/CamoSecurityLayer.ts`  
+**Purpose:** Handle encryption, authentication, and access control
+**Path:** `/src/camo/modules/CamoSecurityLayer.ts`
 **Development Difficulty:** 40/100
 
 #### Encryption Pipeline
@@ -180,13 +189,13 @@ interface EncryptionScheme {
 class CamoSecurity {
   private keyDerivation: PBKDF2;
   private sessionKeys: Map<string, CryptoKey>;
-  
+
   async encrypt(content: string, scheme: string): Promise<EncryptedData> {
     // Apply selected encryption
     // Generate initialization vectors
     // Store encryption metadata
   }
-  
+
   async decrypt(data: EncryptedData, key: string): Promise<string> {
     // Verify authentication
     // Decrypt content
@@ -205,14 +214,14 @@ interface AccessControl {
     privileged: 'password+2fa',
     owner: 'biometric'
   };
-  
+
   permissions: {
     view: boolean;
     copy: boolean;
     export: boolean;
     modify: boolean;
   };
-  
+
   audit: {
     logAccess: boolean;
     trackChanges: boolean;
@@ -225,8 +234,8 @@ interface AccessControl {
 
 ### 4. CamoReactiveRenderer (New Module)
 
-**Purpose:** React to camoMetaData instructions and update display in real-time  
-**Path:** `/src/camo/modules/CamoReactiveRenderer.ts`  
+**Purpose:** React to camoMetaData instructions and update display in real-time
+**Path:** `/src/camo/modules/CamoReactiveRenderer.ts`
 **Development Difficulty:** 35/100
 
 #### State Management
@@ -235,14 +244,14 @@ interface AccessControl {
 class CamoStateManager {
   private state: Map<string, BlockState> = new Map();
   private observers: Set<StateObserver> = new Set();
-  
+
   updateState(blockId: string, instruction: ParsedStatement) {
     // Parse camoMetaData instruction
     // Update block state
     // Trigger reactive updates
     // Maintain state history for undo/redo
   }
-  
+
   subscribe(observer: StateObserver) {
     // Register reactive components
     // Batch updates for performance
@@ -256,7 +265,7 @@ class CamoStateManager {
 class InstructionProcessor {
   process(instruction: ParsedStatement): RenderAction[] {
     const actions: RenderAction[] = [];
-    
+
     // Map camoMetaData to render actions
     switch(instruction.declaration.keyword) {
       case 'set':
@@ -270,7 +279,7 @@ class InstructionProcessor {
         break;
       // ... more keyword handlers
     }
-    
+
     return actions;
   }
 }
@@ -288,17 +297,17 @@ const CAMO_KEYWORDS = {
   'set': 'Modify visual property',
   'apply': 'Apply effect or filter',
   'remove': 'Remove effect or property',
-  
+
   // Security Operations
   'protect': 'Apply security measure',
   'encrypt': 'Encrypt content',
   'authenticate': 'Require authentication',
-  
+
   // Display Control
   'reveal': 'Set reveal conditions',
   'hide': 'Set hiding conditions',
   'toggle': 'Define toggle behavior',
-  
+
   // Navigation
   'link': 'Connect to other blocks',
   'navigate': 'Define navigation paths',
@@ -315,13 +324,13 @@ const CAMO_FUNCTIONS = {
   'line': 'Select specific line(s)',
   'pattern': 'Select by regex pattern',
   'element': 'Select by HTML element',
-  
+
   // Effect functions
   'blur': 'Apply blur effect',
   'scramble': 'Scramble text',
   'redact': 'Black bar redaction',
   'pixelate': 'Pixelation effect',
-  
+
   // Trigger functions
   'hover': 'Mouse hover trigger',
   'click': 'Click trigger',

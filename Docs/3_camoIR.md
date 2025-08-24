@@ -1,5 +1,14 @@
 # camoIR.md - IR Implementation on Obsidian
 
+> [**INDEX**](./0_INDEX.md)
+
+> [!NOTE]
+> [**LAST-PAGE**](./2_ALLABOUT-camoMetaData.md)
+>
+> [**CURRENT-PAGE:** `camoIR`](./3_camoIR.md)
+>
+> [**NEXT-PAGE:**](./4_camoMetaData.md)
+
 ## 1. camoMetaData Execution Engine 🔴 Critical
 
 Since CAMO is an IR, the execution engine needs clear definition:
