@@ -1,15 +1,15 @@
 {
-	"name": "obsidian-sample-plugin",
+	"name": "camo-obsidian-plugin",
 	"version": "1.0.0",
-	"description": "This is a sample plugin for Obsidian (https://obsidian.md)",
+	"description": "CAMO - Camouflage for Codeblocks. Advanced hiding and styling for Obsidian codeblocks with three-tier complexity system.",
 	"main": "main.js",
 	"scripts": {
 		"dev": "node esbuild.config.mjs",
 		"build": "tsc -noEmit -skipLibCheck && node esbuild.config.mjs production",
 		"version": "node version-bump.mjs && git add manifest.json versions.json"
 	},
-	"keywords": [],
-	"author": "",
+	"keywords": ["obsidian", "plugin", "codeblock", "camouflage", "privacy", "security"],
+	"author": "CAMO Team",
 	"license": "MIT",
 	"devDependencies": {
 		"@types/node": "^16.11.6",
