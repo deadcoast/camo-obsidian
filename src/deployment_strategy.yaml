@@ -1,0 +1,38 @@
+deployment:
+  repository:
+    structure:
+      - main.js         # Compiled plugin
+      - manifest.json   # Plugin manifest
+      - styles.css      # Plugin styles
+      - README.md       # Documentation
+
+  manifest:
+    id: "camo-codeblock"
+    name: "CAMO - Camouflage for Codeblocks"
+    author: "Your Name"
+    description: "Hide and stylize your codeblocks with presets and custom effects"
+    version: "1.0.0"
+    minAppVersion: "0.15.0"
+    isDesktopOnly: false
+
+  release_process:
+    1_development:
+      - Build with esbuild
+      - Test in development vault
+      - Validate with Obsidian linter
+
+    2_beta:
+      - Release to GitHub
+      - Beta testing with BRAT plugin
+      - Gather feedback
+
+    3_submission:
+      - Submit PR to obsidian-releases
+      - Pass review process
+      - Available in Community Plugins
+
+  compatibility:
+    - Desktop: Full support
+    - Mobile: Full support with reduced effects
+    - Sync: Settings sync via Obsidian Sync
+    - Publish: Styles work in published sites

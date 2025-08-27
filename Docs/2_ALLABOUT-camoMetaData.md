@@ -132,7 +132,7 @@ Hidden content
 ### With Preset (Automatic camoMetaData)
 
 ````markdown
-```camoblackout
+```camo-blackout
 Hidden content
 ```
 ````
@@ -148,7 +148,7 @@ Hidden content
 You can start with a preset and add your own camoMetaData:
 
 ````markdown
-```camoblackout
+```camo-blackout
 :: add[timer] // reveal % {after}(5s) -> {timed[reveal]}
 This starts as blackout but reveals after 5 seconds
 ```
@@ -308,7 +308,7 @@ Begin with basic commands before attempting complex hierarchies:
 
 If a preset does what you need, use it instead of writing custom camoMetaData:
 
-```camoblackout
+```camo-blackout
 ```
 
 ### 3. Comment Complex Logic
@@ -371,7 +371,7 @@ Start with presets, experiment with simple modifications, and gradually explore 
 
 ## Next Steps
 
-1. **Try a preset:** Start with ````camoblackout```
+1. **Try a preset:** Start with ````camo-blackout```
 2. **Add simple camoMetaData:** Add a reveal trigger
 3. **Experiment:** Try different effects and combinations
 4. **Share:** Create and share your own presets with the community

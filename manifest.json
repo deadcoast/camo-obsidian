@@ -1,0 +1,11 @@
+{
+  "id": "camo-codeblock",
+  "name": "CAMO - Camouflage for Codeblocks",
+  "version": "1.0.0",
+  "minAppVersion": "0.15.0",
+  "description": "Hide and stylize your codeblocks with presets, flags, and custom effects. Three-tier system from simple presets to advanced camoMetaData syntax.",
+  "author": "CAMO Team",
+  "authorUrl": "",
+  "fundingUrl": "",
+  "isDesktopOnly": false
+}

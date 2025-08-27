@@ -62,7 +62,7 @@ CAMO extends beyond technical capability to deliver a **user-first experience**
 #### 1. Blackout Series
 
 ````markdown
-```camoblackout
+```camo-blackout
 Content completely hidden under solid black overlay
 Reveals on interaction
 ````
@@ -77,7 +77,7 @@ Reveals on interaction
 #### 2. Blueprint Series
 
 ````markdown
-```camoblueprint
+```camo-blueprint
 :::
  ::
 
@@ -96,7 +96,7 @@ Professional engineering look
 #### 3. Modern95 Series
 
 ````markdown
-```camomodern95
+```camo-modern95
 Retro terminal meets modern design
 Nostalgic yet contemporary
 ````
@@ -112,7 +112,7 @@ Nostalgic yet contemporary
 #### 4. Ghost Series
 
 ````markdown
-```camoghost
+```camo-ghost
 Semi-transparent overlay with blur
 Content visible but obscured
 ````
@@ -128,7 +128,7 @@ Content visible but obscured
 #### 5. Matrix Series
 
 ````markdown
-```camomatrix
+```camo-matrix
 Digital rain effect with green cascading characters
 Cyberpunk aesthetic
 ````
@@ -144,7 +144,7 @@ Cyberpunk aesthetic
 #### 6. Classified Series
 
 ````markdown
-```camoclassified
+```camo-classified
 Redacted document style with black bars
 Government document aesthetic
 ````
@@ -188,36 +188,36 @@ camo[preset]--[modifier1]--[modifier2]
 
 |Modifier|Effect|Example|
 |---|---|---|
-|`--blur`|Applies gaussian blur (4px default)|`camoblackout--blur`|
-|`--peek`|Shows camoblackout until clicked|`camoblueprint--peek`|
-|`--flash`|Shows white flash before reveal|`camomodern95--flash`|
-|`--fade`|Gradual opacity transition|`camoghost--fade`|
-|`--glitch`|Digital glitch effect|`camomatrix--glitch`|
-|`--scan`|Scanning line animation|`camoclassified--scan`|
+|`--blur`|Applies gaussian blur (4px default)|`camo-blackout--blur`|
+|`--peek`|Shows camo-blackout until clicked|`camo-blueprint--peek`|
+|`--flash`|Shows white flash before reveal|`camo-modern95--flash`|
+|`--fade`|Gradual opacity transition|`camo-ghost--fade`|
+|`--glitch`|Digital glitch effect|`camo-matrix--glitch`|
+|`--scan`|Scanning line animation|`camo-classified--scan`|
 
 #### Interaction Modifiers
 
 |Modifier|Effect|Example|
 |---|---|---|
-|`--hover`|Reveal on hover only|`camoblackout--hover`|
-|`--click`|Reveal on click only|`camoblueprint--click`|
-|`--focus`|Reveal when codeblock focused|`camoghost--focus`|
-|`--timer`|Auto-reveal after X seconds|`camomatrix--timer:5`|
-|`--password`|Require password to reveal|`camoclassified--password`|
+|`--hover`|Reveal on hover only|`camo-blackout--hover`|
+|`--click`|Reveal on click only|`camo-blueprint--click`|
+|`--focus`|Reveal when codeblock focused|`camo-ghost--focus`|
+|`--timer`|Auto-reveal after X seconds|`camo-matrix--timer:5`|
+|`--password`|Require password to reveal|`camo-classified--password`|
 
 #### Layout Modifiers
 
 |Modifier|Effect|Example|
 |---|---|---|
-|`--compact`|Reduces padding/margins|`camoblueprint--compact`|
-|`--wide`|Extends to full width|`camomodern95--wide`|
-|`--centered`|Centers content|`camoghost--centered`|
-|`--bordered`|Adds decorative border|`camomatrix--bordered`|
+|`--compact`|Reduces padding/margins|`camo-blueprint--compact`|
+|`--wide`|Extends to full width|`camo-modern95--wide`|
+|`--centered`|Centers content|`camo-ghost--centered`|
+|`--bordered`|Adds decorative border|`camo-matrix--bordered`|
 
 ### Modifier Chaining Rules
 
 ````markdown
-```camoblackout--blur--hover--timer:3
+```camo-blackout--blur--hover--timer:3
 Combines: blur effect + hover reveal + 3-second auto-reveal
 ````
 
@@ -338,7 +338,7 @@ interface PresetMarketplace {
 
 ```yaml
 camoPreset:
-  extends: "camoblueprint"
+  extends: "camo-blueprint"
   overrides:
     background.color: "#001f3f"
     text.color: "#ffffff"
@@ -392,7 +392,7 @@ class CamoSafeguard {
 ### Casual User Flow
 
 ```text
-1. Types: ```camoblackout
+1. Types: ```camo-blackout
 2. Content is hidden
 3. Clicks to reveal
 4. Done!
@@ -401,7 +401,7 @@ class CamoSafeguard {
 ### Intermediate User Flow
 
 ```text
-1. Types: ```camoblueprint--blur--hover
+1. Types: ```camo-blueprint--blur--hover
 2. Sees blurred blueprint style
 3. Hovers to clarify
 4. Adjusts modifiers as needed

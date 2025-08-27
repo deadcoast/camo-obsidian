@@ -20,34 +20,34 @@
 ```
 
 ```text
-┌─────┐                ┌─────┐               ┌─────┐               ┌─────┐
-│ [1] │ DECLARATION    │ [2] │ TARGET        │ [3] │ EFFECT        │ [4] │ OUTPUT
-├─────┴────────────────┼─────┴───────────────┼─────┴───────────────┼─────┴────────────┐
-│  [1.1] NEWLINESTRING │  [2.1] FUNCTION     │  [3.1] ACTION       │  [4.1] OUTCOME   │
-├──────────────────────┼─────────────────────┼─────────────────────┼──────────────────┤
-│  [1.2] KEYWORD       │  [2.2] OPERATOR     │  [3.2] PARAMETER    │        ---       │
-├──────────────────────┼─────────────────────┼─────────────────────┼──────────────────┤
-│  [1.3] VARIABLE      │         ---         │  [3.3] TRIGGER      │        ---       │
-├──────────────────────┼─────────────────────┼─────────────────────┼──────────────────┤
-│  [1.4] MODIFIER      │         ---         │         ---         │        ---       │
-├┬┬┬┬┬┬┬┬┬┬┬┬┬┬┬┬┬┬┬┬┬┬┼┬┬┬┬┬┬┬┬┬┬┬┬┬┬┬┬┬┬┬┬┬┼┬┬┬┬┬┬┬┬┬┬┬┬┬┬┬┬┬┬┬┬┬┼┬┬┬┬┬┬┬┬┬┬┬┬┬┬┬┬┬┬┤
-│                                                                                     │
-│             [1.4]                                                                   │
-│               ^                                                                     │
-│         [1.3] │            [2.2]            [3.3]                                   │
-│           ^   │              ^                ^                                     │
-│     [1.2] │   │        [2.1] │          [3.2] │                                     │
-│       ^   │   │         ^    │            ^   │                 [4.1]               │
-│ [1.1] │   │   │         │    │      [3.1] │   │                   ^                 │
-│   ^   │   │   │         │    │        ^   │   │                   │                 │
-│ ┌─┼───┴───┼───┼─┐ ┌─────┼────┼─┐ ┌────┼───┼───┼─┐ ┌───────────────┼───────────────┐ │
-│ │ +   +   +   + │ │     +    + │ │    +   +   + │ │               +               │ │
-│ │ :: set[ ]  // │ │ function % │ │ action( ) -> │ │            OUTCOME            │ │
-├─┴───────────────┴─┴────────────┴─┴──────────────┴─┴───────────────────────────────┴─┤
-│```camo                                                                              │
-│   :: set[color] // text[errors] % {new_color}(#FF0000) -> {conf[success]}           │
-│```                                                                                  │
-└─────────────────────────────────────────────────────────────────────────────────────┘
+┌─────┐                ┌─────┐             ┌─────┐             ┌─────┐
+│ [1] │ DECLARATION    │ [2] │ TARGET      │ [3] │ EFFECT      │ [4] │ OUTPUT
+├─────┴────────────────┼─────┴─────────────┼─────┴─────────────┼─────┴──────────┐
+│ [1.1] NEWLINESTRING  │ [2.1] FUNCTION    │ [3.1] ACTION      │ [4.1]OUTCOME   │
+├──────────────────────┼───────────────────┼───────────────────┼────────────────┤
+│  [1.2] KEYWORD       │ [2.2] OPERATOR    │ [3.2] PARAMETER   │     ---        │
+├──────────────────────┼───────────────────┼───────────────────┼────────────────┤
+│  [1.3] VARIABLE      │         ---       │ [3.3] TRIGGER     │     ---        │
+├──────────────────────┼───────────────────┼───────────────────┼────────────────┤
+│  [1.4] MODIFIER      │         ---       │         ---       │     ---        │
+├┬┬┬┬┬┬┬┬┬┬┬┬┬┬┬┬┬┬┬┬┬┬┼┬┬┬┬┬┬┬┬┬┬┬┬┬┬┬┬┬┬┬┼┬┬┬┬┬┬┬┬┬┬┬┬┬┬┬┬┬┬┬┼┬┬┬┬┬┬┬┬┬┬┬┬┬┬┬┬┤
+│                                                                               │
+│             [1.4]                                                             │
+│               ^                                                               │
+│         [1.3] │            [2.2]            [3.3]                             │
+│           ^   │              ^                ^                               │
+│     [1.2] │   │        [2.1] │          [3.2] │                               │
+│       ^   │   │         ^    │            ^   │                               │
+│ [1.1] │   │   │         │    │      [3.1] │   │              [4.1]            │
+│   ^   │   │   │         │    │        ^   │   │                ^              │
+│ ┌─┼───┴───┼───┼─┐ ┌─────┼────┼─┐ ┌────┼───┼───┼─┐ ┌────────────┼────────────┐ │
+│ │ +   +   +   + │ │     +    + │ │    +   +   + │ │            +            │ │
+│ │ :: set[ ]  // │ │ function % │ │ action( ) -> │ │         OUTCOME         │ │
+├─┴───────────────┴─┴────────────┴─┴──────────────┴─┴─────────────────────────┴─┤
+│                                                                               │
+│ :: set[color] // text[errors] % {new_color}(#FF0000) -> {conf[success]}       │
+│                                                                               │
+└───────────────────────────────────────────────────────────────────────────────┘
 ```
 
 ## Enhanced Zone Specifications
@@ -106,6 +106,247 @@ const DECLARATION_KEYWORDS = {
 };
 ```
 
+#### Keyword Semantics Specification
+
+```typescript
+// Normative specification for declaration keywords.
+// Used by tokenizer/validator/IR transform to enforce correctness.
+type Zone = 'declaration' | 'target' | 'effect' | 'output';
+
+interface KeywordSpec {
+  category:
+    | 'visual'
+    | 'security'
+    | 'display'
+    | 'content'
+    | 'navigation'
+    | 'state';
+  requiredZones: Zone[];            // Zones that MUST be present in a statement line
+  optionalZones?: Zone[];           // Zones that MAY be present
+  allowedActions?: string[];        // Subset of EFFECT_ACTIONS keys permitted for this keyword
+  defaultOutcome?: string;          // Default OUTCOME if none provided
+  conflictsWith?: string[];         // Mutually exclusive keywords in the same scope/target
+  priorityBucket?: 1 | 2 | 3 | 4 | 5; // Maps to operationPriority (Docs/3_camoIR.md)
+  notes?: string;                   // Additional constraints/nuance
+}
+
+export const KEYWORD_SPECS: Record<string, KeywordSpec> = {
+  // Visual
+  set: {
+    category: 'visual',
+    requiredZones: ['declaration', 'target', 'effect'],
+    optionalZones: ['output'],
+    allowedActions: ['{blur}', '{pixelate}', '{scramble}', '{glitch}', '{fade}', '{redact}'],
+    defaultOutcome: '{state[complete]}',
+    priorityBucket: 1,
+    notes: 'Idempotent last-write-wins on the same target property.'
+  },
+  apply: {
+    category: 'visual',
+    requiredZones: ['declaration', 'target', 'effect'],
+    optionalZones: ['output'],
+    allowedActions: ['{blur}', '{pixelate}', '{scramble}', '{glitch}', '{fade}', '{redact}'],
+    defaultOutcome: '{state[complete]}',
+    priorityBucket: 1,
+    notes: 'Layered effect; ordering resolved by optimizer using priority + source order.'
+  },
+  remove: {
+    category: 'visual',
+    requiredZones: ['declaration', 'target'],
+    optionalZones: ['effect', 'output'],
+    defaultOutcome: '{state[complete]}',
+    priorityBucket: 1,
+    notes: 'Removes previously applied effect(s) on the same target; accepts specific action or wildcard.'
+  },
+  toggle: {
+    category: 'display',
+    requiredZones: ['declaration', 'target'],
+    optionalZones: ['effect', 'output'],
+    defaultOutcome: '{state[pending]}',
+    priorityBucket: 3,
+    notes: 'Runtime stateful toggle; combined with triggers in EFFECT parameters.'
+  },
+
+  // Security
+  protect: {
+    category: 'security',
+    requiredZones: ['declaration', 'target'],
+    optionalZones: ['effect', 'output'],
+    defaultOutcome: '{secure[locked]}',
+    priorityBucket: 5,
+    notes: 'Security umbrella; may imply visual masking plus access gating.'
+  },
+  encrypt: {
+    category: 'security',
+    requiredZones: ['declaration', 'target', 'effect'],
+    optionalZones: ['output'],
+    allowedActions: ['{encrypt}'],
+    defaultOutcome: '{secure[encrypted]}',
+    priorityBucket: 5,
+    notes: 'Uses Web Crypto at runtime when enabled; never persists plaintext.'
+  },
+  decrypt: {
+    category: 'security',
+    requiredZones: ['declaration', 'target', 'effect'],
+    optionalZones: ['output'],
+    allowedActions: ['{decrypt}'],
+    defaultOutcome: '{secure[authenticated]}',
+    priorityBucket: 5,
+    notes: 'Requires prior encrypt context and valid key/credentials.'
+  },
+  authenticate: {
+    category: 'security',
+    requiredZones: ['declaration'],
+    optionalZones: ['target', 'effect', 'output'],
+    defaultOutcome: '{secure[authenticated]}',
+    priorityBucket: 5,
+    notes: 'Declares auth requirement; concrete mechanism via EFFECT parameters (e.g., password, 2FA).'
+  },
+  audit: {
+    category: 'security',
+    requiredZones: ['declaration'],
+    optionalZones: ['target', 'effect', 'output'],
+    defaultOutcome: '{log[audit]}',
+    priorityBucket: 5,
+    notes: 'Enables logging of reveal/access events; respects privacy settings.'
+  },
+
+  // Display Control
+  reveal: {
+    category: 'display',
+    requiredZones: ['declaration', 'target'],
+    optionalZones: ['effect', 'output'],
+    defaultOutcome: '{visual[revealed]}',
+    priorityBucket: 4,
+    notes: 'Gate via triggers (hover/click/timer/password) in EFFECT parameters.'
+  },
+  hide: {
+    category: 'display',
+    requiredZones: ['declaration', 'target'],
+    optionalZones: ['effect', 'output'],
+    defaultOutcome: '{visual[hidden]}',
+    priorityBucket: 4
+  },
+  mask: {
+    category: 'display',
+    requiredZones: ['declaration', 'target'],
+    optionalZones: ['effect', 'output'],
+    defaultOutcome: '{visual[masked]}',
+    priorityBucket: 1
+  },
+  redact: {
+    category: 'display',
+    requiredZones: ['declaration', 'target'],
+    optionalZones: ['effect', 'output'],
+    defaultOutcome: '{secure[redacted]}',
+    priorityBucket: 1,
+    notes: 'Non-copyable redaction may be enforced by CSS selection/copy guards.'
+  },
+
+  // Content Selection & Transform
+  select: {
+    category: 'content',
+    requiredZones: ['declaration', 'target'],
+    optionalZones: ['effect', 'output'],
+    defaultOutcome: '{state[complete]}',
+    priorityBucket: 2,
+    notes: 'Defines a selection scope for subsequent chained statements.'
+  },
+  filter: {
+    category: 'content',
+    requiredZones: ['declaration', 'target'],
+    optionalZones: ['effect', 'output'],
+    defaultOutcome: '{state[complete]}',
+    priorityBucket: 2,
+    notes: 'Narrows selection using predicates (pattern, attributes).'
+  },
+  transform: {
+    category: 'content',
+    requiredZones: ['declaration', 'target', 'effect'],
+    optionalZones: ['output'],
+    defaultOutcome: '{state[complete]}',
+    priorityBucket: 2,
+    notes: 'Content conversions or markup transforms; visual-only in CSS-first mode.'
+  },
+
+  // Navigation & Grouping
+  link: {
+    category: 'navigation',
+    requiredZones: ['declaration', 'target'],
+    optionalZones: ['effect', 'output'],
+    defaultOutcome: '{state[complete]}',
+    priorityBucket: 2,
+    notes: 'Associates current block/selection with another block/anchor.'
+  },
+  navigate: {
+    category: 'navigation',
+    requiredZones: ['declaration'],
+    optionalZones: ['target', 'effect', 'output'],
+    defaultOutcome: '{state[pending]}',
+    priorityBucket: 2,
+    notes: 'Defines traversal behavior; primarily future module (Coordinate System).'
+  },
+  group: {
+    category: 'navigation',
+    requiredZones: ['declaration', 'target'],
+    optionalZones: ['effect', 'output'],
+    defaultOutcome: '{state[complete]}',
+    priorityBucket: 2,
+    notes: 'Creates a logical group for shared operations.'
+  },
+  coordinate: {
+    category: 'navigation',
+    requiredZones: ['declaration'],
+    optionalZones: ['target', 'effect', 'output'],
+    defaultOutcome: '{state[complete]}',
+    priorityBucket: 2,
+    notes: 'Spatial metadata (positioning) for future visualization; no visual effect by itself.'
+  },
+
+  // State Management
+  store: {
+    category: 'state',
+    requiredZones: ['declaration', 'target', 'effect'],
+    optionalZones: ['output'],
+    allowedActions: ['{save}'],
+    defaultOutcome: '{state[complete]}',
+    priorityBucket: 5,
+    notes: 'Persists block-local preferences/state via plugin data.json.'
+  },
+  retrieve: {
+    category: 'state',
+    requiredZones: ['declaration', 'target', 'effect'],
+    optionalZones: ['output'],
+    allowedActions: ['{load}'],
+    defaultOutcome: '{state[complete]}',
+    priorityBucket: 5
+  },
+  reset: {
+    category: 'state',
+    requiredZones: ['declaration', 'target'],
+    optionalZones: ['effect', 'output'],
+    defaultOutcome: '{state[complete]}',
+    priorityBucket: 5
+  },
+  snapshot: {
+    category: 'state',
+    requiredZones: ['declaration', 'target'],
+    optionalZones: ['effect', 'output'],
+    defaultOutcome: '{state[complete]}',
+    priorityBucket: 5,
+    notes: 'Creates a restorable checkpoint of current visual/state configuration.'
+  }
+};
+```
+
+```text
+Validation rules
+1) A statement MUST include at least zones in `requiredZones` for its keyword.
+2) EFFECT actions MUST be a subset of `allowedActions` when specified; otherwise validator errors.
+3) Conflicting keywords on the same normalized target are resolved by operation priority (Docs/3) then source order.
+4) State/security keywords MUST NOT leak secrets; validator warns on suspicious parameters.
+```
+
 ### [2] TARGET Zone
 
 The target zone specifies what content or element the instruction operates on.
@@ -145,6 +386,37 @@ const TARGET_FUNCTIONS = {
   'private[*]': 'Private content',
   'encrypted[*]': 'Already encrypted content'
 };
+```
+
+#### Selector Normalization and Taxonomy
+
+```typescript
+// Normal form used by the optimizer and renderer
+interface NormalizedSelector {
+  domain: 'content' | 'text' | 'code' | 'link' | 'image' | 'table' | 'first' | 'last' | 'range' | 'every' | 'sensitive' | 'public' | 'private' | 'encrypted';
+  args?: Record<string, string | number>;
+}
+
+function normalizeSelector(raw: string): NormalizedSelector {
+  // Examples:
+  //  content[all]           -> { domain: 'content' }
+  //  content[lines:1-5]     -> { domain: 'range', args: { from: 1, to: 5 } }
+  //  pattern[/API_KEY/]     -> { domain: 'content', args: { pattern: 'API_KEY' } }
+  //  text[headers]          -> { domain: 'text', args: { type: 'headers' } }
+  //  first[3]               -> { domain: 'first', args: { count: 3 } }
+  //  every[2nd]             -> { domain: 'every', args: { step: 2 } }
+  //  sensitive[*]           -> { domain: 'sensitive' }
+  //  encrypted[*]           -> { domain: 'encrypted' }
+  // Implementation detail: parsed by TARGET_FUNCTIONS patterns + bracket payload
+  return { domain: 'content' };
+}
+
+// Normalization rules
+// 1) content[lines:a-b] → range[from=a,to=b]
+// 2) content[pattern:/re/] → content + args.pattern = re
+// 3) text[*]/code[*]/image[*]/link[*]/table[*] → respective domain
+// 4) first[n], last[n], every[nth] retained as positional domains with numeric args
+// 5) semantic labels (sensitive/public/private/encrypted) map to domain-only selectors
 ```
 
 ### [3] EFFECT Zone
@@ -235,8 +507,59 @@ const OUTCOME_STATES = {
 
 ```camo
 :: set[blur] // content[sensitive] % {intensity}(80) -> {visual[blurred]}
- :^: blur // IF{hover} % {authenticated}(true) -> {reveal[content]}
+ :^: IF{hover} // reveal % {animation}(fade) -> {visual[revealed]}
   :: ELSE // maintain[blur] % {intensity}(80) -> {visual[protected]}
+```
+
+#### Condition Operators and Evaluator
+
+```typescript
+// Minimal, Obsidian-compliant evaluator. Context is block-local.
+type Primitive = string | number | boolean;
+
+interface Condition {
+  lhs: string;          // e.g., 'hover', 'time', 'theme', 'user.role'
+  op: 'exists' | 'equals' | 'not_equals' | 'gt' | 'lt' | 'gte' | 'lte' | 'matches';
+  rhs?: Primitive;      // optional; required by all except 'exists'
+}
+
+interface EvalContext {
+  hover: boolean;               // live interaction state
+  theme: 'dark' | 'light';      // from document body
+  timeISO: string;              // current ISO datetime
+  viewport: { width: number; height: number };
+  user?: { role?: string };
+}
+
+function evaluateCondition(cond: Condition, ctx: EvalContext): boolean {
+  const value = resolveValue(cond.lhs, ctx);
+  switch (cond.op) {
+    case 'exists': return value !== undefined && value !== null;
+    case 'equals': return value === cond.rhs;
+    case 'not_equals': return value !== cond.rhs;
+    case 'gt': return Number(value) > Number(cond.rhs);
+    case 'lt': return Number(value) < Number(cond.rhs);
+    case 'gte': return Number(value) >= Number(cond.rhs);
+    case 'lte': return Number(value) <= Number(cond.rhs);
+    case 'matches': return new RegExp(String(cond.rhs)).test(String(value));
+  }
+}
+
+function resolveValue(path: string, ctx: EvalContext): Primitive | undefined {
+  // Supported paths: 'hover', 'theme', 'time', 'viewport.width', 'viewport.height', 'user.role'
+  if (path === 'hover') return ctx.hover;
+  if (path === 'theme') return ctx.theme;
+  if (path === 'time') return ctx.timeISO;
+  if (path === 'viewport.width') return ctx.viewport.width;
+  if (path === 'viewport.height') return ctx.viewport.height;
+  if (path === 'user.role') return ctx.user?.role;
+  return undefined;
+}
+
+// Branching:
+// A statement line starting with ":^: IF{...}" opens a conditional branch.
+// Subsequent sibling lines beginning with ":: ELSE" represent the fallback branch.
+// Only the first matching branch executes for a given context.
 ```
 
 ### Multi-Target Operations
@@ -304,6 +627,58 @@ class CamoTokenizer {
 }
 ```
 
+### Grammar (EBNF) and Precedence
+
+```text
+// Operator precedence (highest → lowest):
+//  1. NEWLINE ("::"), HIERARCHICAL (":^:") — statement starters
+//  2. RELATION ("//") — separates declaration and target
+//  3. OPERATOR ("%") — introduces effect parameters
+//  4. TRIGGER ("->") — introduces output/outcome
+//  5. ACTION_BLOCK "{"..."}", VARIABLE_BLOCK "["..."]", OPTION_BLOCK "("...")"
+
+statement      = (newline | hierarchical), ws*, declaration, ws*, relation, ws*, target, [ws*, operator, ws*, effect], [ws*, trigger, ws*, output] ;
+newline        = "::" ;
+hierarchical   = ":^:" ;
+relation       = "//" ;
+operator       = "%" ;
+trigger        = "->" ;
+
+declaration    = keyword, [variable], {ws+, modifier} ;
+target         = function, [selector] ;
+effect         = action, [parameters] ;
+output         = outcome, [callback] ;
+
+keyword        = IDENT ;
+variable       = "[", VAR_BODY, "]" ;
+modifier       = IDENT | VARIABLE_BLOCK ;
+
+function       = IDENT, [VARIABLE_BLOCK] ;
+selector       = VARIABLE_BLOCK ;
+
+action         = ACTION_BLOCK ;
+parameters     = OPTION_BLOCK ;
+
+outcome        = ACTION_BLOCK ;
+callback       = ACTION_BLOCK ;
+
+IDENT          = /[a-zA-Z_][a-zA-Z0-9_]*/ ;
+VAR_BODY       = /[^\]]+/ ;
+
+ACTION_BLOCK   = "{", /[^}]+/, "}" ;
+VARIABLE_BLOCK = "[", /[^\]]+/, "]" ;
+OPTION_BLOCK   = "(", /[^)]+/, ")" ;
+ws             = /\s+/ ;
+```
+
+```text
+Parsing notes
+1) Multi-line statements: a sequence of lines beginning with NEWLINE/HIERARCHICAL are collected into a block; depth computed from operator type and indentation.
+2) Zones ordering is enforced: declaration → target → effect → output.
+3) Ambiguities are resolved by precedence: RELATION binds declaration-target; OPERATOR binds effect params; TRIGGER binds output.
+4) Validators must ensure required zones for the given keyword (see KEYWORD_SPECS).
+```
+
 ### AST Builder
 
 ```typescript
@@ -349,6 +724,19 @@ class CamoASTBuilder {
     // Build reference map for runtime lookup
   }
 }
+```
+
+### Hierarchy Execution Rules
+
+```text
+1) A root-level statement begins with "::" (NewLineString).
+2) A hierarchical child begins with ":^:" and MUST reference a valid ancestor label or keyword context.
+3) Execution order within a sibling group is source order after optimizer normalization.
+4) Parent effects apply before children; children may refine the same target scope.
+5) Conditional branches use ":^: IF{...}" followed by optional ":: ELSE" siblings; only one branch executes.
+6) Orphan ":^:" statements (no valid ancestor) are validator errors.
+7) Cross-branch side effects are isolated; state writes occur only for the executed branch.
+8) Last-write-wins on identical normalized targets within the same priority bucket (see Docs/3 operationPriority).
 ```
 
 ## Runtime Execution Engine

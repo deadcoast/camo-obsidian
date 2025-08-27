@@ -1,5 +1,226 @@
 # CHANGELOG
 
+<<<<<<< Current (Your changes)
+## QUIKSTART — Next Stage Plan
+
+### CURRENT TASK MARKER PROMPT
+
+> -
+> > [CurrentPosition]
+> -
+
+- Current Position: Effect routing centralized via `BlockContext.effects` and `VisualEffectsEngine.effects`; conflict matrix extended with per‑plugin compatibility classes; semantic selectors normalized and resolved across transform/targets; Live Preview hooks, print policy, accessibility, mobile gating, and metrics in place. Build is green.
+
+### Next Stage @TODO Plan (Docs + Code pairs)
+
+- Centralize Effect Handling
+  - Route set/apply/remove/toggle through a single `EffectHandler`; complete remove/toggle paths and de‑dup code in `camoMetaData`.
+  - { [4_camoMetaData.md](../4_camoMetaData.md) [camoMetaData.ts](../../src/core/camoMetaData.ts) [EffectHandler.ts](../../src/handler/EffectHandler.ts) [main.ts](../../src/main.ts) }
+
+- Compatibility CSS Matrix
+  - Implement CSS responses for `camo-compat-*` classes (dataview, templater, advanced‑tables, cm‑syntax, languagetool, math, admonition, zoom). Add light/heavy effect fallbacks.
+  - { [7_systemArchitecture.md](../7_systemArchitecture.md) [styles.css](../../styles.css) [main.ts](../../src/main.ts) [ConflictResolution.ts](../../src/error_control/ConflictResolution.ts) [VisualCamoflage.ts](../../src/modules/VisualCamoflage.ts) }
+
+- Optimizer & Performance
+  - Extend metrics to effect application and state IO; ensure IO is debounced; finalize range/selector normalization parity.
+  - { [3_camoIR.md](../3_camoIR.md) [7_systemArchitecture.md](../7_systemArchitecture.md) [camoIRExecutor.ts](../../src/core/camoIRExecutor.ts) [CacheManager.ts](../../src/modules/CacheManager.ts) [Optimizer.ts](../../src/performance/Optimizer.ts) }
+
+- Dev Tools & Editor Integration
+  - Finish CM6 decoration coverage for all tokens; align EditorSuggest options with `KEYWORD_SPECS`; add quick‑insert commands.
+  - { [obsidian-docs/Editor/Editor extensions.md](../obsidian-docs/Editor/Editor%20extensions.md) [CamoCMHighlighter.ts](../../src/ui/CamoCMHighlighter.ts) [CamoMetaSuggest.ts](../../src/ui/CamoMetaSuggest.ts) [camoSyntaxHighlighting.ts](../../src/core/camoSyntaxHighlighting.ts) }
+
+- Accessibility
+  - Verify ARIA in reading mode; ensure keyboard toggles with `camo-trigger-click`; add reduced‑motion assertions.
+  - { [6_userExperience.md](../6_userExperience.md) [CamoAccessibility.ts](../../src/accessibility/CamoAccessibility.ts) }
+
+- State & Security
+  - Wire full `encrypt/decrypt` path via `CamoSecurityIntegration`; document key management; unify `store/retrieve/reset/snapshot` with `StateManager`.
+  - { [4_camoMetaData.md](../4_camoMetaData.md) [SecurityIntegration.ts](../../src/security/SecurityIntegration.ts) [camoMetaData.ts](../../src/core/camoMetaData.ts) [main.ts](../../src/main.ts) }
+
+- Export/Publish Compatibility
+  - Harden `getPrintStyles/getNoScriptStyles` for reveal/mask; verify Obsidian Publish fallbacks.
+  - { [obsidian-docs/Releasing/Submission requirements for plugins.md](../obsidian-docs/Releasing/Submission%20requirements%20for%20plugins.md) [ExportCompatibility.ts](../../src/accessibility/ExportCompatibility.ts) }
+
+- Documentation (OATHS I — ACADIA)
+  - Update docs/examples for new selectors (content[public|private|encrypted|sensitive]), centralized effect routing, and compatibility classes.
+  - { [4_camoMetaData.md](../4_camoMetaData.md) [5_nestingRules.md](../5_nestingRules.md) [3_camoIR.md](../3_camoIR.md) }
+
+### Comprehensive Onboarding Summary
+
+- Architecture & Compliance
+  - Obsidian-compliant: separate languages (`camo`, `camo-<preset>`), no params in language line; content-based flags/metadata; debounced processors
+  - CSS-first rendering, official API usage, state via data.json
+
+- Quickstart Flow (trace one block end-to-end)
+  1) Markdown post-processor: `src/main.ts` registers `camo`/`camo-<preset>` processors (debounced).
+  2) Parse: `CamoParser` splits flags/metadata/content; presets compiled from `CamoDictionary`.
+  3) IR pipeline: `CamoIRExecutor` → tokenize → AST → AST validation → IR transform → optimize → apply.
+  4) Apply: `camoMetaData.execute` resolves targets and calls `context.effects.apply(...)` per effect.
+  5) Effects: `VisualEffectsEngine.effects` sets CSS classes/vars; styles injected once at load.
+  6) State/security: `BlockContext.state/storage/security` back `store/retrieve/encrypt/decrypt`.
+  7) UX: Accessibility, mobile IO, compatibility classes, and print policy adjust visuals.
+
+- Core Modules
+  - Parser/IR/Validation: tokenization → AST → IR; `KEYWORD_SPECS` enforces zones; validator accepts labels (`IF/ELSE/TRUE/FALSE`)
+  - Optimizer: DCE, duplicate coalescing, range merges, target normalization, wrapper coalescing, category ordering
+  - Effects: presets + `apply[...]` mappings (`blur/pixelate/scramble/glitch/fade/grid/matrix`, security/state stubs)
+  - Safeguards: fallback chain (preset → default → minimal → plaintext)
+
+- Dev Experience
+  - Syntax highlighting and autocomplete aligned to keywords/actions/targets; section/paragraph selectors added
+  - Debug metrics strip shows parse/validate/transform/optimize/apply timings and cache hits
+
+- What’s In Progress
+  - Extend caches/metrics to effects/state; finalize effect action CSS hooks; integrate more Obsidian events; update docs
+
+---
+
+## Changes — 2025-08-26
+
+### Effect Routing, Selectors, and Compatibility (Completed)
+
+- Centralized effect application via `BlockContext.effects`; created inline `effectHandler` in `main.ts` delegating to `VisualEffectsEngine.effects`.
+  - Files: [main.ts](../../src/main.ts), [camoMetaData.ts](../../src/core/camoMetaData.ts), [VisualEffectsEngine.ts](../../src/engines/VisualEffectsEngine.ts), [EffectHandler.ts](../../src/handler/EffectHandler.ts)
+- Extended semantic selector normalization and resolution
+  - Transform normalization for `public[*]/private[*]/encrypted[*]/sensitive[*]` → `content[...]`
+  - Target resolver supports `content[public|private|encrypted|sensitive]` and `content[marked]` variants
+  - Files: [camoIRExecutor.ts](../../src/core/camoIRExecutor.ts), [camoMetaData.ts](../../src/core/camoMetaData.ts)
+- Expanded conflict matrix with per-plugin classes and auto‑toggles
+  - `resolveConflicts` now adds `camo-compat-*` body classes for known plugins; compatibility mode also disables heavy animations
+  - Files: [ConflictResolution.ts](../../src/error_control/ConflictResolution.ts), [main.ts](../../src/main.ts)
+- Finalized and typed `VisualEffectsEngine.effects` for `blur/pixelate/scramble/glitch/matrix/redact/fade`; exposed `window.camoEffects` for external consumers
+  - Files: [VisualEffectsEngine.ts](../../src/engines/VisualEffectsEngine.ts), [main.ts](../../src/main.ts)
+- Kept CSS‑first fallbacks in `camoMetaData` for resilience when handlers are unavailable
+
+### What’s Next (High‑priority)
+
+- Complete remove/toggle paths via centralized `EffectHandler`; eliminate duplicated class/var branches in `camoMetaData`
+- Implement CSS for new `camo-compat-*` classes and verify against target plugins
+- Extend metrics to effect application and state IO; add small test fixtures for selectors
+
+---
+
+## Changes — 2025-08-25
+
+### Docs Alignment — Preset Language and IR JSON key
+
+### Optimizer & Performance — Completed
+
+- Idempotent effect application and metrics pipeline added to `camoMetaData`
+- Effect-cache TTL + eviction in `CamoCacheManager`; rolling metrics recorded
+- Performance monitor hooks via `CamoOptimizer.measureRenderImpact()` and UI surfacing when enabled
+- Registered additional Obsidian events: file-open, css-change, layout-change, active-leaf-change, vault rename/delete
+
+### Visual Effects Consolidation
+
+- Centralized effect CSS injection using `VisualCamouflage.getEffectStyles()`
+- Consolidated fade/redact/grid/glitch/scramble/scan/hide/lock CSS
+
+### Preset Dictionary Integration
+
+- Removed legacy `PRESET_DEFAULT_METADATA` from `src/main.ts`
+- Preset defaults and registration now sourced from `CamoDictionary` (`compilePreset`, `getPresetIds`)
+
+### Selector Expansion
+
+- Added `content[line:n]`, `content[headers]` alias, and `content[empty]`
+- Retained paragraphs/sections/marked support and normalization
+
+- Updated preset language fences to hyphenated Obsidian-compliant forms:
+  - `Docs/2_ALLABOUT-camoMetaData.md`: `camoblackout` → `camo-blackout` (and related mentions)
+  - `Docs/6_userExperience.md`: `camoblackout|camoblueprint|camomodern95|camoghost|camomatrix|camoclassified` → `camo-*`
+- Updated flag/modifier examples to use `camo-*` prefixes in tables and chained examples
+- Corrected `futureevelopment` → `futureDevelopment` in `Docs/3_camoIR.json`
+
+- Core Language & Validation
+  - Added `KEYWORD_SPECS` (zones, categories, allowed actions, priorities)
+    - File: [camoMetaData.ts](../../src/core/camoMetaData.ts)
+  - Hardened syntax validator to allow `IF{...}`, `ELSE`, `TRUE`, `FALSE` label lines and keep strict operator ordering
+    - File: [camoSyntaxValidator.ts](../../src/core/camoSyntaxValidator.ts)
+  - AST validation now enforces required zones per `KEYWORD_SPECS` and skips label-only lines
+    - File: [camoIRExecutor.ts](../../src/core/camoIRExecutor.ts)
+
+- Optimizer Passes
+  - Dead-code elimination, exact duplicate coalescing, unreachable branch removal
+  - Range merging for `content[lines:a-b]`, target normalization, wrapper coalescing
+  - Stable category ordering: visual → layout → animation → interaction → state/security
+    - File: [camoIRExecutor.ts](../../src/core/camoIRExecutor.ts)
+
+- Effect Mappings & Selectors
+  - Expanded `apply[...]` mappings: `matrix`, `scramble` (speed var), enhanced `glitch`, `fade`, `grid`
+  - Added section selectors: `content[section:n]`, `content[sections:a-b]`, `content[section:"Title"]`
+    - File: [camoMetaData.ts](../../src/core/camoMetaData.ts)
+
+- System & Backend
+  - Added BackendCamouflage module stubs for state/integrity/transactions
+    - File: [BackendCamouflage.ts](../../src/modules/BackendCamouflage.ts)
+  - Added CamoCoordinateSystem navigation stubs and APIs
+    - File: [CamoCoordinateSystem.ts](../../src/modules/CamoCoordinateSystem.ts)
+  - Expanded PresetFlagProcessor with categories and enforced chaining priority (visual → interaction → layout)
+    - File: [PresetFlagProcessor.ts](../../src/processors/PresetFlagProcessor.ts)
+  - Removed duplicate `security/Safeguard.ts` in favor of `error_control/Safeguard.ts`
+  - Wired security integration stubs for future encrypt/hash/sign hooks
+    - File: [main.ts](../../src/main.ts)
+
+### Obsidian Integration — Live Preview & Export
+
+- Live Preview: added editor-change cursor tracking stub and layout-change partial render hook
+  - Files: [LivePreviewCompatibility.ts](../../src/compatibility/LivePreviewCompatibility.ts), [main.ts](../../src/main.ts)
+- Export/Print: added Print Policy setting (Reveal/Mask) and wired `ExportCompatibility` styles and `<noscript>` fallback
+  - Files: [SettingsTab.ts](../../src/ui/SettingsTab.ts), [ExportCompatibility.ts](../../src/accessibility/ExportCompatibility.ts), [main.ts](../../src/main.ts)
+
+### Dev Tools — Autocomplete (Initial)
+
+### Preset Builder & Marketplace
+
+- Preset Builder: added export/import JSON and live preview updates on field changes
+  - Files: [PresetBuilderModal.ts](../../src/ui/PresetBuilderModal.ts)
+- Added marketplace stub command to open external resource
+  - File: [main.ts](../../src/main.ts)
+
+### Settings
+
+- Added sync and security layer toggles (stubs)
+  - File: [SettingsTab.ts](../../src/ui/SettingsTab.ts)
+- Wired an EditorSuggest provider for camoMetaData keywords/selectors/actions (initial)
+  - Files: [CamoMetaSuggest.ts](../../src/ui/CamoMetaSuggest.ts), [camoAutoComplete.ts](../../src/core/camoAutoComplete.ts), [main.ts](../../src/main.ts)
+=======
+## v1.0.0 - Core Implementation Complete (2024-12-19) ✅
+
+### Major Features Implemented
+- **Complete CAMO Plugin Architecture**: Full Obsidian-compliant implementation replacing default template
+- **Three-Tier System**: All tiers fully functional
+  - Tier 1: camoPreset - 6 presets (blackout, ghost, blueprint, modern95, matrix, classified)
+  - Tier 2: presetFlag - Advanced flag system (--blur, --fade, --redact, --scramble, --glitch, etc.)
+  - Tier 3: camoMetaData - Full syntax parser and processor with error handling
+- **Visual Effects Engine**: Advanced CSS-based effects with mobile/accessibility optimizations
+- **camoIR Execution Engine**: Intermediate representation processing pipeline
+- **Core Module Structure**: Implemented camoMetaData.ts, camoIRExecutor.ts, VisualEffectsEngine.ts
+
+### Obsidian Compliance Achieved
+- ✅ Content-based flag parsing (not language line parameters)
+- ✅ Debounced processors (500ms) to prevent constant re-rendering
+- ✅ CSS-only effects (no direct DOM manipulation)
+- ✅ Proper Obsidian API usage (createDiv, addClass, data.json storage)
+- ✅ Separate language registration for each preset (camo-blackout, etc.)
+
+### Technical Features
+- Performance optimizations (caching, debouncing, lazy loading)
+- Mobile responsive design with reduced effects
+- Accessibility support (reduced motion, screen reader compatibility)
+- Debug mode with comprehensive error reporting
+- Settings panel with full configuration options
+- Command palette integration (reveal/hide all blocks)
+
+### Developer Experience
+- Modular architecture with clear separation of concerns
+- TypeScript interfaces and comprehensive error handling
+- Living documentation updates (MODULE_AUDIT_TREE.md)
+- Extensible effect system for future enhancements
+>>>>>>> Incoming (Background Agent changes)
+
+---
+
 ## What IS Compatible with Obsidian
 
 1. CodeBlock Processors - The core approach of using `registerMarkdownCodeBlockProcessor()` is correct

@@ -1,0 +1,59 @@
+---
+description: This document require context from the official obsidian documentation
+globs: **/*.ts,**obsidian*,**/*obsidian-docs*
+alwaysApply: false
+---
+
+** {context} {functionality}**
+- Grep the documentation for the {context} and {functionality} you require for the Obsidian api
+- Use this context to properly implement your solutions withholding to Obsidian supported api
+
+## Obsidian Docs Tree
+
+[obsidian-docs](./Docs/obsidian-docs)
+
+```
+./Docs/
+│   ├── obsidian-docs
+│   │   ├── Editor
+│   │   │   ├── Communicating with editor extensions.md
+│   │   │   ├── Decorations.md
+│   │   │   ├── Editor extensions.md
+│   │   │   ├── Editor.md
+│   │   │   ├── Markdown post processing.md
+│   │   │   ├── State fields.md
+│   │   │   ├── State management.md
+│   │   │   ├── View plugins.md
+│   │   │   └── Viewport.md
+│   │   ├── Events.md
+│   │   ├── Getting started
+│   │   │   ├── Anatomy of a plugin.md
+│   │   │   ├── Build a plugin.md
+│   │   │   ├── Development workflow.md
+│   │   │   ├── Mobile development.md
+│   │   │   ├── Use React in your plugin.md
+│   │   │   └── Use Svelte in your plugin.md
+│   │   ├── Guides
+│   │   │   ├── Optimizing plugin load time.md
+│   │   │   └── Understanding deferred views.md
+│   │   ├── Releasing
+│   │   │   ├── Beta-testing plugins.md
+│   │   │   ├── Plugin guidelines.md
+│   │   │   ├── Release your plugin with GitHub Actions.md
+│   │   │   ├── Submission requirements for plugins.md
+│   │   │   └── Submit your plugin.md
+│   │   ├── User interface
+│   │   │   ├── About user interface.md
+│   │   │   ├── Commands.md
+│   │   │   ├── Context menus.md
+│   │   │   ├── HTML elements.md
+│   │   │   ├── Icons.md
+│   │   │   ├── Modals.md
+│   │   │   ├── Ribbon actions.md
+│   │   │   ├── Right-to-left.md
+│   │   │   ├── Settings.md
+│   │   │   ├── Status bar.md
+│   │   │   ├── Views.md
+│   │   │   └── Workspace.md
+│   │   └── Vault.md
+```

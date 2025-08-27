@@ -13,5 +13,24 @@
     "strictNullChecks": true,
     "lib": ["DOM", "ES5", "ES6", "ES7"]
   },
-  "include": ["**/*.ts"]
+  "include": [
+    "main.ts",
+    "ui/**/*.ts",
+    "core/camoMetaData.ts",
+    "core/camoIRExecutor.ts"
+, "security/SecurityIntegration.ts"  ],
+  "exclude": [
+    "modules/**",
+    "accessibility/**",
+    "error_control/**",
+    "compatibility/**",
+    "compilers/**",
+    // keep most core excluded, but allow explicit include above for camoMetaData.ts
+    "core/**",
+    "engines/**",
+    "extractors/**",
+    "performance/**",
+    "processors/**",
+    "security/**"
+  ]
 }
