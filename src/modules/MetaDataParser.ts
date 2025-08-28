@@ -1,435 +1,928 @@
-// import { camoFlags } from "../core/camoPresets";
+/**
+ * CAMO MetaData Parser System
+ *
+ * Dedicated parser for camoMetaData syntax with comprehensive tokenization,
+ * AST building, and grammar validation:
+ * - Tokenization engine for camoMetaData operators and blocks
+ * - AST builder for hierarchical statement structures
+ * - Grammar validation for syntax correctness
+ * - Statement parsing for individual camoMetaData lines
+ * - Integration with IR system for execution pipeline
+ */
+
 import { CamoAST, CamoASTNode } from "./AST";
 
-// Type definitions for Obsidian API (you may need to import these from obsidian)
-interface TFile {
-  path: string;
-  name: string;
+// Token types for camoMetaData syntax
+export enum TokenType {
+  NEWLINE = "NEWLINE", // ::
+  HIERARCHICAL = "HIERARCHICAL", // :^:
+  RELATION = "RELATION", // //
+  OPERATOR = "OPERATOR", // %
+  TRIGGER = "TRIGGER", // ->
+  ACTION_BLOCK = "ACTION_BLOCK", // {action}
+  VARIABLE_BLOCK = "VARIABLE_BLOCK", // [variable]
+  OPTION_BLOCK = "OPTION_BLOCK", // (parameters)
+  IDENTIFIER = "IDENTIFIER", // keyword, function names
+  STRING = "STRING", // "quoted string" or 'quoted string'
+  NUMBER = "NUMBER", // 123 or 123.45
+  WHITESPACE = "WHITESPACE", // spaces, tabs
+  COMMENT = "COMMENT", // // comments (when not relation)
+  NEWLINE_CHAR = "NEWLINE_CHAR", // \n
+  EOF = "EOF", // End of file
+  INVALID = "INVALID", // Invalid token
 }
 
-interface Editor {
-  getValue(): string;
-  setValue(value: string): void;
-}
-
-// Performance and reporting types
-interface PerformanceMetrics {
-  blockProcessTime: PerformanceMeasure | undefined;
-  cssInjectionTime: PerformanceMeasure | undefined;
-  debounceEfficiency: number;
-  memoryFootprint: number | undefined;
-}
-
-interface BottleneckReport {
-  "too-many-blocks": boolean;
-  "complex-metadata-parsing": boolean;
-  "excessive-dom-mutations": boolean;
+// Token structure
+export interface Token {
+  type: TokenType;
+  value: string;
+  start: number;
+  end: number;
+  line: number;
+  column: number;
 }
 
 // Parsed statement structure
 export interface ParsedStatement {
-  type: "declaration" | "target" | "effect" | "output" | "statement";
-  flags: string[];
-  metadata: string[];
-  content: string;
-  preset: string | null;
+  type: "statement" | "declaration" | "target" | "effect" | "output";
+  line: number;
+  column: number;
+  operator: "::" | ":^:";
+
   declaration: {
     type: "newline" | "hierarchical";
     keyword: string;
+    variable?: string;
     modifiers: string[];
   };
+
   target: {
     function: string;
-    equate: string;
+    selector?: string;
   };
-  effect: {
+
+  effect?: {
     action: string;
-    parameters: Map<string, unknown>;
-    trigger?: string;
+    parameters: Map<string, any>;
+    options?: string[];
   };
-  output: {
+
+  output?: {
     outcome: string;
     conditions?: string[];
   };
+
+  raw: string;
+  valid: boolean;
+  errors: string[];
 }
 
-// Main IR Executor interface
-interface ICamoIRExecutor {
-  execute(ast: CamoAST): void;
-  executeBranch(
-    branch: "IF" | "ELSE",
-    statements: CamoASTNode[],
-    context: CamoAST,
-    condition: string
-  ): void;
-  evaluateCondition(condition: string, context: CamoAST): boolean;
+// Parser configuration
+interface ParserConfig {
+  strictMode: boolean;
+  enableComments: boolean;
+  maxLineLength: number;
+  allowIncompleteStatements: boolean;
 }
 
-// CamoIRExecutor is a class that executes the IR (Intermediate Representation) of the camoMetaData.
-// It is used to execute the camoMetaData and apply the effects to the DOM.
-export class CamoIRExecutor implements ICamoIRExecutor {
-  // IR compilation pipeline
-  private executionPipeline = [
-    "parse", // Tokenize camoMetaData syntax
-    "validate", // Check syntax validity
-    "transform", // Convert to CSS classes
-    "optimize", // Remove redundant operations
-    "apply", // Apply to DOM via Obsidian API
-  ];
-
-  // Execution priority for conflicting instructions
-  private operationPriority = {
-    1: "visual", // Background, colors, blur
-    2: "layout", // Sizing, positioning
-    3: "animation", // Transitions, effects
-    4: "interaction", // Click, hover handlers
-    5: "state", // Persistence operations
+/**
+ * Tokenization engine for camoMetaData syntax
+ */
+export class CamoTokenizer {
+  private readonly TOKEN_PATTERNS = {
+    [TokenType.NEWLINE]: /^::/,
+    [TokenType.HIERARCHICAL]: /^:\^:/,
+    [TokenType.RELATION]: /^\/\//,
+    [TokenType.OPERATOR]: /^%/,
+    [TokenType.TRIGGER]: /^->/,
+    [TokenType.ACTION_BLOCK]: /^\{([^}]*)\}/,
+    [TokenType.VARIABLE_BLOCK]: /^\[([^\]]*)\]/,
+    [TokenType.OPTION_BLOCK]: /^\(([^)]*)\)/,
+    [TokenType.IDENTIFIER]: /^[a-zA-Z_][a-zA-Z0-9_]*/,
+    [TokenType.STRING]: /^("([^"\\]|\\.)*"|'([^'\\]|\\.)*')/,
+    [TokenType.NUMBER]: /^\d+(\.\d+)?/,
+    [TokenType.WHITESPACE]: /^\s+/,
+    [TokenType.NEWLINE_CHAR]: /^\n/,
   };
 
-  execute(ast: CamoAST): void {
-    // Main execution logic
-    for (const statement of ast.statements) {
-      this.executeStatement(statement);
-    }
-  }
+  tokenize(input: string): Token[] {
+    const tokens: Token[] = [];
+    let position = 0;
+    let line = 1;
+    let column = 1;
 
-  private executeStatement(statement: CamoASTNode): void {
-    // Execute individual statement based on type
-    switch (statement.type) {
-      case "declaration":
-        this.handleDeclaration(statement);
-        break;
-      case "target":
-        this.handleTarget(statement);
-        break;
-      case "effect":
-        this.handleEffect(statement);
-        break;
-      case "output":
-        this.handleOutput(statement);
-        break;
-      case "statement":
-      default:
-        this.handleGenericStatement(statement);
-        break;
-    }
-  }
+    while (position < input.length) {
+      const token = this.nextToken(input, position, line, column);
 
-  executeBranch(
-    branch: "IF" | "ELSE",
-    statements: CamoASTNode[],
-    context: CamoAST,
-    condition: string
-  ): void {
-    const shouldExecute =
-      branch === "IF"
-        ? this.evaluateCondition(condition, context)
-        : !this.evaluateCondition(condition, context);
+      if (token) {
+        tokens.push(token);
+        position = token.end;
 
-    if (shouldExecute) {
-      for (const statement of statements) {
-        this.executeStatement(statement);
+        // Update line/column tracking
+        if (token.type === TokenType.NEWLINE_CHAR) {
+          line++;
+          column = 1;
+        } else {
+          column += token.value.length;
+        }
+      } else {
+        // Skip invalid character
+        position++;
+        column++;
       }
     }
+
+    // Add EOF token
+    tokens.push({
+      type: TokenType.EOF,
+      value: "",
+      start: position,
+      end: position,
+      line,
+      column,
+    });
+
+    return tokens;
   }
 
-  evaluateCondition(condition: string, context: CamoAST): boolean {
-    // Examples:
-    // IF{hover} -> check if mouse is over
-    // IF{time > 17:00} -> check current time
-    // IF{theme.dark} -> check Obsidian theme
+  private nextToken(
+    input: string,
+    position: number,
+    line: number,
+    column: number
+  ): Token | null {
+    const remaining = input.slice(position);
 
-    if (condition === "hover") {
-      // Check hover state
-      return false; // Placeholder
-    }
+    // Try each token pattern
+    for (const [type, pattern] of Object.entries(this.TOKEN_PATTERNS)) {
+      const match = remaining.match(pattern);
+      if (match) {
+        const value = match[0];
+        const capturedValue = match[1] || value; // Use captured group if available
 
-    if (condition.includes("time")) {
-      // Parse time condition
-      const now = new Date(Date.now());
-      const time = now.getHours() * 60 + now.getMinutes();
-      const [, timeStr] = condition.split(">");
-      const [hours, minutes] = timeStr.split(":");
-      const conditionTime = parseInt(hours) * 60 + parseInt(minutes);
-      if (time > conditionTime) {
-        return true;
+        return {
+          type: type as TokenType,
+          value:
+            type === TokenType.ACTION_BLOCK ||
+            type === TokenType.VARIABLE_BLOCK ||
+            type === TokenType.OPTION_BLOCK
+              ? capturedValue
+              : value,
+          start: position,
+          end: position + value.length,
+          line,
+          column,
+        };
       }
-      // Implement time comparison logic
-      return false; // Placeholder
     }
 
-    if (condition === "theme.dark") {
-      return document.body.classList.contains("theme-dark");
+    // Check for invalid token
+    if (remaining.length > 0) {
+      return {
+        type: TokenType.INVALID,
+        value: remaining[0],
+        start: position,
+        end: position + 1,
+        line,
+        column,
+      };
     }
 
-    return false;
-  }
-
-  private handleDeclaration(node: CamoASTNode): void {
-    // Handle declaration node
-  }
-
-  private handleTarget(node: CamoASTNode): void {
-    // Handle target node
-  }
-
-  private handleEffect(node: CamoASTNode): void {
-    // Handle effect node
-  }
-
-  private handleOutput(node: CamoASTNode): void {
-    // Handle output node
-  }
-
-  private handleGenericStatement(node: CamoASTNode): void {
-    // Handle generic statement
+    return null;
   }
 }
 
-// Scope management for block-local variables
-export class CamoIRScope {
-  // Block-local variables only (Obsidian constraint)
-  blockScope: Map<string, any> = new Map();
-
-  // No cross-block references (security/performance)
-  // No vault-wide variables (complexity)
-
-  // Predefined system variables
-  readonly systemVars = {
-    theme: () =>
-      document.body.classList.contains("theme-dark") ? "dark" : "light",
-    time: () => new Date().toISOString(),
-    viewport: () => ({ width: window.innerWidth, height: window.innerHeight }),
+/**
+ * Grammar validator for camoMetaData syntax
+ */
+export class CamoGrammar {
+  // Keyword specifications with required zones
+  private readonly KEYWORD_SPECS: Record<
+    string,
+    { zones: string[]; description: string }
+  > = {
+    set: {
+      zones: ["declaration", "target", "effect"],
+      description: "Set visual property or style",
+    },
+    apply: {
+      zones: ["declaration", "target", "effect"],
+      description: "Apply effect or transformation",
+    },
+    protect: {
+      zones: ["declaration", "target", "effect", "output"],
+      description: "Apply security protection",
+    },
+    reveal: {
+      zones: ["declaration", "target", "effect"],
+      description: "Reveal hidden content",
+    },
+    hide: {
+      zones: ["declaration", "target", "effect"],
+      description: "Hide content",
+    },
+    mask: {
+      zones: ["declaration", "target", "effect"],
+      description: "Mask content with pattern",
+    },
+    redact: {
+      zones: ["declaration", "target", "effect"],
+      description: "Redact sensitive information",
+    },
+    store: {
+      zones: ["declaration", "target", "output"],
+      description: "Store state or data",
+    },
+    retrieve: {
+      zones: ["declaration", "target", "output"],
+      description: "Retrieve stored data",
+    },
+    coordinate: {
+      zones: ["declaration", "target", "effect"],
+      description: "Coordinate with other blocks",
+    },
   };
 
-  get(key: string): any {
-    if (this.systemVars[key as keyof typeof this.systemVars]) {
-      return this.systemVars[key as keyof typeof this.systemVars]();
+  validateKeyword(keyword: string): boolean {
+    return keyword in this.KEYWORD_SPECS;
+  }
+
+  getRequiredZones(keyword: string): string[] {
+    return this.KEYWORD_SPECS[keyword]?.zones || ["declaration", "target"];
+  }
+
+  validateStatement(statement: ParsedStatement): string[] {
+    const errors: string[] = [];
+
+    // Check keyword validity
+    if (!this.validateKeyword(statement.declaration.keyword)) {
+      errors.push(`Unknown keyword: ${statement.declaration.keyword}`);
     }
-    return this.blockScope.get(key);
+
+    // Check required zones
+    const requiredZones = this.getRequiredZones(statement.declaration.keyword);
+    if (requiredZones.includes("effect") && !statement.effect) {
+      errors.push(
+        `Keyword '${statement.declaration.keyword}' requires effect zone`
+      );
+    }
+    if (requiredZones.includes("output") && !statement.output) {
+      errors.push(
+        `Keyword '${statement.declaration.keyword}' requires output zone`
+      );
+    }
+
+    // Check target function validity
+    if (!statement.target.function || statement.target.function.trim() === "") {
+      errors.push("Target function is required");
+    }
+
+    return errors;
   }
 
-  set(key: string, value: any): void {
-    this.blockScope.set(key, value);
+  getKeywordDescription(keyword: string): string {
+    return this.KEYWORD_SPECS[keyword]?.description || "Unknown keyword";
   }
 
-  clear(): void {
-    this.blockScope.clear();
-  }
-}
-
-// Optimizer for IR performance
-export class CamoIROptimizer {
-  // Dead code elimination
-  removeUnusedStatements(ir: CamoAST): CamoAST {
-    // Remove statements with no effect
-    // Remove unreachable branches
-    const optimized: CamoAST = {
-      type: "root",
-      statements: ir.statements.filter((stmt) => this.hasEffect(stmt)),
-    };
-    return optimized;
-  }
-
-  // CSS consolidation
-  consolidateStyles(ir: CamoAST): CamoAST {
-    // Merge similar CSS rules
-    // Combine sequential operations
-    // Implementation would go here
-    return ir;
-  }
-
-  // Performance optimization for desktop
-  optimizeForDesktop(ir: CamoAST): CamoAST {
-    // Keep full animation complexity for desktop
-    // Maintain high resolution effects
-    return ir;
-  }
-
-  // Performance optimization for mobile
-  optimizeForMobile(ir: CamoAST): CamoAST {
-    // Reduce animation complexity
-    // Simplify effects
-    // Lower resolution for pixelation
-    return this.simplifyAnimations(ir);
-  }
-
-  private hasEffect(statement: CamoASTNode): boolean {
-    // Check if statement has any side effects
-    return (
-      statement.type !== "declaration" || (statement.children?.length ?? 0) > 0
-    );
-  }
-
-  private simplifyAnimations(ir: CamoAST): CamoAST {
-    // Simplify animations for mobile
-    return ir;
+  getSupportedKeywords(): string[] {
+    return Object.keys(this.KEYWORD_SPECS);
   }
 }
 
-// Obsidian event handlers for CAMO
-export class ObsidianEventHandlers {
-  private handlers: {
-    "file-open": (file: TFile) => void;
-    "layout-change": () => void;
-    "css-change": () => void;
-    "editor-change": (editor: Editor) => void;
-    "editor-paste": (evt: ClipboardEvent) => void;
-    "active-leaf-change": () => void;
-    "window-resize": () => void;
-  };
+/**
+ * Statement parser for individual camoMetaData lines
+ */
+export class CamoStatementParser {
+  private grammar: CamoGrammar;
 
   constructor() {
-    this.handlers = {
-      "file-open": (file: TFile) => {
-        // Reset CAMO states
-        console.log(`File opened: ${file.path}`);
+    this.grammar = new CamoGrammar();
+  }
+
+  parseStatement(
+    tokens: Token[],
+    startIndex: number = 0
+  ): {
+    statement: ParsedStatement | null;
+    nextIndex: number;
+  } {
+    let current = startIndex;
+    const errors: string[] = [];
+
+    // Skip whitespace
+    current = this.skipWhitespace(tokens, current);
+
+    if (current >= tokens.length || tokens[current].type === TokenType.EOF) {
+      return { statement: null, nextIndex: current };
+    }
+
+    // Check for statement start
+    const firstToken = tokens[current];
+    if (
+      firstToken.type !== TokenType.NEWLINE &&
+      firstToken.type !== TokenType.HIERARCHICAL
+    ) {
+      return { statement: null, nextIndex: current };
+    }
+
+    const operator = firstToken.value as "::" | ":^:";
+    const line = firstToken.line;
+    const column = firstToken.column;
+    current++;
+
+    // Parse declaration zone
+    const declaration = this.parseDeclaration(tokens, current);
+    if (!declaration.success) {
+      errors.push(...declaration.errors);
+      return {
+        statement: this.createErrorStatement(tokens, startIndex, errors),
+        nextIndex: declaration.nextIndex,
+      };
+    }
+    current = declaration.nextIndex;
+
+    // Parse target zone (required)
+    const target = this.parseTarget(tokens, current);
+    if (!target.success) {
+      errors.push(...target.errors);
+      return {
+        statement: this.createErrorStatement(tokens, startIndex, errors),
+        nextIndex: target.nextIndex,
+      };
+    }
+    current = target.nextIndex;
+
+    // Parse optional effect zone
+    let effect: any = null;
+    if (
+      current < tokens.length &&
+      tokens[current].type === TokenType.OPERATOR
+    ) {
+      const effectResult = this.parseEffect(tokens, current);
+      if (effectResult.success) {
+        effect = effectResult.data;
+        current = effectResult.nextIndex;
+      } else {
+        errors.push(...effectResult.errors);
+      }
+    }
+
+    // Parse optional output zone
+    let output: any = null;
+    if (current < tokens.length && tokens[current].type === TokenType.TRIGGER) {
+      const outputResult = this.parseOutput(tokens, current);
+      if (outputResult.success) {
+        output = outputResult.data;
+        current = outputResult.nextIndex;
+      } else {
+        errors.push(...outputResult.errors);
+      }
+    }
+
+    // Collect raw text
+    const rawTokens = tokens.slice(startIndex, current);
+    const raw = rawTokens.map((t) => t.value).join("");
+
+    // Create statement
+    const statement: ParsedStatement = {
+      type: "statement",
+      line,
+      column,
+      operator,
+      declaration: {
+        type: operator === "::" ? "newline" : "hierarchical",
+        keyword: declaration.data?.keyword || "unknown",
+        variable: declaration.data?.variable,
+        modifiers: declaration.data?.modifiers || [],
       },
-      "layout-change": () => {
-        // Reprocess visible blocks
-        console.log("Layout changed");
+      target: {
+        function: target.data?.function || "unknown",
+        selector: target.data?.selector,
       },
-      "css-change": () => {
-        // Refresh CAMO styles
-        console.log("CSS changed");
-      },
-      "editor-change": (editor: Editor) => {
-        // Debounced reprocessing
-        console.log("Editor changed");
-      },
-      "editor-paste": (evt: ClipboardEvent) => {
-        // Handle pasted CAMO blocks
-        console.log("Content pasted");
-      },
-      "active-leaf-change": () => {
-        // Update block visibility
-        console.log("Active leaf changed");
-      },
-      "window-resize": () => {
-        // Responsive adjustments
-        console.log("Window resized");
-      },
+      effect,
+      output,
+      raw,
+      valid: errors.length === 0,
+      errors,
+    };
+
+    // Grammar validation
+    const grammarErrors = this.grammar.validateStatement(statement);
+    statement.errors.push(...grammarErrors);
+    statement.valid = statement.errors.length === 0;
+
+    return { statement, nextIndex: current };
+  }
+
+  private parseDeclaration(tokens: Token[], startIndex: number) {
+    let current = this.skipWhitespace(tokens, startIndex);
+    const errors: string[] = [];
+
+    // Parse keyword
+    if (
+      current >= tokens.length ||
+      tokens[current].type !== TokenType.IDENTIFIER
+    ) {
+      return {
+        success: false,
+        errors: ["Expected keyword after statement operator"],
+        nextIndex: current,
+        data: null,
+      };
+    }
+
+    const keyword = tokens[current].value;
+    current++;
+
+    // Parse optional variable
+    let variable: string | undefined;
+    current = this.skipWhitespace(tokens, current);
+    if (
+      current < tokens.length &&
+      tokens[current].type === TokenType.VARIABLE_BLOCK
+    ) {
+      variable = tokens[current].value;
+      current++;
+    }
+
+    // Parse modifiers (additional identifiers)
+    const modifiers: string[] = [];
+    while (current < tokens.length) {
+      current = this.skipWhitespace(tokens, current);
+      if (
+        current < tokens.length &&
+        tokens[current].type === TokenType.IDENTIFIER
+      ) {
+        modifiers.push(tokens[current].value);
+        current++;
+      } else {
+        break;
+      }
+    }
+
+    return {
+      success: true,
+      errors,
+      nextIndex: current,
+      data: { keyword, variable, modifiers },
     };
   }
 
-  register(
-    event: keyof typeof this.handlers,
-    handler: (typeof this.handlers)[keyof typeof this.handlers]
-  ): void {
-    this.handlers[event] = handler as any;
+  private parseTarget(tokens: Token[], startIndex: number) {
+    let current = this.skipWhitespace(tokens, startIndex);
+    const errors: string[] = [];
+
+    // Expect relation operator
+    if (
+      current >= tokens.length ||
+      tokens[current].type !== TokenType.RELATION
+    ) {
+      return {
+        success: false,
+        errors: ["Expected '//' relation operator before target"],
+        nextIndex: current,
+        data: null,
+      };
+    }
+    current++;
+
+    // Parse function
+    current = this.skipWhitespace(tokens, current);
+    if (
+      current >= tokens.length ||
+      tokens[current].type !== TokenType.IDENTIFIER
+    ) {
+      return {
+        success: false,
+        errors: ["Expected target function after '//'"],
+        nextIndex: current,
+        data: null,
+      };
+    }
+
+    const func = tokens[current].value;
+    current++;
+
+    // Parse optional selector
+    let selector: string | undefined;
+    current = this.skipWhitespace(tokens, current);
+    if (
+      current < tokens.length &&
+      tokens[current].type === TokenType.VARIABLE_BLOCK
+    ) {
+      selector = tokens[current].value;
+      current++;
+    }
+
+    return {
+      success: true,
+      errors,
+      nextIndex: current,
+      data: { function: func, selector },
+    };
   }
 
-  trigger(event: keyof typeof this.handlers, ...args: any[]): void {
-    const handler = this.handlers[event];
-    if (handler) {
-      (handler as any)(...args);
+  private parseEffect(tokens: Token[], startIndex: number) {
+    let current = startIndex;
+    const errors: string[] = [];
+
+    // Skip operator
+    if (
+      current < tokens.length &&
+      tokens[current].type === TokenType.OPERATOR
+    ) {
+      current++;
+    }
+
+    // Parse action
+    current = this.skipWhitespace(tokens, current);
+    if (
+      current >= tokens.length ||
+      tokens[current].type !== TokenType.ACTION_BLOCK
+    ) {
+      return {
+        success: false,
+        errors: ["Expected action block after '%' operator"],
+        nextIndex: current,
+        data: null,
+      };
+    }
+
+    const action = tokens[current].value;
+    current++;
+
+    // Parse optional parameters
+    const parameters = new Map<string, any>();
+    current = this.skipWhitespace(tokens, current);
+    if (
+      current < tokens.length &&
+      tokens[current].type === TokenType.OPTION_BLOCK
+    ) {
+      const paramString = tokens[current].value;
+      // Parse parameters like "intensity=80, duration=500"
+      const paramPairs = paramString.split(",");
+      for (const pair of paramPairs) {
+        const [key, value] = pair.split("=").map((s) => s.trim());
+        if (key && value) {
+          parameters.set(key, this.parseValue(value));
+        }
+      }
+      current++;
+    }
+
+    return {
+      success: true,
+      errors,
+      nextIndex: current,
+      data: { action, parameters },
+    };
+  }
+
+  private parseOutput(tokens: Token[], startIndex: number) {
+    let current = startIndex;
+    const errors: string[] = [];
+
+    // Skip trigger
+    if (current < tokens.length && tokens[current].type === TokenType.TRIGGER) {
+      current++;
+    }
+
+    // Parse outcome
+    current = this.skipWhitespace(tokens, current);
+    if (
+      current >= tokens.length ||
+      tokens[current].type !== TokenType.ACTION_BLOCK
+    ) {
+      return {
+        success: false,
+        errors: ["Expected outcome block after '->' trigger"],
+        nextIndex: current,
+        data: null,
+      };
+    }
+
+    const outcome = tokens[current].value;
+    current++;
+
+    return {
+      success: true,
+      errors,
+      nextIndex: current,
+      data: { outcome, conditions: [] },
+    };
+  }
+
+  private parseValue(value: string): any {
+    // Boolean
+    if (value === "true") return true;
+    if (value === "false") return false;
+
+    // Number
+    if (/^\d+$/.test(value)) return parseInt(value, 10);
+    if (/^\d+\.\d+$/.test(value)) return parseFloat(value);
+
+    // String (remove quotes if present)
+    return value.replace(/^["']|["']$/g, "");
+  }
+
+  private skipWhitespace(tokens: Token[], startIndex: number): number {
+    let current = startIndex;
+    while (
+      current < tokens.length &&
+      tokens[current].type === TokenType.WHITESPACE
+    ) {
+      current++;
+    }
+    return current;
+  }
+
+  private createErrorStatement(
+    tokens: Token[],
+    startIndex: number,
+    errors: string[]
+  ): ParsedStatement {
+    const firstToken = tokens[startIndex] || { line: 1, column: 1, value: "" };
+    const rawTokens = tokens.slice(
+      startIndex,
+      Math.min(startIndex + 10, tokens.length)
+    );
+    const raw = rawTokens.map((t) => t.value).join("");
+
+    return {
+      type: "statement",
+      line: firstToken.line,
+      column: firstToken.column,
+      operator: "::" as "::" | ":^:",
+      declaration: {
+        type: "newline",
+        keyword: "invalid",
+        modifiers: [],
+      },
+      target: {
+        function: "unknown",
+      },
+      raw,
+      valid: false,
+      errors,
+    };
+  }
+}
+
+/**
+ * AST builder for camoMetaData statements
+ */
+export class CamoASTBuilder {
+  private statementParser: CamoStatementParser;
+
+  constructor() {
+    this.statementParser = new CamoStatementParser();
+  }
+
+  build(input: string): CamoAST {
+    const tokenizer = new CamoTokenizer();
+    const tokens = tokenizer.tokenize(input);
+
+    return this.buildFromTokens(tokens);
+  }
+
+  buildFromTokens(tokens: Token[]): CamoAST {
+    const root: CamoAST = {
+      type: "root",
+      statements: [],
+    };
+
+    let current = 0;
+    while (current < tokens.length && tokens[current].type !== TokenType.EOF) {
+      // Skip non-statement tokens (comments, whitespace, etc.)
+      if (
+        tokens[current].type !== TokenType.NEWLINE &&
+        tokens[current].type !== TokenType.HIERARCHICAL
+      ) {
+        current++;
+        continue;
+      }
+
+      const { statement, nextIndex } = this.statementParser.parseStatement(
+        tokens,
+        current
+      );
+
+      if (statement) {
+        const astNode = this.convertToASTNode(statement);
+        root.statements.push(astNode);
+      }
+
+      current = nextIndex;
+      if (current === tokens.length - 1) break; // EOF
+    }
+
+    // Link hierarchical references
+    this.linkHierarchicalReferences(root);
+
+    return root;
+  }
+
+  private convertToASTNode(statement: ParsedStatement): CamoASTNode {
+    const node: CamoASTNode = {
+      type: "statement",
+      operator: statement.operator,
+      keyword: statement.declaration.keyword,
+      variable: statement.declaration.variable,
+      function: statement.target.function,
+      children: [],
+      depth: statement.operator === "::" ? 0 : 1,
+      line: statement.line,
+      column: statement.column,
+      startIndex: 0, // Will be set by tokenizer if needed
+      endIndex: 0, // Will be set by tokenizer if needed
+    };
+
+    // Add effect information
+    if (statement.effect) {
+      node.action = statement.effect.action;
+
+      // Convert parameters Map to Record
+      if (statement.effect.parameters.size > 0) {
+        node.parameters = {};
+        statement.effect.parameters.forEach((value, key) => {
+          if (node.parameters) {
+            node.parameters[key] = String(value);
+          }
+        });
+      }
+    }
+
+    // Add output information
+    if (statement.output) {
+      node.outcome = statement.output.outcome;
+    }
+
+    return node;
+  }
+
+  private linkHierarchicalReferences(ast: CamoAST): void {
+    const stack: CamoASTNode[] = [];
+
+    for (const statement of ast.statements) {
+      if (statement.operator === "::") {
+        // Root level statement
+        stack.length = 0; // Clear stack
+        stack.push(statement);
+        statement.depth = 0;
+      } else if (statement.operator === ":^:") {
+        // Hierarchical statement
+        if (stack.length > 0) {
+          const parent = stack[stack.length - 1];
+          parent.children = parent.children || [];
+          parent.children.push(statement);
+          statement.parent = parent;
+          statement.depth = parent.depth + 1;
+        }
+        stack.push(statement);
+      }
     }
   }
 }
 
-// Performance monitoring for CAMO
-export class CamoPerformanceMonitor {
-  private debounceHits = 0;
-  private debounceTotal = 0;
+/**
+ * Main MetaData parser combining all components
+ */
+export class CamoMetaDataParser {
+  private tokenizer: CamoTokenizer;
+  private statementParser: CamoStatementParser;
+  private astBuilder: CamoASTBuilder;
+  private grammar: CamoGrammar;
+  private config: ParserConfig;
 
-  // Measure against Obsidian's render cycle
-  measureRenderImpact(): PerformanceMetrics {
+  constructor(config: Partial<ParserConfig> = {}) {
+    this.config = {
+      strictMode: false,
+      enableComments: true,
+      maxLineLength: 1000,
+      allowIncompleteStatements: true,
+      ...config,
+    };
+
+    this.tokenizer = new CamoTokenizer();
+    this.statementParser = new CamoStatementParser();
+    this.astBuilder = new CamoASTBuilder();
+    this.grammar = new CamoGrammar();
+  }
+
+  /**
+   * Parse camoMetaData lines into structured statements
+   */
+  parseMetaData(lines: string[]): ParsedStatement[] {
+    const statements: ParsedStatement[] = [];
+
+    for (const line of lines) {
+      const trimmed = line.trim();
+
+      // Skip empty lines and non-metadata lines
+      if (
+        !trimmed ||
+        (!trimmed.startsWith("::") && !trimmed.startsWith(":^:"))
+      ) {
+        continue;
+      }
+
+      const tokens = this.tokenizer.tokenize(trimmed);
+      const { statement } = this.statementParser.parseStatement(tokens);
+
+      if (statement) {
+        statements.push(statement);
+      }
+    }
+
+    return statements;
+  }
+
+  /**
+   * Parse single camoMetaData statement
+   */
+  parseStatement(input: string): ParsedStatement | null {
+    const tokens = this.tokenizer.tokenize(input.trim());
+    const { statement } = this.statementParser.parseStatement(tokens);
+    return statement;
+  }
+
+  /**
+   * Build AST from camoMetaData content
+   */
+  buildAST(input: string): CamoAST {
+    return this.astBuilder.build(input);
+  }
+
+  /**
+   * Validate camoMetaData syntax
+   */
+  validate(input: string): { valid: boolean; errors: string[] } {
+    const ast = this.buildAST(input);
+    const errors: string[] = [];
+
+    for (const statement of ast.statements) {
+      if (statement.keyword) {
+        if (!this.grammar.validateKeyword(statement.keyword)) {
+          errors.push(
+            `Unknown keyword: ${statement.keyword} at line ${statement.line}`
+          );
+        }
+      }
+    }
+
     return {
-      blockProcessTime: performance.measure("camo-process"),
-      cssInjectionTime: performance.measure("camo-css"),
-      debounceEfficiency: this.calculateDebounceHits(),
-      memoryFootprint: (performance as any).memory?.usedJSHeapSize,
+      valid: errors.length === 0,
+      errors,
     };
   }
 
-  // Detect performance issues
-  detectBottlenecks(): BottleneckReport {
-    const metrics = this.measureRenderImpact();
-    console.log("metrics", metrics);
+  /**
+   * Get supported keywords
+   */
+  getSupportedKeywords(): string[] {
+    return this.grammar.getSupportedKeywords();
+  }
+
+  /**
+   * Get keyword description
+   */
+  getKeywordDescription(keyword: string): string {
+    return this.grammar.getKeywordDescription(keyword);
+  }
+
+  /**
+   * Get parser configuration
+   */
+  getConfig(): ParserConfig {
+    return { ...this.config };
+  }
+
+  /**
+   * Update parser configuration
+   */
+  updateConfig(newConfig: Partial<ParserConfig>): void {
+    this.config = { ...this.config, ...newConfig };
+  }
+
+  /**
+   * Get detailed parsing information for debugging
+   */
+  getParsingInfo(input: string): {
+    tokens: Token[];
+    statements: ParsedStatement[];
+    ast: CamoAST;
+    errors: string[];
+  } {
+    const tokens = this.tokenizer.tokenize(input);
+    const statements = this.parseMetaData(input.split("\n"));
+    const ast = this.buildAST(input);
+    const validation = this.validate(input);
+
     return {
-      "too-many-blocks": false, // Check if too many blocks are being processed
-      "complex-metadata-parsing": false, // Check parsing complexity
-      "excessive-dom-mutations": false, // Check DOM mutation count
+      tokens,
+      statements,
+      ast,
+      errors: validation.errors,
     };
-  }
-
-  private calculateDebounceHits(): number {
-    return this.debounceTotal > 0 ? this.debounceHits / this.debounceTotal : 0;
-  }
-
-  recordDebounce(hit: boolean): void {
-    this.debounceTotal++;
-    if (hit) this.debounceHits++;
-  }
-}
-
-// Migration strategy for existing plugins
-export class MigrationStrategy {
-  // Detect existing codeblock customizations
-  detectExistingPlugins(): string[] {
-    // Check for: CodeblockCustomizer, Code Styler, etc.
-    return [
-      "codeblock-customizer",
-      "code-styler",
-      "custom-css",
-      "obsidian-code-block-styler",
-      "obsidian-code-block-customizer",
-    ];
-  }
-
-  // Convert syntax from other plugins
-  migrateFrom = {
-    "codeblock-customizer": (block: string): string => {
-      // Convert CodeblockCustomizer syntax to CAMO
-      return this.convertCodeblockCustomizer(block);
-    },
-    "code-styler": (block: string): string => {
-      // Convert Code Styler syntax to CAMO
-      return this.convertCodeStyler(block);
-    },
-    "custom-css": (css: string): string => {
-      // Convert custom CSS to CAMO syntax
-      return this.convertCustomCSS(css);
-    },
-    "obsidian-code-block-styler": (block: string): string => {
-      // Convert Obsidian Code Block Styler syntax
-      return this.convertObsidianStyler(block);
-    },
-    "obsidian-code-block-customizer": (block: string): string => {
-      // Convert Obsidian Code Block Customizer syntax
-      return this.convertObsidianCustomizer(block);
-    },
-  };
-
-  // Preserve user customizations
-  preserveSettings(oldPlugin: string): string {
-    // Extract and preserve settings from old plugin
-    // Return CAMO-compatible configuration
-    return "";
-  }
-
-  private convertCodeblockCustomizer(block: string): string {
-    // Implementation for converting CodeblockCustomizer syntax
-    return block;
-  }
-
-  private convertCodeStyler(block: string): string {
-    // Implementation for converting Code Styler syntax
-    return block;
-  }
-
-  private convertCustomCSS(css: string): string {
-    // Implementation for converting custom CSS
-    return css;
-  }
-
-  private convertObsidianStyler(block: string): string {
-    // Implementation for converting Obsidian Code Block Styler
-    return block;
-  }
-
-  private convertObsidianCustomizer(block: string): string {
-    // Implementation for converting Obsidian Code Block Customizer
-    return block;
   }
 }

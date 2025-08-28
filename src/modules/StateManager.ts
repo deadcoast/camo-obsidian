@@ -11,7 +11,7 @@ export interface BlockState {
   effectsApplied: string[];
   userInteractions: number;
   lastModified: number;
-  customProperties: Record<string, any>;
+  customProperties: Record<string, string | number | boolean | null>;
   preset?: string;
   flags: string[];
   metadata: string[];
@@ -41,14 +41,38 @@ export interface SessionData {
 
 export class CamoStateManager {
   private state: GlobalState;
-  private plugin: any; // Obsidian Plugin instance
+  private plugin: {
+    app: {
+      workspace: { getActiveFile: () => any };
+      vault: {
+        adapter: {
+          read: (path: string) => Promise<string>;
+          write: (path: string, data: string) => Promise<void>;
+        };
+      };
+    };
+    loadData: () => Promise<any>;
+    saveData: (data: any) => Promise<void>;
+  };
   private saveQueue: Set<string> = new Set();
   private saveTimeout: NodeJS.Timeout | null = null;
   private readonly SAVE_DEBOUNCE_MS = 1000;
   private readonly MAX_BLOCK_HISTORY = 1000;
   private readonly STATE_VERSION = "1.0.0";
 
-  constructor(plugin: any) {
+  constructor(plugin: {
+    app: {
+      workspace: { getActiveFile: () => any };
+      vault: {
+        adapter: {
+          read: (path: string) => Promise<string>;
+          write: (path: string, data: string) => Promise<void>;
+        };
+      };
+    };
+    loadData: () => Promise<any>;
+    saveData: (data: any) => Promise<void>;
+  }) {
     this.plugin = plugin;
     this.state = this.getDefaultState();
   }
@@ -333,7 +357,7 @@ export class CamoStateManager {
   /**
    * Validate state structure
    */
-  private validateState(state: any): state is GlobalState {
+  private validateState(state: unknown): state is GlobalState {
     return (
       typeof state === "object" &&
       typeof state.blocks === "object" &&
@@ -366,6 +390,7 @@ export class CamoStateManager {
   private setupPeriodicCleanup(): void {
     setInterval(() => {
       this.cleanupOldBlocks();
+      this.cleanupProcessorCache();
       this.enforceBlockLimit();
     }, 60 * 60 * 1000); // Every hour
   }
@@ -421,6 +446,53 @@ export class CamoStateManager {
   }
 
   /**
+   * Processor Cache Management
+   *
+   * These methods handle caching for debounced processors to avoid
+   * unnecessary re-processing of content that hasn't changed.
+   */
+  private processorCache: Map<string, { hash: string; timestamp: number }> =
+    new Map();
+
+  /**
+   * Check if cached content is valid
+   */
+  isCacheValid(cacheKey: string, currentHash: string): boolean {
+    const cached = this.processorCache.get(cacheKey);
+    if (!cached) return false;
+
+    // Check if hash matches and cache is not expired
+    const maxAge = 5 * 60 * 1000; // 5 minutes
+    const isExpired = Date.now() - cached.timestamp > maxAge;
+
+    return cached.hash === currentHash && !isExpired;
+  }
+
+  /**
+   * Update processor cache
+   */
+  updateProcessorCache(cacheKey: string, hash: string): void {
+    this.processorCache.set(cacheKey, {
+      hash,
+      timestamp: Date.now(),
+    });
+  }
+
+  /**
+   * Clean up old processor cache entries
+   */
+  private cleanupProcessorCache(): void {
+    const now = Date.now();
+    const maxAge = 5 * 60 * 1000; // 5 minutes
+
+    this.processorCache.forEach((cache, key) => {
+      if (now - cache.timestamp > maxAge) {
+        this.processorCache.delete(key);
+      }
+    });
+  }
+
+  /**
    * Cleanup on plugin unload
    */
   async cleanup(): Promise<void> {
@@ -428,5 +500,8 @@ export class CamoStateManager {
       clearTimeout(this.saveTimeout);
       await this.saveState();
     }
+
+    // Clear processor cache
+    this.processorCache.clear();
   }
 }

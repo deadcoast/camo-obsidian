@@ -30,14 +30,14 @@ export interface IRTarget {
 }
 
 export interface IRParameters {
-  [key: string]: any;
+  [key: string]: string | number | boolean | null;
 }
 
 export interface IRCondition {
   type: "IF" | "ELSE" | "WHILE" | "WHEN";
   expression: string;
   operator: string;
-  value: any;
+  value: string | number | boolean | null;
 }
 
 export interface IRMetadata {
@@ -50,9 +50,9 @@ export interface IRMetadata {
 export interface ExecutionContext {
   blockId: string;
   element: HTMLElement;
-  settings: any;
-  state: Map<string, any>;
-  variables: Map<string, any>;
+  settings: Record<string, string | number | boolean>;
+  state: Map<string, string | number | boolean | null>;
+  variables: Map<string, string | number | boolean | null>;
 }
 
 export interface ExecutionResult {
@@ -72,7 +72,7 @@ export interface OperationResult {
 export interface AppliedEffect {
   type: string;
   target: string;
-  value: any;
+  value: string | number | boolean | null;
   timestamp: number;
 }
 
@@ -537,7 +537,10 @@ export class ConditionalExecutor {
       : false;
   }
 
-  private evaluateTimeCondition(operator: string, value: any): boolean {
+  private evaluateTimeCondition(
+    operator: string,
+    value: string | number
+  ): boolean {
     const now = new Date();
     const compareTime = new Date(value);
 
@@ -556,7 +559,7 @@ export class ConditionalExecutor {
     }
   }
 
-  private evaluateThemeCondition(operator: string, value: any): boolean {
+  private evaluateThemeCondition(operator: string, value: string): boolean {
     const isDark = document.body.classList.contains("theme-dark");
     const currentTheme = isDark ? "dark" : "light";
 
@@ -572,7 +575,7 @@ export class ConditionalExecutor {
     }
   }
 
-  private evaluateViewportCondition(operator: string, value: any): boolean {
+  private evaluateViewportCondition(operator: string, value: number): boolean {
     const viewport = {
       width: window.innerWidth,
       height: window.innerHeight,
@@ -600,7 +603,7 @@ export class ConditionalExecutor {
 
   private evaluateUserRoleCondition(
     operator: string,
-    value: any,
+    value: string | number | boolean | null,
     context: ExecutionContext
   ): boolean {
     const userRole = context.variables.get("user.role") || "public";
@@ -625,7 +628,7 @@ export class ConditionalExecutor {
 
   private evaluateContentLengthCondition(
     operator: string,
-    value: any,
+    value: string | number | boolean | null,
     context: ExecutionContext
   ): boolean {
     const contentLength = context.variables.get("content.length") || 0;
@@ -654,7 +657,7 @@ export class ConditionalExecutor {
   private evaluateCustomCondition(
     expression: string,
     operator: string,
-    value: any,
+    value: string | number | boolean | null,
     context: ExecutionContext
   ): boolean {
     const contextValue =

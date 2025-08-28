@@ -26,17 +26,15 @@ SUMMARIZE THE CHANGES SO FAR ROBUSTLY SO THE NEW DEV WHO WORKS ON THIS TOMORROW 
 
 1. `QUIKSTART`: Based on your current position marker in the tasklist, and the source codes current state;
 
-```
+```text
 > -
 > > Current Position
 > -
 ```
-- Create the next stage of @TODO TODO list to work on as a plan at the top of the @CHANGELOG
-    - Include what (./Docs)documents to review, and place their corresponding source code links beside them:{
-    "[MyDocument](./Docs/myDocumentFile.md)"
-    "[MyCodeFile](path/to/mycodefile.ts)"
-}
 
-```
-I'll scan the existing accessibility modules to implement export/publish fallbacks, and locate syntax highlighting and autocomplete integration points to wire providers according to Obsidian docs.
-```
+Create the next stage of @TODO TODO list to work on as a plan at the top of the @CHANGELOG
+
+Include what (./Docs)documents to review, and place their corresponding source code links beside them:
+
+- "[MyDocument](./Docs/myDocumentFile.md)"
+- "[MyCodeFile](path/to/mycodefile.ts)"

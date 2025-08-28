@@ -337,6 +337,20 @@ export class PresetProcessor {
   }
 
   /**
+   * Add a preset (alias for registerCustomPreset for consistency)
+   */
+  addPreset(preset: CamoPreset): void {
+    this.registerCustomPreset(preset);
+  }
+
+  /**
+   * Get all custom presets
+   */
+  getCustomPresets(): CamoPreset[] {
+    return Array.from(this.customPresets.values());
+  }
+
+  /**
    * Remove a custom preset
    */
   removeCustomPreset(id: string): boolean {
@@ -384,7 +398,7 @@ export class PresetProcessor {
   /**
    * Validate preset structure
    */
-  validatePreset(preset: any): preset is CamoPreset {
+  validatePreset(preset: unknown): preset is CamoPreset {
     const required = [
       "id",
       "name",
@@ -393,7 +407,9 @@ export class PresetProcessor {
       "cssClass",
       "styles",
     ];
-    return required.every((field) => preset.hasOwnProperty(field));
+    return required.every(
+      (field) => preset && typeof preset === "object" && field in preset
+    );
   }
 
   /**

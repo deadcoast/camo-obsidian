@@ -1,6 +1,7 @@
 # CHANGELOG
 
 <<<<<<< Current (Your changes)
+
 ## QUIKSTART — Next Stage Plan
 
 ### CURRENT TASK MARKER PROMPT
@@ -9,7 +10,7 @@
 > > [CurrentPosition]
 > -
 
-- Current Position: Effect routing centralized via `BlockContext.effects` and `VisualEffectsEngine.effects`; conflict matrix extended with per‑plugin compatibility classes; semantic selectors normalized and resolved across transform/targets; Live Preview hooks, print policy, accessibility, mobile gating, and metrics in place. Build is green.
+- Current Position: Major module integration completed - camoPreset system wired, StateManager fully integrated with cache management, EffectHandler registry system operational with ApplyEffectHandler and SetEffectHandler. Legacy modules removed (CamoSecurityLayer.ts, VisualCamoflage.ts, Parser.ts). Core architecture now fully modular with proper separation of concerns. Build is green.
 
 ### Next Stage @TODO Plan (Docs + Code pairs)
 
@@ -72,6 +73,45 @@
 
 - What’s In Progress
   - Extend caches/metrics to effects/state; finalize effect action CSS hooks; integrate more Obsidian events; update docs
+
+---
+
+## Changes — 2025-01-23
+
+### Module Integration & Architecture Cleanup (Completed)
+
+- **Legacy Module Removal**: Deleted CamoSecurityLayer.ts, VisualCamoflage.ts, Parser.ts - legacy placeholder and superseded implementations
+  - Files: Removed `/src/security/CamoSecurityLayer.ts`, `/src/modules/VisualCamoflage.ts`, `/src/extractors/Parser.ts`
+
+- **Core Preset System Integration**: Integrated camoPreset.ts as compatibility layer with PresetProcessor
+  - Added PRESET_TRIGGERS constants for Obsidian-compliant language registration
+  - Maintained backward compatibility while streamlining preset management
+  - Files: [camoPreset.ts](../../src/core/camoPreset.ts), [main.ts](../../src/main.ts)
+
+- **StateManager Full Integration**: Replaced inline caching with comprehensive StateManager
+  - Moved processor cache management from main.ts to StateManager
+  - Added `isCacheValid()` and `updateProcessorCache()` methods
+  - Integrated periodic cleanup into StateManager's internal scheduling
+  - Files: [StateManager.ts](../../src/modules/StateManager.ts), [main.ts](../../src/main.ts)
+
+- **EffectHandler Registry System**: Implemented modular effect handling architecture
+  - Replaced inline effect application with EffectHandlerRegistry pattern
+  - Integrated ApplyEffectHandler and SetEffectHandler into main processing pipeline
+  - Standardized effect parameter parsing and application
+  - Files: [EffectHandler.ts](../../src/handler/EffectHandler.ts), [ApplyEffectHandler.ts](../../src/handler/ApplyEffectHandler.ts), [SetEffectHandler.ts](../../src/handler/SetEffectHandler.ts), [main.ts](../../src/main.ts)
+
+- **Documentation Updates**: Updated MODULE_AUDIT_TREE.md to reflect current integration status
+  - Marked completed integrations with ✅
+  - Documented removed modules with 🗑️
+  - Updated CHANGELOG with current position
+  - Files: [MODULE_AUDIT_TREE.md](../MODULE_AUDIT_TREE.md), [CHANGELOG](../CHANGELOG)
+
+### Architecture Improvements
+
+- **Modular Separation**: Core components now follow single responsibility principle
+- **Type Safety**: Enhanced TypeScript interfaces and proper import/export patterns
+- **Performance**: Centralized caching reduces redundant processing
+- **Maintainability**: Clear ownership and dependency patterns established
 
 ---
 
@@ -185,9 +225,11 @@
 - Wired an EditorSuggest provider for camoMetaData keywords/selectors/actions (initial)
   - Files: [CamoMetaSuggest.ts](../../src/ui/CamoMetaSuggest.ts), [camoAutoComplete.ts](../../src/core/camoAutoComplete.ts), [main.ts](../../src/main.ts)
 =======
+
 ## v1.0.0 - Core Implementation Complete (2024-12-19) ✅
 
 ### Major Features Implemented
+
 - **Complete CAMO Plugin Architecture**: Full Obsidian-compliant implementation replacing default template
 - **Three-Tier System**: All tiers fully functional
   - Tier 1: camoPreset - 6 presets (blackout, ghost, blueprint, modern95, matrix, classified)
@@ -198,6 +240,7 @@
 - **Core Module Structure**: Implemented camoMetaData.ts, camoIRExecutor.ts, VisualEffectsEngine.ts
 
 ### Obsidian Compliance Achieved
+
 - ✅ Content-based flag parsing (not language line parameters)
 - ✅ Debounced processors (500ms) to prevent constant re-rendering
 - ✅ CSS-only effects (no direct DOM manipulation)
@@ -205,6 +248,7 @@
 - ✅ Separate language registration for each preset (camo-blackout, etc.)
 
 ### Technical Features
+
 - Performance optimizations (caching, debouncing, lazy loading)
 - Mobile responsive design with reduced effects
 - Accessibility support (reduced motion, screen reader compatibility)
@@ -213,6 +257,7 @@
 - Command palette integration (reveal/hide all blocks)
 
 ### Developer Experience
+
 - Modular architecture with clear separation of concerns
 - TypeScript interfaces and comprehensive error handling
 - Living documentation updates (MODULE_AUDIT_TREE.md)

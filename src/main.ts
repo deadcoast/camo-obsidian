@@ -1,5 +1,6 @@
 import {
   App,
+  Editor,
   MarkdownPostProcessorContext,
   Notice,
   Plugin,
@@ -8,12 +9,27 @@ import {
 } from "obsidian";
 
 // Import core modules
+import { LivePreviewCompatibility } from "./compatibility/LivePreviewCompatibility";
 import { CamoIRExecutor } from "./core/camoIRExecutor";
 import { CamoMetaDataProcessor, MetaDataContext } from "./core/camoMetaData";
 import { CamoSyntaxHighlighter } from "./core/camoSyntaxHighlighting";
+import { CamoGrammarEngine } from "./engines/GrammarEngine";
 import { VisualEffectsEngine } from "./engines/VisualEffectsEngine";
+import { CamoIRExtractor } from "./extractors/IRExtractor";
+import { ApplyEffectHandler } from "./handler/ApplyEffectHandler";
+import { EffectHandlerRegistry } from "./handler/EffectHandler";
+import { SetEffectHandler } from "./handler/SetEffectHandler";
+import {
+  CommunityPresetBrowserModal,
+  CommunitySharing,
+} from "./modules/CommunitySharing";
+import { CamoConditionalExecution } from "./modules/ConditionalExecution";
+import { CamoMetaDataParser } from "./modules/MetaDataParser";
+import { CamoReactiveRenderer } from "./modules/ReactiveRenderer";
+import { RenderStrategyManager } from "./modules/RenderStrategy";
 import { CamoStateManager } from "./modules/StateManager";
 import { PresetProcessor } from "./processors/PresetProcessor";
+import { CamoSecurityIntegration } from "./security/SecurityIntegration";
 
 interface CamoSettings {
   defaultPreset: string;
@@ -21,6 +37,16 @@ interface CamoSettings {
   enableAnimations: boolean;
   performanceMode: boolean;
   debugMode: boolean;
+  enableSecurity: boolean;
+  securityAudit: boolean;
+  gpuAcceleration: boolean;
+  renderMode: "css" | "canvas" | "webgl" | "auto";
+  // Community settings
+  enableCommunityPresets: boolean;
+  githubToken: string;
+  autoUpdatePresets: boolean;
+  enableBetaPresets: boolean;
+  trustedAuthors: string[];
 }
 
 const DEFAULT_SETTINGS: CamoSettings = {
@@ -29,11 +55,20 @@ const DEFAULT_SETTINGS: CamoSettings = {
   enableAnimations: true,
   performanceMode: false,
   debugMode: false,
+  enableSecurity: true,
+  securityAudit: false,
+  gpuAcceleration: true,
+  renderMode: "auto",
+  // Community defaults
+  enableCommunityPresets: true,
+  githubToken: "",
+  autoUpdatePresets: false,
+  enableBetaPresets: false,
+  trustedAuthors: [],
 };
 
 export default class CamoPlugin extends Plugin {
   settings: CamoSettings;
-  private processorCache: Map<string, ProcessorCache> = new Map();
   private debounceTimers: Map<string, NodeJS.Timeout> = new Map();
 
   // Core components
@@ -43,6 +78,16 @@ export default class CamoPlugin extends Plugin {
   private presetProcessor: PresetProcessor;
   private stateManager: CamoStateManager;
   private syntaxHighlighter: CamoSyntaxHighlighter;
+  private effectHandlerRegistry: EffectHandlerRegistry;
+  private livePreviewCompatibility: LivePreviewCompatibility;
+  private securityIntegration: CamoSecurityIntegration;
+  private renderStrategyManager: RenderStrategyManager;
+  private communitySharing: CommunitySharing;
+  private conditionalExecution: CamoConditionalExecution;
+  private metaDataParser: CamoMetaDataParser;
+  private irExtractor: CamoIRExtractor;
+  private grammarEngine: CamoGrammarEngine;
+  private reactiveRenderer: CamoReactiveRenderer;
 
   // Public accessor for settings tab
   getPresetProcessor(): PresetProcessor {
@@ -97,6 +142,59 @@ export default class CamoPlugin extends Plugin {
       .map((preset) => preset.id);
   }
 
+  // Public method for reinitializing security integration
+  initializeSecurityIntegration(): void {
+    this.securityIntegration = new CamoSecurityIntegration({
+      enableSecurityAudit: this.settings.securityAudit,
+    });
+  }
+
+  // Public accessor for render strategy manager
+  getRenderStrategyManager(): RenderStrategyManager {
+    return this.renderStrategyManager;
+  }
+
+  // Public accessor for community sharing
+  getCommunitySharing(): CommunitySharing {
+    return this.communitySharing;
+  }
+
+  // Public accessor for conditional execution
+  getConditionalExecution(): CamoConditionalExecution {
+    return this.conditionalExecution;
+  }
+
+  // Public accessor for reactive renderer
+  getReactiveRenderer(): CamoReactiveRenderer {
+    return this.reactiveRenderer;
+  }
+
+  // Public accessor for metadata parser
+  getMetaDataParser(): CamoMetaDataParser {
+    return this.metaDataParser;
+  }
+
+  // Public accessor for IR extractor
+  getIRExtractor(): CamoIRExtractor {
+    return this.irExtractor;
+  }
+
+  // Public accessor for grammar engine
+  getGrammarEngine(): CamoGrammarEngine {
+    return this.grammarEngine;
+  }
+
+  // Update community sharing settings
+  updateCommunitySettings(): void {
+    this.communitySharing.updateSettings({
+      enableCommunityPresets: this.settings.enableCommunityPresets,
+      githubToken: this.settings.githubToken,
+      autoUpdate: this.settings.autoUpdatePresets,
+      enableBetaPresets: this.settings.enableBetaPresets,
+      trustedAuthors: this.settings.trustedAuthors,
+    });
+  }
+
   previewApplyMetadata(metadata: string): void {
     // Preview metadata application (for settings preview)
     console.log("Preview metadata:", metadata);
@@ -122,6 +220,38 @@ export default class CamoPlugin extends Plugin {
     this.presetProcessor = new PresetProcessor();
     this.stateManager = new CamoStateManager(this);
     this.syntaxHighlighter = new CamoSyntaxHighlighter();
+    this.livePreviewCompatibility = new LivePreviewCompatibility();
+    this.securityIntegration = new CamoSecurityIntegration({
+      enableSecurityAudit: this.settings.securityAudit,
+    });
+    this.renderStrategyManager = new RenderStrategyManager(this.visualEffects);
+    this.communitySharing = new CommunitySharing(this.app, {
+      enableCommunityPresets: this.settings.enableCommunityPresets,
+      githubToken: this.settings.githubToken,
+      autoUpdate: this.settings.autoUpdatePresets,
+      enableBetaPresets: this.settings.enableBetaPresets,
+      trustedAuthors: this.settings.trustedAuthors,
+    });
+    this.conditionalExecution = new CamoConditionalExecution(this.app);
+    this.metaDataParser = new CamoMetaDataParser({
+      strictMode: this.settings.debugMode,
+      enableComments: true,
+      maxLineLength: 1000,
+      allowIncompleteStatements: !this.settings.debugMode,
+    });
+    this.irExtractor = new CamoIRExtractor();
+    this.grammarEngine = new CamoGrammarEngine();
+    this.reactiveRenderer = new CamoReactiveRenderer(
+      this.app,
+      this.visualEffects
+    );
+
+    // Initialize effect handler registry
+    this.effectHandlerRegistry = new EffectHandlerRegistry();
+
+    // Register effect handlers
+    this.effectHandlerRegistry.registerHandler(new ApplyEffectHandler());
+    this.effectHandlerRegistry.registerHandler(new SetEffectHandler());
 
     // Load settings from Obsidian's data.json
     await this.loadSettings();
@@ -185,6 +315,54 @@ export default class CamoPlugin extends Plugin {
       },
     });
 
+    // Community sharing commands
+    this.addCommand({
+      id: "browse-community-presets",
+      name: "Browse Community Presets",
+      callback: () => {
+        if (!this.settings.enableCommunityPresets) {
+          new Notice(
+            "Community presets are disabled. Enable them in settings."
+          );
+          return;
+        }
+
+        const modal = new CommunityPresetBrowserModal(
+          this.app,
+          this.communitySharing,
+          async (preset) => {
+            const success = await this.communitySharing.installPreset(preset);
+            if (success) {
+              // Refresh preset processor with new preset
+              this.presetProcessor.addPreset(preset);
+            }
+          }
+        );
+        modal.open();
+      },
+    });
+
+    this.addCommand({
+      id: "share-current-preset",
+      name: "Share Custom Preset",
+      checkCallback: (checking: boolean) => {
+        // Check if we have custom presets to share
+        const customPresets = this.presetProcessor.getCustomPresets();
+        if (customPresets.length === 0) {
+          return false;
+        }
+
+        if (!checking) {
+          // For now, share the first custom preset
+          // In a real implementation, this would open a selection modal
+          const preset = customPresets[0];
+          this.communitySharing.sharePreset(preset);
+        }
+
+        return true;
+      },
+    });
+
     // Add settings tab
     this.addSettingTab(new CamoSettingTab(this.app, this));
 
@@ -195,12 +373,60 @@ export default class CamoPlugin extends Plugin {
       })
     );
 
-    // Clean up old states periodically
-    this.registerInterval(
-      window.setInterval(() => {
-        this.cleanupOldCache();
-      }, 60 * 60 * 1000) // Every hour
+    // Register Live Preview compatibility events
+    this.registerEvent(
+      this.app.workspace.on("editor-change", (editor) => {
+        this.livePreviewCompatibility.trackCursorPosition(editor);
+      })
     );
+
+    this.registerEvent(
+      this.app.workspace.on("active-leaf-change", () => {
+        const activeLeaf = this.app.workspace.activeLeaf;
+        if (activeLeaf && activeLeaf.view.getViewType() === "markdown") {
+          const markdownView = activeLeaf.view as { editor?: Editor };
+          if (markdownView.editor) {
+            this.livePreviewCompatibility.refreshEditingState(
+              markdownView.editor
+            );
+          }
+        }
+      })
+    );
+
+    // Register interaction event handlers for conditional execution
+    this.registerDomEvent(document, "mouseover", (event) => {
+      this.handleInteractionEvent(event, "hover", true);
+    });
+
+    this.registerDomEvent(document, "mouseout", (event) => {
+      this.handleInteractionEvent(event, "hover", false);
+    });
+
+    this.registerDomEvent(document, "click", (event) => {
+      this.handleInteractionEvent(event, "clicked", true);
+
+      // Reset click state after brief delay
+      setTimeout(() => {
+        const blockId = this.extractBlockIdFromEvent(event);
+        if (blockId) {
+          this.conditionalExecution.updateInteractionState(blockId, {
+            clicked: false,
+          });
+        }
+      }, 100);
+    });
+
+    this.registerDomEvent(document, "focusin", (event) => {
+      this.handleInteractionEvent(event, "focused", true);
+    });
+
+    this.registerDomEvent(document, "focusout", (event) => {
+      this.handleInteractionEvent(event, "focused", false);
+    });
+
+    // Clean up old states periodically (StateManager handles this internally)
+    // Note: StateManager.setupPeriodicCleanup() handles this automatically
   }
 
   async onunload() {
@@ -211,6 +437,12 @@ export default class CamoPlugin extends Plugin {
 
     // Clean up state manager
     await this.stateManager.cleanup();
+
+    // Clean up reactive renderer
+    this.reactiveRenderer.cleanup();
+
+    // Clean up conditional execution cache
+    this.conditionalExecution.clearCache();
 
     // Clean up styles
     const styleEl = document.getElementById("camo-styles");
@@ -248,8 +480,8 @@ export default class CamoPlugin extends Plugin {
       const sectionInfo = ctx.getSectionInfo(el);
       const cacheKey = `${ctx.docId}-${sectionInfo?.lineStart || 0}`;
 
-      const cached = this.processorCache.get(cacheKey);
-      if (cached && cached.hash === hash && !cached.expired) {
+      // Check cache via StateManager
+      if (this.stateManager.isCacheValid(cacheKey, hash)) {
         return; // Skip re-processing
       }
 
@@ -262,11 +494,8 @@ export default class CamoPlugin extends Plugin {
       // Set new debounced execution
       const timer = setTimeout(async () => {
         await processor(source, el, ctx);
-        this.processorCache.set(cacheKey, {
-          hash,
-          timestamp: Date.now(),
-          expired: false,
-        });
+        // Update cache via StateManager
+        this.stateManager.updateProcessorCache(cacheKey, hash);
         this.debounceTimers.delete(cacheKey);
       }, 500); // 500ms debounce
 
@@ -314,15 +543,101 @@ export default class CamoPlugin extends Plugin {
     const blockId = this.generateBlockId();
     container.setAttribute("data-camo-id", blockId);
 
+    // Validate metadata syntax in debug mode
+    if (this.settings.debugMode && metadata.length > 0) {
+      try {
+        const parsedStatements = this.metaDataParser.parseMetaData(metadata);
+        const invalidStatements = parsedStatements.filter(
+          (stmt) => !stmt.valid
+        );
+
+        if (invalidStatements.length > 0) {
+          console.warn("CAMO: Invalid metadata statements:", invalidStatements);
+
+          // Show errors in debug mode
+          const errorDiv = container.createDiv("camo-debug-errors");
+          errorDiv.style.cssText =
+            "color: red; font-size: 0.8em; margin-bottom: 10px; padding: 5px; border: 1px solid red; background: rgba(255,0,0,0.1);";
+
+          const errorList = invalidStatements
+            .map((stmt) => `Line ${stmt.line}: ${stmt.errors.join(", ")}`)
+            .join("\n");
+
+          errorDiv.textContent = `Metadata Errors:\n${errorList}`;
+        }
+
+        // Grammar validation with EBNF rules
+        const grammarValidation = this.grammarEngine.validateGrammar(
+          metadata.join("\n")
+        );
+        if (!grammarValidation.valid) {
+          console.warn(
+            "CAMO: Grammar validation errors:",
+            grammarValidation.errors
+          );
+
+          // Show grammar errors in debug mode
+          if (grammarValidation.errors.some((e) => e.severity === "error")) {
+            const grammarErrorDiv = container.createDiv("camo-grammar-errors");
+            grammarErrorDiv.style.cssText =
+              "color: orange; font-size: 0.8em; margin-bottom: 10px; padding: 5px; border: 1px solid orange; background: rgba(255,165,0,0.1);";
+
+            const grammarErrorList = grammarValidation.errors
+              .filter((e) => e.severity === "error")
+              .map((e) => `Line ${e.position.line}: ${e.message}`)
+              .join("\n");
+
+            grammarErrorDiv.textContent = `Grammar Errors:\n${grammarErrorList}`;
+          }
+        }
+
+        // Transform to IR for validation and debugging
+        if (parsedStatements.length > 0) {
+          const ast = this.metaDataParser.buildAST(metadata.join("\n"));
+          const irResult = this.irExtractor.transformASTtoIR(ast, blockId);
+
+          if (irResult.errors.length > 0) {
+            console.warn("CAMO: IR transformation errors:", irResult.errors);
+          }
+
+          if (irResult.warnings.length > 0) {
+            console.warn(
+              "CAMO: IR transformation warnings:",
+              irResult.warnings
+            );
+          }
+
+          // Log grammar and IR stats in debug mode
+          console.log("CAMO Grammar Stats:", this.grammarEngine.getStats());
+          console.log("CAMO IR Stats:", irResult.stats);
+          console.log("CAMO IR Instructions:", irResult.instructions);
+        }
+      } catch (error) {
+        console.error("CAMO: Failed to parse metadata:", error);
+      }
+    }
+
+    // Handle Live Preview compatibility
+    this.livePreviewCompatibility.handlePartialRender(container, ctx);
+
+    // Process conditional execution in metadata
+    const processedMetadata = await this.processConditionalMetadata(
+      metadata,
+      blockId
+    );
+
     // Apply configuration
     await this.applyConfiguration(container, {
       flags,
-      metadata,
+      metadata: processedMetadata,
       content,
       preset: null,
       settings: this.settings,
       blockId,
     });
+
+    // Process reactive metadata instructions
+    await this.processReactiveMetadata(processedMetadata, blockId, container);
   }
 
   private async processPresetBlock(
@@ -365,15 +680,59 @@ export default class CamoPlugin extends Plugin {
     const blockId = this.generateBlockId();
     container.setAttribute("data-camo-id", blockId);
 
+    // Validate metadata syntax in debug mode
+    if (this.settings.debugMode && metadata.length > 0) {
+      try {
+        const parsedStatements = this.metaDataParser.parseMetaData(metadata);
+        const invalidStatements = parsedStatements.filter(
+          (stmt) => !stmt.valid
+        );
+
+        if (invalidStatements.length > 0) {
+          console.warn(
+            "CAMO: Invalid metadata statements in preset block:",
+            invalidStatements
+          );
+        }
+
+        // Transform to IR for validation
+        if (parsedStatements.length > 0) {
+          const ast = this.metaDataParser.buildAST(metadata.join("\n"));
+          const irResult = this.irExtractor.transformASTtoIR(ast, blockId);
+
+          if (irResult.errors.length > 0) {
+            console.warn(
+              "CAMO: Preset IR transformation errors:",
+              irResult.errors
+            );
+          }
+        }
+      } catch (error) {
+        console.error("CAMO: Failed to parse preset metadata:", error);
+      }
+    }
+
+    // Handle Live Preview compatibility
+    this.livePreviewCompatibility.handlePartialRender(container, ctx);
+
+    // Process conditional execution in metadata
+    const processedMetadata = await this.processConditionalMetadata(
+      metadata,
+      blockId
+    );
+
     // Apply preset configuration
     await this.applyConfiguration(container, {
       flags,
-      metadata,
+      metadata: processedMetadata,
       content,
       preset,
       settings: this.settings,
       blockId,
     });
+
+    // Process reactive metadata instructions
+    await this.processReactiveMetadata(processedMetadata, blockId, container);
   }
 
   private async applyConfiguration(container: HTMLElement, config: CamoConfig) {
@@ -422,36 +781,31 @@ export default class CamoPlugin extends Plugin {
     flag: string,
     value?: string
   ) {
+    const blockId = container.getAttribute("data-camo-id") || "";
+    const effectContext = {
+      element: container,
+      blockId,
+      content: container.textContent || "",
+      settings: this.settings,
+      state: new Map(),
+    };
+
+    // Handle visual effects through the effect handler registry
     switch (flag) {
-      case "blur": {
-        const intensity = value ? parseInt(value) : 4;
-        this.visualEffects.applyEffect(container, "blur", { intensity });
-        break;
-      }
-      case "fade": {
-        const opacity = value ? parseFloat(value) : 0.5;
-        this.visualEffects.applyEffect(container, "fade", {
-          intensity: opacity,
-        });
-        break;
-      }
-      case "redact": {
-        const color = value || "#000000";
-        this.visualEffects.applyEffect(container, "redact", { color });
-        break;
-      }
-      case "scramble": {
-        const duration = value || "0.5s";
-        this.visualEffects.applyEffect(container, "scramble", { duration });
-        break;
-      }
+      case "blur":
+      case "fade":
+      case "redact":
+      case "scramble":
       case "glitch": {
-        const glitchIntensity = value ? parseInt(value) : 1;
-        this.visualEffects.applyEffect(container, "glitch", {
-          intensity: glitchIntensity,
+        const parameters = this.parseEffectParameters(flag, value);
+        await this.effectHandlerRegistry.applyEffect("apply", effectContext, {
+          effect: flag,
+          ...parameters,
         });
         break;
       }
+
+      // Handle interaction triggers (these remain CSS-based)
       case "hover":
         container.addClass("camo-trigger-hover");
         break;
@@ -466,6 +820,41 @@ export default class CamoPlugin extends Plugin {
       case "peek":
         container.addClass("camo-mod-peek");
         break;
+    }
+  }
+
+  /**
+   * Parse effect parameters from flag values
+   */
+  private parseEffectParameters(
+    effect: string,
+    value?: string
+  ): Record<string, string | number> {
+    if (!value) {
+      // Default parameters for each effect
+      const defaults = {
+        blur: { intensity: 4 },
+        fade: { intensity: 0.5 },
+        redact: { color: "#000000" },
+        scramble: { duration: "0.5s" },
+        glitch: { intensity: 1 },
+      };
+      return defaults[effect as keyof typeof defaults] || {};
+    }
+
+    // Parse specific parameter based on effect type
+    switch (effect) {
+      case "blur":
+      case "glitch":
+        return { intensity: parseInt(value) };
+      case "fade":
+        return { intensity: parseFloat(value) };
+      case "redact":
+        return { color: value };
+      case "scramble":
+        return { duration: value };
+      default:
+        return {};
     }
   }
 
@@ -689,6 +1078,201 @@ export default class CamoPlugin extends Plugin {
     return "camo-" + Math.random().toString(36).substr(2, 9);
   }
 
+  /**
+   * Process conditional metadata statements and return evaluated metadata
+   */
+  private async processConditionalMetadata(
+    metadata: string[],
+    blockId: string
+  ): Promise<string[]> {
+    const processedMetadata: string[] = [];
+    const conditionalGroups: {
+      condition: string;
+      ifStatements: string[];
+      elseStatements: string[];
+    }[] = [];
+    let currentGroup: {
+      condition: string;
+      ifStatements: string[];
+      elseStatements: string[];
+    } | null = null;
+    let inElseBranch = false;
+
+    // Parse metadata for conditional statements
+    for (const line of metadata) {
+      const trimmed = line.trim();
+
+      // Check for IF statements
+      if (trimmed.startsWith(":^: IF{") && trimmed.includes("}")) {
+        // Extract condition from IF{condition}
+        const conditionMatch = trimmed.match(/:^:\s*IF\{([^}]+)\}/);
+        if (conditionMatch) {
+          // Finish previous group if exists
+          if (currentGroup) {
+            conditionalGroups.push(currentGroup);
+          }
+
+          // Start new conditional group
+          currentGroup = {
+            condition: conditionMatch[1],
+            ifStatements: [],
+            elseStatements: [],
+          };
+          inElseBranch = false;
+
+          // Check if there's additional content after the condition
+          const afterCondition = trimmed
+            .replace(/:^:\s*IF\{[^}]+\}\s*/, "")
+            .trim();
+          if (afterCondition && afterCondition.startsWith("//")) {
+            currentGroup.ifStatements.push(afterCondition);
+          }
+        }
+      }
+      // Check for ELSE statements
+      else if (
+        trimmed.startsWith(":: ELSE") ||
+        trimmed.startsWith(":^: ELSE")
+      ) {
+        if (currentGroup) {
+          inElseBranch = true;
+
+          // Check if there's content after ELSE
+          const afterElse = trimmed
+            .replace(/::\s*ELSE\s*|:^:\s*ELSE\s*/, "")
+            .trim();
+          if (afterElse && afterElse.startsWith("//")) {
+            currentGroup.elseStatements.push(afterElse);
+          }
+        }
+      }
+      // Check for conditional branch content
+      else if (
+        currentGroup &&
+        (trimmed.startsWith("::") || trimmed.startsWith(":^:"))
+      ) {
+        if (inElseBranch) {
+          currentGroup.elseStatements.push(trimmed);
+        } else {
+          currentGroup.ifStatements.push(trimmed);
+        }
+      }
+      // Regular metadata (not conditional)
+      else if (!currentGroup) {
+        processedMetadata.push(line);
+      }
+    }
+
+    // Finish last group if exists
+    if (currentGroup) {
+      conditionalGroups.push(currentGroup);
+    }
+
+    // Evaluate conditional groups and add appropriate statements
+    for (const group of conditionalGroups) {
+      try {
+        const conditionResult = this.conditionalExecution.evaluateCondition(
+          group.condition,
+          blockId
+        );
+
+        if (conditionResult) {
+          // Add IF branch statements
+          processedMetadata.push(...group.ifStatements);
+
+          if (this.settings.debugMode) {
+            console.log(
+              `CAMO Conditional: IF condition "${group.condition}" evaluated to TRUE for block ${blockId}`
+            );
+          }
+        } else {
+          // Add ELSE branch statements
+          processedMetadata.push(...group.elseStatements);
+
+          if (this.settings.debugMode) {
+            console.log(
+              `CAMO Conditional: IF condition "${group.condition}" evaluated to FALSE for block ${blockId}, executing ELSE branch`
+            );
+          }
+        }
+      } catch (error) {
+        console.warn(
+          `CAMO Conditional: Failed to evaluate condition "${group.condition}":`,
+          error
+        );
+        // On error, default to ELSE branch for fail-safe behavior
+        processedMetadata.push(...group.elseStatements);
+      }
+    }
+
+    return processedMetadata;
+  }
+
+  /**
+   * Handle interaction events for conditional execution
+   */
+  private handleInteractionEvent(
+    event: Event,
+    type: "hover" | "clicked" | "focused",
+    value: boolean
+  ): void {
+    const blockId = this.extractBlockIdFromEvent(event);
+    if (blockId) {
+      this.conditionalExecution.updateInteractionState(blockId, {
+        [type]: value,
+      });
+    }
+  }
+
+  /**
+   * Extract CAMO block ID from DOM event
+   */
+  private extractBlockIdFromEvent(event: Event): string | null {
+    const target = event.target as HTMLElement;
+    if (!target) return null;
+
+    // Find closest CAMO block element
+    const camoBlock = target.closest("[data-camo-id]");
+    if (camoBlock) {
+      return camoBlock.getAttribute("data-camo-id");
+    }
+
+    return null;
+  }
+
+  /**
+   * Process metadata instructions for reactive rendering
+   */
+  private async processReactiveMetadata(
+    metadata: string[],
+    blockId: string,
+    container: HTMLElement
+  ): Promise<void> {
+    try {
+      // Filter out conditional statements (already processed)
+      const reactiveInstructions = metadata.filter((line) => {
+        const trimmed = line.trim();
+        return (
+          trimmed.startsWith("::") &&
+          !trimmed.includes("IF{") &&
+          !trimmed.includes("ELSE")
+        );
+      });
+
+      // Process each instruction for reactive updates
+      if (reactiveInstructions.length > 0) {
+        await this.reactiveRenderer.applyInstructionBatch(
+          blockId,
+          reactiveInstructions,
+          container,
+          "system"
+        );
+      }
+    } catch (error) {
+      console.error("CAMO: Failed to process reactive metadata:", error);
+    }
+  }
+
   private hashContent(content: string): string {
     let hash = 0;
     for (let i = 0; i < content.length; i++) {
@@ -717,17 +1301,6 @@ export default class CamoPlugin extends Plugin {
       const blockId = block.getAttribute("data-camo-id");
       if (blockId) {
         // Refresh block state
-      }
-    });
-  }
-
-  private cleanupOldCache() {
-    const now = Date.now();
-    const maxAge = 7 * 24 * 60 * 60 * 1000; // 7 days
-
-    this.processorCache.forEach((cache, key) => {
-      if (now - cache.timestamp > maxAge) {
-        this.processorCache.delete(key);
       }
     });
   }
@@ -816,15 +1389,178 @@ class CamoSettingTab extends PluginSettingTab {
             await this.plugin.saveSettings();
           })
       );
+
+    // Security Settings Section
+    containerEl.createEl("h3", { text: "Security Settings" });
+
+    new Setting(containerEl)
+      .setName("Enable security features")
+      .setDesc("Enable encryption, hashing, and signing capabilities")
+      .addToggle((toggle) =>
+        toggle
+          .setValue(this.plugin.settings.enableSecurity)
+          .onChange(async (value) => {
+            this.plugin.settings.enableSecurity = value;
+            await this.plugin.saveSettings();
+            // Reinitialize security integration with new settings
+            this.plugin.initializeSecurityIntegration();
+          })
+      );
+
+    new Setting(containerEl)
+      .setName("Security audit logging")
+      .setDesc("Log security operations for debugging (disable in production)")
+      .addToggle((toggle) =>
+        toggle
+          .setValue(this.plugin.settings.securityAudit)
+          .onChange(async (value) => {
+            this.plugin.settings.securityAudit = value;
+            await this.plugin.saveSettings();
+            // Reinitialize security integration with new settings
+            this.plugin.initializeSecurityIntegration();
+          })
+      );
+
+    // Display security capabilities
+    const capabilities = CamoSecurityIntegration.isSupported()
+      ? "Web Crypto API available: AES-GCM, AES-CBC, SHA-256, SHA-512, ECDSA"
+      : "Web Crypto API not available - security features disabled";
+
+    new Setting(containerEl)
+      .setName("Security capabilities")
+      .setDesc(capabilities);
+
+    // Rendering Settings Section
+    containerEl.createEl("h3", { text: "Rendering Settings" });
+
+    new Setting(containerEl)
+      .setName("GPU acceleration")
+      .setDesc("Enable GPU-accelerated rendering for complex effects")
+      .addToggle((toggle) =>
+        toggle
+          .setValue(this.plugin.settings.gpuAcceleration)
+          .onChange(async (value) => {
+            this.plugin.settings.gpuAcceleration = value;
+            await this.plugin.saveSettings();
+          })
+      );
+
+    new Setting(containerEl)
+      .setName("Render mode")
+      .setDesc(
+        "Choose rendering strategy: auto (recommended), CSS-only, Canvas, or WebGL"
+      )
+      .addDropdown((dropdown) =>
+        dropdown
+          .addOption("auto", "Auto (recommended)")
+          .addOption("css", "CSS only")
+          .addOption("canvas", "Canvas")
+          .addOption("webgl", "WebGL")
+          .setValue(this.plugin.settings.renderMode)
+          .onChange(async (value: "css" | "canvas" | "webgl" | "auto") => {
+            this.plugin.settings.renderMode = value;
+            await this.plugin.saveSettings();
+          })
+      );
+
+    // Display render capabilities
+    const renderCapabilities = this.plugin
+      .getRenderStrategyManager()
+      .getCapabilities();
+    const capabilityList = [
+      `CSS: ${renderCapabilities.css ? "Available" : "Unavailable"}`,
+      `Canvas: ${renderCapabilities.canvas ? "Available" : "Unavailable"}`,
+      `WebGL: ${renderCapabilities.webgl ? "Available" : "Unavailable"}`,
+    ].join(", ");
+
+    new Setting(containerEl)
+      .setName("Render capabilities")
+      .setDesc(capabilityList);
+
+    // Community Settings Section
+    containerEl.createEl("h3", { text: "Community Settings" });
+
+    new Setting(containerEl)
+      .setName("Enable community presets")
+      .setDesc("Allow browsing and installing presets shared by the community")
+      .addToggle((toggle) =>
+        toggle
+          .setValue(this.plugin.settings.enableCommunityPresets)
+          .onChange(async (value) => {
+            this.plugin.settings.enableCommunityPresets = value;
+            await this.plugin.saveSettings();
+            this.plugin.updateCommunitySettings();
+          })
+      );
+
+    new Setting(containerEl)
+      .setName("GitHub token")
+      .setDesc("Personal access token for sharing presets (optional)")
+      .addText((text) =>
+        text
+          .setPlaceholder("ghp_xxxxxxxxxxxxxxxxxxxx")
+          .setValue(this.plugin.settings.githubToken)
+          .onChange(async (value) => {
+            this.plugin.settings.githubToken = value;
+            await this.plugin.saveSettings();
+            this.plugin.updateCommunitySettings();
+          })
+      );
+
+    new Setting(containerEl)
+      .setName("Auto-update presets")
+      .setDesc("Automatically check for updates to installed community presets")
+      .addToggle((toggle) =>
+        toggle
+          .setValue(this.plugin.settings.autoUpdatePresets)
+          .onChange(async (value) => {
+            this.plugin.settings.autoUpdatePresets = value;
+            await this.plugin.saveSettings();
+            this.plugin.updateCommunitySettings();
+          })
+      );
+
+    new Setting(containerEl)
+      .setName("Enable beta presets")
+      .setDesc("Show experimental and beta presets in community browser")
+      .addToggle((toggle) =>
+        toggle
+          .setValue(this.plugin.settings.enableBetaPresets)
+          .onChange(async (value) => {
+            this.plugin.settings.enableBetaPresets = value;
+            await this.plugin.saveSettings();
+            this.plugin.updateCommunitySettings();
+          })
+      );
+
+    new Setting(containerEl)
+      .setName("Trusted authors")
+      .setDesc("Comma-separated list of trusted GitHub usernames")
+      .addText((text) =>
+        text
+          .setPlaceholder("user1, user2, organization1")
+          .setValue(this.plugin.settings.trustedAuthors.join(", "))
+          .onChange(async (value) => {
+            this.plugin.settings.trustedAuthors = value
+              .split(",")
+              .map((author) => author.trim())
+              .filter(Boolean);
+            await this.plugin.saveSettings();
+            this.plugin.updateCommunitySettings();
+          })
+      );
+
+    // Community stats
+    const installedCount = this.plugin
+      .getCommunitySharing()
+      .getInstalledPresets().length;
+    new Setting(containerEl)
+      .setName("Installed community presets")
+      .setDesc(`${installedCount} community presets currently installed`);
   }
 }
 
 // Type definitions
-interface ProcessorCache {
-  hash: string;
-  timestamp: number;
-  expired: boolean;
-}
 
 interface CamoConfig {
   flags: string[];

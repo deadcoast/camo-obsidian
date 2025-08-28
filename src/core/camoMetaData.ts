@@ -40,7 +40,7 @@ export interface CamoAST {
 export interface MetaDataContext {
   blockId: string;
   element: HTMLElement;
-  settings: any;
+  settings: Record<string, string | number | boolean>;
 }
 
 export class CamoMetaDataParser {
@@ -212,7 +212,7 @@ export class CamoMetaDataParser {
   /**
    * Parse a parameter value to appropriate type
    */
-  private parseValue(value: string): any {
+  private parseValue(value: string): string | number | boolean {
     // Try number
     if (/^\d+$/.test(value)) {
       return parseInt(value);
@@ -437,5 +437,5 @@ export interface ProcessingResult {
 export interface StatementResult {
   success: boolean;
   error?: string;
-  data?: any;
+  data?: Record<string, string | number | boolean | null>;
 }
