@@ -9,8 +9,8 @@
  * - Integration with StateManager and VisualEffectsEngine
  */
 
-import { App } from "obsidian";
-import { VisualEffectsEngine } from "../engines/VisualEffectsEngine";
+import { App } from 'obsidian';
+import { VisualEffectsEngine } from '../engines/VisualEffectsEngine';
 
 // Core interfaces for reactive rendering
 export interface ParsedInstruction {
@@ -32,7 +32,7 @@ export interface EffectDefinition {
 }
 
 export interface RenderAction {
-  type: "apply" | "remove" | "toggle" | "animate";
+  type: 'apply' | 'remove' | 'toggle' | 'animate';
   target: HTMLElement | HTMLElement[];
   effect: EffectDefinition;
   immediate: boolean;
@@ -42,7 +42,7 @@ export interface RenderUpdate {
   blockId: string;
   actions: RenderAction[];
   timestamp: number;
-  source: "user" | "system" | "conditional";
+  source: 'user' | 'system' | 'conditional';
 }
 
 // Observer interface for reactive components
@@ -61,7 +61,7 @@ export class CamoReactiveRenderer {
   private visualEffects: VisualEffectsEngine;
   private observers: Map<string, ReactiveObserver> = new Map();
   private updateQueue: RenderUpdate[] = [];
-  private batchTimer: NodeJS.Timeout | null = null;
+  private batchTimer: number | null = null;
   private isProcessing = false;
 
   // Performance tracking
@@ -87,9 +87,7 @@ export class CamoReactiveRenderer {
    */
   subscribe(observer: ReactiveObserver): () => void {
     if (this.observers.size >= this.MAX_OBSERVERS) {
-      console.warn(
-        "CAMO Reactive: Maximum observers reached, rejecting new subscription"
-      );
+      // Maximum observers reached, rejecting new subscription
       return () => {};
     }
 
@@ -114,16 +112,13 @@ export class CamoReactiveRenderer {
     blockId: string,
     instruction: string,
     element: HTMLElement,
-    source: "user" | "system" | "conditional" = "user"
+    source: 'user' | 'system' | 'conditional' = 'user'
   ): Promise<void> {
     try {
       // Parse instruction into structured format
       const parsed = this.parseInstruction(instruction, blockId);
       if (!parsed) {
-        console.warn(
-          "CAMO Reactive: Failed to parse instruction:",
-          instruction
-        );
+        // Failed to parse instruction
         return;
       }
 
@@ -141,8 +136,8 @@ export class CamoReactiveRenderer {
       // Queue for batch processing
       this.queueUpdate(update);
     } catch (error) {
-      console.error("CAMO Reactive: Error processing instruction:", error);
-      this.notifyObserversError(error, {
+      // Error processing instruction
+      this.notifyObserversError(error as Error, {
         blockId,
         actions: [],
         timestamp: Date.now(),
@@ -158,7 +153,7 @@ export class CamoReactiveRenderer {
     blockId: string,
     instructions: string[],
     element: HTMLElement,
-    source: "user" | "system" | "conditional" = "system"
+    source: 'user' | 'system' | 'conditional' = 'system'
   ): Promise<void> {
     const allActions: RenderAction[] = [];
 
@@ -186,17 +181,13 @@ export class CamoReactiveRenderer {
   /**
    * Trigger reactive update for block state changes
    */
-  notifyStateChange(
-    blockId: string,
-    newState: any,
-    element: HTMLElement
-  ): void {
+  notifyStateChange(blockId: string, _newState: any, _element: HTMLElement): void {
     // Create synthetic update for state changes
     const update: RenderUpdate = {
       blockId,
       actions: [], // State changes don't directly create actions
       timestamp: Date.now(),
-      source: "system",
+      source: 'system',
     };
 
     // Notify observers about state change
@@ -228,10 +219,7 @@ export class CamoReactiveRenderer {
   /**
    * Parse camoMetaData instruction into structured format
    */
-  private parseInstruction(
-    instruction: string,
-    blockId: string
-  ): ParsedInstruction | null {
+  private parseInstruction(instruction: string, blockId: string): ParsedInstruction | null {
     const trimmed = instruction.trim();
 
     // Basic instruction parsing (:: keyword // target % params -> outcome)
@@ -243,14 +231,14 @@ export class CamoReactiveRenderer {
       return null;
     }
 
-    const [, keyword, label, target, params, outcome] = match;
+    const [, keyword, _label, target, params, _outcome] = match;
 
     // Parse parameters
     const parameters: Record<string, any> = {};
     if (params) {
       const paramMatches = params.match(/\{([^}]+)\}\(([^)]+)\)/g);
       if (paramMatches) {
-        paramMatches.forEach((paramMatch) => {
+        paramMatches.forEach(paramMatch => {
           const paramParts = paramMatch.match(/\{([^}]+)\}\(([^)]+)\)/);
           if (paramParts) {
             const [, key, value] = paramParts;
@@ -283,15 +271,15 @@ export class CamoReactiveRenderer {
    */
   private parseParameterValue(value: string): any {
     // Boolean
-    if (value === "true") return true;
-    if (value === "false") return false;
+    if (value === 'true') return true;
+    if (value === 'false') return false;
 
     // Number
     if (/^\d+$/.test(value)) return parseInt(value, 10);
     if (/^\d+\.\d+$/.test(value)) return parseFloat(value);
 
     // String (remove quotes if present)
-    return value.replace(/^["']|["']$/g, "");
+    return value.replace(/^["']|["']$/g, '');
   }
 
   /**
@@ -301,63 +289,63 @@ export class CamoReactiveRenderer {
     keyword: string,
     target: string,
     parameters: Record<string, any>,
-    label?: string
+    _label?: string
   ): EffectDefinition[] {
     const effects: EffectDefinition[] = [];
 
     // Map keywords to effect types
     switch (keyword) {
-      case "set":
+      case 'set':
         effects.push({
-          type: "set-property",
+          type: 'set-property',
           target,
           properties: parameters,
           priority: 1,
         });
         break;
 
-      case "apply":
+      case 'apply':
         effects.push({
-          type: "apply-effect",
+          type: 'apply-effect',
           target,
           properties: parameters,
           priority: 2,
-          animation: parameters.animation || "fade",
+          animation: parameters.animation || 'fade',
         });
         break;
 
-      case "remove":
+      case 'remove':
         effects.push({
-          type: "remove-effect",
+          type: 'remove-effect',
           target,
           properties: parameters,
           priority: 3,
         });
         break;
 
-      case "reveal":
+      case 'reveal':
         effects.push({
-          type: "reveal",
+          type: 'reveal',
           target,
           properties: { ...parameters, revealed: true },
           priority: 1,
-          animation: parameters.animation || "fade-in",
+          animation: parameters.animation || 'fade-in',
         });
         break;
 
-      case "hide":
+      case 'hide':
         effects.push({
-          type: "hide",
+          type: 'hide',
           target,
           properties: { ...parameters, hidden: true },
           priority: 1,
-          animation: parameters.animation || "fade-out",
+          animation: parameters.animation || 'fade-out',
         });
         break;
 
-      case "protect":
+      case 'protect':
         effects.push({
-          type: "protect",
+          type: 'protect',
           target,
           properties: { ...parameters, protected: true },
           priority: 4,
@@ -390,14 +378,14 @@ export class CamoReactiveRenderer {
     const targetElements = this.findTargetElements(instruction.target, element);
 
     // Create actions for each effect
-    instruction.effects.forEach((effect) => {
+    instruction.effects.forEach(effect => {
       const actionType = this.mapEffectToActionType(effect.type);
 
       actions.push({
         type: actionType,
         target: targetElements,
         effect,
-        immediate: effect.type.includes("immediate") || effect.priority >= 4,
+        immediate: effect.type.includes('immediate') || effect.priority >= 4,
       });
     });
 
@@ -407,25 +395,18 @@ export class CamoReactiveRenderer {
   /**
    * Find target elements within the block
    */
-  private findTargetElements(
-    target: string,
-    blockElement: HTMLElement
-  ): HTMLElement[] {
+  private findTargetElements(target: string, blockElement: HTMLElement): HTMLElement[] {
     const elements: HTMLElement[] = [];
 
     // Parse target selector
-    if (target === "all" || target === "content") {
+    if (target === 'all' || target === 'content') {
       elements.push(blockElement);
-    } else if (target.includes("[") && target.includes("]")) {
+    } else if (target.includes('[') && target.includes(']')) {
       // Specific selector like text[sensitive] or paragraph[1-3]
       const selectorMatch = target.match(/(\w+)\[([^\]]+)\]/);
       if (selectorMatch) {
         const [, type, selector] = selectorMatch;
-        const foundElements = this.selectElementsByType(
-          type,
-          selector,
-          blockElement
-        );
+        const foundElements = this.selectElementsByType(type, selector, blockElement);
         elements.push(...foundElements);
       }
     } else {
@@ -448,17 +429,13 @@ export class CamoReactiveRenderer {
     const elements: HTMLElement[] = [];
 
     switch (type) {
-      case "text":
+      case 'text': {
         // Text content selection
-        if (selector === "all") {
+        if (selector === 'all') {
           elements.push(container);
         } else {
           // Find text nodes containing selector pattern
-          const walker = document.createTreeWalker(
-            container,
-            NodeFilter.SHOW_TEXT,
-            null
-          );
+          const walker = document.createTreeWalker(container, NodeFilter.SHOW_TEXT, null);
 
           let node;
           while ((node = walker.nextNode())) {
@@ -471,11 +448,12 @@ export class CamoReactiveRenderer {
           }
         }
         break;
+      }
 
-      case "paragraph":
+      case 'paragraph': {
         // Paragraph selection by index
-        const paragraphs = container.querySelectorAll("p");
-        if (selector === "all") {
+        const paragraphs = container.querySelectorAll('p');
+        if (selector === 'all') {
           elements.push(...(Array.from(paragraphs) as HTMLElement[]));
         } else if (/^\d+$/.test(selector)) {
           const index = parseInt(selector, 10) - 1; // 1-based to 0-based
@@ -483,21 +461,22 @@ export class CamoReactiveRenderer {
             elements.push(paragraphs[index] as HTMLElement);
           }
         } else if (/^\d+-\d+$/.test(selector)) {
-          const [start, end] = selector.split("-").map((n) => parseInt(n, 10));
+          const [start, end] = selector.split('-').map(n => parseInt(n, 10));
           for (let i = start - 1; i < end && i < paragraphs.length; i++) {
             elements.push(paragraphs[i] as HTMLElement);
           }
         }
         break;
+      }
 
-      case "line":
+      case 'line': {
         // Line selection
-        const lines = container.textContent?.split("\n") || [];
         if (/^\d+$/.test(selector)) {
           // For now, treat as paragraph selection
           elements.push(container);
         }
         break;
+      }
 
       default:
         // Fallback to CSS selector
@@ -511,18 +490,18 @@ export class CamoReactiveRenderer {
   /**
    * Map effect type to render action type
    */
-  private mapEffectToActionType(effectType: string): RenderAction["type"] {
+  private mapEffectToActionType(effectType: string): RenderAction['type'] {
     switch (effectType) {
-      case "remove-effect":
-        return "remove";
-      case "reveal":
-      case "hide":
-        return "toggle";
-      case "apply-effect":
-      case "set-property":
-      case "protect":
+      case 'remove-effect':
+        return 'remove';
+      case 'reveal':
+      case 'hide':
+        return 'toggle';
+      case 'apply-effect':
+      case 'set-property':
+      case 'protect':
       default:
-        return "apply";
+        return 'apply';
     }
   }
 
@@ -578,10 +557,9 @@ export class CamoReactiveRenderer {
       this.updateStats.totalUpdates += updates.length;
       this.updateStats.batchedUpdates++;
       this.updateStats.lastBatchSize = updates.length;
-      this.updateStats.averageLatency =
-        (this.updateStats.averageLatency + processingTime) / 2;
+      this.updateStats.averageLatency = (this.updateStats.averageLatency + processingTime) / 2;
     } catch (error) {
-      console.error("CAMO Reactive: Batch processing error:", error);
+      // Batch processing error
     } finally {
       this.isProcessing = false;
     }
@@ -600,8 +578,8 @@ export class CamoReactiveRenderer {
       // Notify observers
       this.notifyObservers(update);
     } catch (error) {
-      console.error("CAMO Reactive: Update processing error:", error);
-      this.notifyObserversError(error, update);
+      // Update processing error
+      this.notifyObserversError(error as Error, update);
     }
   }
 
@@ -609,25 +587,23 @@ export class CamoReactiveRenderer {
    * Apply a single render action
    */
   private async applyRenderAction(action: RenderAction): Promise<void> {
-    const elements = Array.isArray(action.target)
-      ? action.target
-      : [action.target];
+    const elements = Array.isArray(action.target) ? action.target : [action.target];
 
     for (const element of elements) {
       switch (action.type) {
-        case "apply":
+        case 'apply':
           await this.applyEffect(element, action.effect);
           break;
 
-        case "remove":
+        case 'remove':
           await this.removeEffect(element, action.effect);
           break;
 
-        case "toggle":
+        case 'toggle':
           await this.toggleEffect(element, action.effect);
           break;
 
-        case "animate":
+        case 'animate':
           await this.animateEffect(element, action.effect);
           break;
       }
@@ -637,32 +613,26 @@ export class CamoReactiveRenderer {
   /**
    * Apply visual effect to element
    */
-  private async applyEffect(
-    element: HTMLElement,
-    effect: EffectDefinition
-  ): Promise<void> {
+  private async applyEffect(element: HTMLElement, effect: EffectDefinition): Promise<void> {
     // Use VisualEffectsEngine for actual effect application
     this.visualEffects.applyEffect(element, effect.type, effect.properties);
 
     // Add reactive class for tracking
-    element.addClass("camo-reactive");
-    element.setAttribute("data-camo-effect", effect.type);
+    element.addClass('camo-reactive');
+    element.setAttribute('data-camo-effect', effect.type);
   }
 
   /**
    * Remove visual effect from element
    */
-  private async removeEffect(
-    element: HTMLElement,
-    effect: EffectDefinition
-  ): Promise<void> {
+  private async removeEffect(element: HTMLElement, effect: EffectDefinition): Promise<void> {
     // Remove effect-specific classes and styles
     element.removeClass(`camo-effect-${effect.type}`);
-    element.removeAttribute("data-camo-effect");
+    element.removeAttribute('data-camo-effect');
 
     // Clean up inline styles applied by the effect
     const stylesToRemove = Object.keys(effect.properties);
-    stylesToRemove.forEach((prop) => {
+    stylesToRemove.forEach(prop => {
       element.style.removeProperty(prop);
     });
   }
@@ -670,10 +640,7 @@ export class CamoReactiveRenderer {
   /**
    * Toggle visual effect on element
    */
-  private async toggleEffect(
-    element: HTMLElement,
-    effect: EffectDefinition
-  ): Promise<void> {
+  private async toggleEffect(element: HTMLElement, effect: EffectDefinition): Promise<void> {
     const hasEffect = element.hasClass(`camo-effect-${effect.type}`);
 
     if (hasEffect) {
@@ -686,11 +653,8 @@ export class CamoReactiveRenderer {
   /**
    * Animate visual effect on element
    */
-  private async animateEffect(
-    element: HTMLElement,
-    effect: EffectDefinition
-  ): Promise<void> {
-    const animation = effect.animation || "fade";
+  private async animateEffect(element: HTMLElement, effect: EffectDefinition): Promise<void> {
+    const animation = effect.animation || 'fade';
     const duration = effect.duration || 300;
 
     // Apply animation class
@@ -709,7 +673,7 @@ export class CamoReactiveRenderer {
    * Notify all observers of update
    */
   private notifyObservers(update: RenderUpdate): void {
-    this.observers.forEach((observer) => {
+    this.observers.forEach(observer => {
       try {
         // Check if observer wants this update
         if (observer.shouldUpdate && !observer.shouldUpdate(update)) {
@@ -718,7 +682,7 @@ export class CamoReactiveRenderer {
 
         observer.onUpdate(update);
       } catch (error) {
-        console.error(`CAMO Reactive: Observer ${observer.id} error:`, error);
+        // Observer error
       }
     });
   }
@@ -727,16 +691,13 @@ export class CamoReactiveRenderer {
    * Notify observers of error
    */
   private notifyObserversError(error: Error, update: RenderUpdate): void {
-    this.observers.forEach((observer) => {
+    this.observers.forEach(observer => {
       try {
         if (observer.onError) {
           observer.onError(error, update);
         }
       } catch (observerError) {
-        console.error(
-          `CAMO Reactive: Observer ${observer.id} error handler failed:`,
-          observerError
-        );
+        // Observer error handler failed
       }
     });
   }

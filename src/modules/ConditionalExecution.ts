@@ -8,22 +8,22 @@
  * - Obsidian-compliant context detection
  */
 
-import { App } from "obsidian";
-import { CamoAST, CamoASTNode } from "./AST";
+import { App } from 'obsidian';
+import { CamoAST, CamoASTNode } from './AST';
 
 // Primitive types for condition values
 type Primitive = string | number | boolean;
 
 // Supported condition operators
 type ConditionOperator =
-  | "exists"
-  | "equals"
-  | "not_equals"
-  | "gt"
-  | "lt"
-  | "gte"
-  | "lte"
-  | "matches";
+  | 'exists'
+  | 'equals'
+  | 'not_equals'
+  | 'gt'
+  | 'lt'
+  | 'gte'
+  | 'lte'
+  | 'matches';
 
 // Condition structure for evaluation
 export interface Condition {
@@ -40,7 +40,7 @@ export interface EvalContext {
   focused: boolean; // Focus state
 
   // Theme and appearance
-  theme: "dark" | "light"; // Current Obsidian theme
+  theme: 'dark' | 'light'; // Current Obsidian theme
 
   // Time-based conditions
   timeISO: string; // Current ISO datetime
@@ -123,10 +123,7 @@ export class CamoConditionalExecution {
 
       return result;
     } catch (error) {
-      console.warn(
-        `CAMO Conditional: Failed to evaluate condition "${conditionStr}":`,
-        error
-      );
+      console.warn(`CAMO Conditional: Failed to evaluate condition "${conditionStr}":`, error);
       return false; // Fail-safe: default to false
     }
   }
@@ -136,7 +133,7 @@ export class CamoConditionalExecution {
    * Handles IF/ELSE statement execution with proper context isolation
    */
   executeBranch(
-    branch: "IF" | "ELSE",
+    branch: 'IF' | 'ELSE',
     condition: string,
     statements: CamoASTNode[],
     context: CamoAST,
@@ -144,7 +141,7 @@ export class CamoConditionalExecution {
   ): BranchResult {
     try {
       const shouldExecute =
-        branch === "IF"
+        branch === 'IF'
           ? this.evaluateCondition(condition, blockId)
           : !this.evaluateCondition(condition, blockId);
 
@@ -156,21 +153,14 @@ export class CamoConditionalExecution {
       }
 
       // Execute statements in branch
-      const executedStatements = this.executeStatements(
-        statements,
-        context,
-        blockId
-      );
+      const executedStatements = this.executeStatements(statements, context, blockId);
 
       return {
         executed: true,
         statements: executedStatements,
       };
     } catch (error) {
-      console.error(
-        `CAMO Conditional: Failed to execute ${branch} branch:`,
-        error
-      );
+      console.error(`CAMO Conditional: Failed to execute ${branch} branch:`, error);
       return {
         executed: false,
         statements: [],
@@ -207,9 +197,9 @@ export class CamoConditionalExecution {
 
     // Detect theme from Obsidian's body classes
     const isDarkTheme =
-      body.classList.contains("theme-dark") ||
-      body.classList.contains("dark") ||
-      window.matchMedia("(prefers-color-scheme: dark)").matches;
+      body.classList.contains('theme-dark') ||
+      body.classList.contains('dark') ||
+      window.matchMedia('(prefers-color-scheme: dark)').matches;
 
     // Get viewport information
     const viewport = {
@@ -224,12 +214,12 @@ export class CamoConditionalExecution {
 
     return {
       // Interaction state
-      hover: blockElement?.matches(":hover") || false,
+      hover: blockElement?.matches(':hover') || false,
       clicked: false, // Will be updated by event listeners
-      focused: blockElement?.matches(":focus-within") || false,
+      focused: blockElement?.matches(':focus-within') || false,
 
       // Theme
-      theme: isDarkTheme ? "dark" : "light",
+      theme: isDarkTheme ? 'dark' : 'light',
 
       // Time context
       timeISO: now.toISOString(),
@@ -242,7 +232,7 @@ export class CamoConditionalExecution {
 
       // User context (basic implementation)
       user: {
-        role: "user", // Could be extended with actual user management
+        role: 'user', // Could be extended with actual user management
       },
 
       // File context
@@ -251,10 +241,10 @@ export class CamoConditionalExecution {
       // Block context
       block: {
         id: blockId,
-        type: "camo",
-        content: blockElement?.textContent || "",
+        type: 'camo',
+        content: blockElement?.textContent || '',
         visible: blockElement?.offsetParent !== null,
-        revealed: blockElement?.classList.contains("camo-revealed") || false,
+        revealed: blockElement?.classList.contains('camo-revealed') || false,
       },
     };
   }
@@ -274,12 +264,12 @@ export class CamoConditionalExecution {
         };
       }
     } catch (error) {
-      console.warn("CAMO Conditional: Could not get file context:", error);
+      console.warn('CAMO Conditional: Could not get file context:', error);
     }
 
     return {
-      path: "",
-      name: "",
+      path: '',
+      name: '',
       exists: false,
     };
   }
@@ -304,19 +294,19 @@ export class CamoConditionalExecution {
 
     // Simple existence check (just a variable name)
     if (
-      !trimmed.includes(" ") &&
-      !trimmed.includes("=") &&
-      !trimmed.includes(">") &&
-      !trimmed.includes("<")
+      !trimmed.includes(' ') &&
+      !trimmed.includes('=') &&
+      !trimmed.includes('>') &&
+      !trimmed.includes('<')
     ) {
       return {
         lhs: trimmed,
-        op: "exists",
+        op: 'exists',
       };
     }
 
     // Parse comparison operators
-    const operators = [">=", "<=", "!=", "==", ">", "<", "=", "~"];
+    const operators = ['>=', '<=', '!=', '==', '>', '<', '=', '~'];
 
     for (const op of operators) {
       const parts = trimmed.split(op);
@@ -335,7 +325,7 @@ export class CamoConditionalExecution {
     // Fallback to existence check
     return {
       lhs: trimmed,
-      op: "exists",
+      op: 'exists',
     };
   }
 
@@ -344,23 +334,23 @@ export class CamoConditionalExecution {
    */
   private mapOperator(op: string): ConditionOperator {
     switch (op) {
-      case "==":
-      case "=":
-        return "equals";
-      case "!=":
-        return "not_equals";
-      case ">":
-        return "gt";
-      case "<":
-        return "lt";
-      case ">=":
-        return "gte";
-      case "<=":
-        return "lte";
-      case "~":
-        return "matches";
+      case '==':
+      case '=':
+        return 'equals';
+      case '!=':
+        return 'not_equals';
+      case '>':
+        return 'gt';
+      case '<':
+        return 'lt';
+      case '>=':
+        return 'gte';
+      case '<=':
+        return 'lte';
+      case '~':
+        return 'matches';
       default:
-        return "equals";
+        return 'equals';
     }
   }
 
@@ -371,8 +361,8 @@ export class CamoConditionalExecution {
     const trimmed = value.trim();
 
     // Boolean values
-    if (trimmed === "true") return true;
-    if (trimmed === "false") return false;
+    if (trimmed === 'true') return true;
+    if (trimmed === 'false') return false;
 
     // Numeric values
     if (/^\d+$/.test(trimmed)) return parseInt(trimmed, 10);
@@ -380,53 +370,47 @@ export class CamoConditionalExecution {
 
     // Time format (HH:MM)
     if (/^\d{1,2}:\d{2}$/.test(trimmed)) {
-      const [hours, minutes] = trimmed.split(":").map(Number);
+      const [hours, minutes] = trimmed.split(':').map(Number);
       return hours * 60 + minutes; // Convert to minutes for comparison
     }
 
     // String value (remove quotes if present)
-    return trimmed.replace(/^["']|["']$/g, "");
+    return trimmed.replace(/^["']|["']$/g, '');
   }
 
   /**
    * Evaluate structured condition against context
    */
-  private evaluateStructuredCondition(
-    condition: Condition,
-    context: EvalContext
-  ): boolean {
+  private evaluateStructuredCondition(condition: Condition, context: EvalContext): boolean {
     const value = this.resolveValue(condition.lhs, context);
 
     switch (condition.op) {
-      case "exists":
+      case 'exists':
         return value !== undefined && value !== null;
 
-      case "equals":
+      case 'equals':
         return value === condition.rhs;
 
-      case "not_equals":
+      case 'not_equals':
         return value !== condition.rhs;
 
-      case "gt":
+      case 'gt':
         return Number(value) > Number(condition.rhs);
 
-      case "lt":
+      case 'lt':
         return Number(value) < Number(condition.rhs);
 
-      case "gte":
+      case 'gte':
         return Number(value) >= Number(condition.rhs);
 
-      case "lte":
+      case 'lte':
         return Number(value) <= Number(condition.rhs);
 
-      case "matches":
+      case 'matches':
         try {
           return new RegExp(String(condition.rhs)).test(String(value));
         } catch (error) {
-          console.warn(
-            "CAMO Conditional: Invalid regex pattern:",
-            condition.rhs
-          );
+          console.warn('CAMO Conditional: Invalid regex pattern:', condition.rhs);
           return false;
         }
 
@@ -439,15 +423,12 @@ export class CamoConditionalExecution {
    * Resolve value from context using dot notation path
    * Supported paths: 'hover', 'theme', 'time', 'viewport.width', 'user.role', etc.
    */
-  private resolveValue(
-    path: string,
-    context: EvalContext
-  ): Primitive | undefined {
-    const parts = path.split(".");
+  private resolveValue(path: string, context: EvalContext): Primitive | undefined {
+    const parts = path.split('.');
     let current: any = context;
 
     for (const part of parts) {
-      if (current && typeof current === "object" && part in current) {
+      if (current && typeof current === 'object' && part in current) {
         current = current[part];
       } else {
         return undefined;
@@ -455,7 +436,7 @@ export class CamoConditionalExecution {
     }
 
     // Special handling for time comparisons
-    if (path === "time" && typeof current === "string") {
+    if (path === 'time' && typeof current === 'string') {
       // Convert time string to minutes for comparison
       const time = new Date(current);
       return time.getHours() * 60 + time.getMinutes();
@@ -476,9 +457,7 @@ export class CamoConditionalExecution {
     // In a full implementation, this would execute each statement
     // and potentially modify the context or trigger side effects
 
-    console.log(
-      `CAMO Conditional: Executing ${statements.length} statements for block ${blockId}`
-    );
+    console.log(`CAMO Conditional: Executing ${statements.length} statements for block ${blockId}`);
 
     return statements;
   }
@@ -486,31 +465,21 @@ export class CamoConditionalExecution {
   /**
    * Cache condition result with appropriate TTL
    */
-  private cacheConditionResult(
-    cacheKey: string,
-    result: boolean,
-    condition: Condition
-  ): void {
+  private cacheConditionResult(cacheKey: string, result: boolean, condition: Condition): void {
     this.conditionCache.set(cacheKey, result);
 
     // Set TTL based on condition type
     let ttl = 5000; // Default 5 seconds
 
     if (
-      condition.lhs.includes("time") ||
-      condition.lhs.includes("hour") ||
-      condition.lhs.includes("minute")
+      condition.lhs.includes('time') ||
+      condition.lhs.includes('hour') ||
+      condition.lhs.includes('minute')
     ) {
       ttl = 30000; // 30 seconds for time-based conditions
-    } else if (
-      condition.lhs.includes("theme") ||
-      condition.lhs.includes("file")
-    ) {
+    } else if (condition.lhs.includes('theme') || condition.lhs.includes('file')) {
       ttl = 60000; // 1 minute for slower-changing conditions
-    } else if (
-      condition.lhs.includes("hover") ||
-      condition.lhs.includes("click")
-    ) {
+    } else if (condition.lhs.includes('hover') || condition.lhs.includes('click')) {
       ttl = 1000; // 1 second for interaction-based conditions
     }
 
@@ -545,14 +514,12 @@ export class CamoConditionalExecution {
 
       // Clear related condition cache entries
       const keysToDelete = Array.from(this.conditionCache.keys()).filter(
-        (key) =>
+        key =>
           key.startsWith(`${blockId}:`) &&
-          (key.includes("hover") ||
-            key.includes("click") ||
-            key.includes("focus"))
+          (key.includes('hover') || key.includes('click') || key.includes('focus'))
       );
 
-      keysToDelete.forEach((key) => this.conditionCache.delete(key));
+      keysToDelete.forEach(key => this.conditionCache.delete(key));
     }
   }
 
@@ -564,8 +531,8 @@ export class CamoConditionalExecution {
     cachedConditions: string[];
   } {
     const context = this.getEvaluationContext(blockId);
-    const cachedConditions = Array.from(this.conditionCache.keys()).filter(
-      (key) => key.startsWith(`${blockId}:`)
+    const cachedConditions = Array.from(this.conditionCache.keys()).filter(key =>
+      key.startsWith(`${blockId}:`)
     );
 
     return {

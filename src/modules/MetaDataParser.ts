@@ -10,26 +10,26 @@
  * - Integration with IR system for execution pipeline
  */
 
-import { CamoAST, CamoASTNode } from "./AST";
+import { CamoAST, CamoASTNode } from './AST';
 
 // Token types for camoMetaData syntax
 export enum TokenType {
-  NEWLINE = "NEWLINE", // ::
-  HIERARCHICAL = "HIERARCHICAL", // :^:
-  RELATION = "RELATION", // //
-  OPERATOR = "OPERATOR", // %
-  TRIGGER = "TRIGGER", // ->
-  ACTION_BLOCK = "ACTION_BLOCK", // {action}
-  VARIABLE_BLOCK = "VARIABLE_BLOCK", // [variable]
-  OPTION_BLOCK = "OPTION_BLOCK", // (parameters)
-  IDENTIFIER = "IDENTIFIER", // keyword, function names
-  STRING = "STRING", // "quoted string" or 'quoted string'
-  NUMBER = "NUMBER", // 123 or 123.45
-  WHITESPACE = "WHITESPACE", // spaces, tabs
-  COMMENT = "COMMENT", // // comments (when not relation)
-  NEWLINE_CHAR = "NEWLINE_CHAR", // \n
-  EOF = "EOF", // End of file
-  INVALID = "INVALID", // Invalid token
+  NEWLINE = 'NEWLINE', // ::
+  HIERARCHICAL = 'HIERARCHICAL', // :^:
+  RELATION = 'RELATION', // //
+  OPERATOR = 'OPERATOR', // %
+  TRIGGER = 'TRIGGER', // ->
+  ACTION_BLOCK = 'ACTION_BLOCK', // {action}
+  VARIABLE_BLOCK = 'VARIABLE_BLOCK', // [variable]
+  OPTION_BLOCK = 'OPTION_BLOCK', // (parameters)
+  IDENTIFIER = 'IDENTIFIER', // keyword, function names
+  STRING = 'STRING', // "quoted string" or 'quoted string'
+  NUMBER = 'NUMBER', // 123 or 123.45
+  WHITESPACE = 'WHITESPACE', // spaces, tabs
+  COMMENT = 'COMMENT', // // comments (when not relation)
+  NEWLINE_CHAR = 'NEWLINE_CHAR', // \n
+  EOF = 'EOF', // End of file
+  INVALID = 'INVALID', // Invalid token
 }
 
 // Token structure
@@ -44,13 +44,13 @@ export interface Token {
 
 // Parsed statement structure
 export interface ParsedStatement {
-  type: "statement" | "declaration" | "target" | "effect" | "output";
+  type: 'statement' | 'declaration' | 'target' | 'effect' | 'output';
   line: number;
   column: number;
-  operator: "::" | ":^:";
+  operator: '::' | ':^:';
 
   declaration: {
-    type: "newline" | "hierarchical";
+    type: 'newline' | 'hierarchical';
     keyword: string;
     variable?: string;
     modifiers: string[];
@@ -135,7 +135,7 @@ export class CamoTokenizer {
     // Add EOF token
     tokens.push({
       type: TokenType.EOF,
-      value: "",
+      value: '',
       start: position,
       end: position,
       line,
@@ -145,12 +145,7 @@ export class CamoTokenizer {
     return tokens;
   }
 
-  private nextToken(
-    input: string,
-    position: number,
-    line: number,
-    column: number
-  ): Token | null {
+  private nextToken(input: string, position: number, line: number, column: number): Token | null {
     const remaining = input.slice(position);
 
     // Try each token pattern
@@ -197,49 +192,46 @@ export class CamoTokenizer {
  */
 export class CamoGrammar {
   // Keyword specifications with required zones
-  private readonly KEYWORD_SPECS: Record<
-    string,
-    { zones: string[]; description: string }
-  > = {
+  private readonly KEYWORD_SPECS: Record<string, { zones: string[]; description: string }> = {
     set: {
-      zones: ["declaration", "target", "effect"],
-      description: "Set visual property or style",
+      zones: ['declaration', 'target', 'effect'],
+      description: 'Set visual property or style',
     },
     apply: {
-      zones: ["declaration", "target", "effect"],
-      description: "Apply effect or transformation",
+      zones: ['declaration', 'target', 'effect'],
+      description: 'Apply effect or transformation',
     },
     protect: {
-      zones: ["declaration", "target", "effect", "output"],
-      description: "Apply security protection",
+      zones: ['declaration', 'target', 'effect', 'output'],
+      description: 'Apply security protection',
     },
     reveal: {
-      zones: ["declaration", "target", "effect"],
-      description: "Reveal hidden content",
+      zones: ['declaration', 'target', 'effect'],
+      description: 'Reveal hidden content',
     },
     hide: {
-      zones: ["declaration", "target", "effect"],
-      description: "Hide content",
+      zones: ['declaration', 'target', 'effect'],
+      description: 'Hide content',
     },
     mask: {
-      zones: ["declaration", "target", "effect"],
-      description: "Mask content with pattern",
+      zones: ['declaration', 'target', 'effect'],
+      description: 'Mask content with pattern',
     },
     redact: {
-      zones: ["declaration", "target", "effect"],
-      description: "Redact sensitive information",
+      zones: ['declaration', 'target', 'effect'],
+      description: 'Redact sensitive information',
     },
     store: {
-      zones: ["declaration", "target", "output"],
-      description: "Store state or data",
+      zones: ['declaration', 'target', 'output'],
+      description: 'Store state or data',
     },
     retrieve: {
-      zones: ["declaration", "target", "output"],
-      description: "Retrieve stored data",
+      zones: ['declaration', 'target', 'output'],
+      description: 'Retrieve stored data',
     },
     coordinate: {
-      zones: ["declaration", "target", "effect"],
-      description: "Coordinate with other blocks",
+      zones: ['declaration', 'target', 'effect'],
+      description: 'Coordinate with other blocks',
     },
   };
 
@@ -248,7 +240,7 @@ export class CamoGrammar {
   }
 
   getRequiredZones(keyword: string): string[] {
-    return this.KEYWORD_SPECS[keyword]?.zones || ["declaration", "target"];
+    return this.KEYWORD_SPECS[keyword]?.zones || ['declaration', 'target'];
   }
 
   validateStatement(statement: ParsedStatement): string[] {
@@ -261,27 +253,23 @@ export class CamoGrammar {
 
     // Check required zones
     const requiredZones = this.getRequiredZones(statement.declaration.keyword);
-    if (requiredZones.includes("effect") && !statement.effect) {
-      errors.push(
-        `Keyword '${statement.declaration.keyword}' requires effect zone`
-      );
+    if (requiredZones.includes('effect') && !statement.effect) {
+      errors.push(`Keyword '${statement.declaration.keyword}' requires effect zone`);
     }
-    if (requiredZones.includes("output") && !statement.output) {
-      errors.push(
-        `Keyword '${statement.declaration.keyword}' requires output zone`
-      );
+    if (requiredZones.includes('output') && !statement.output) {
+      errors.push(`Keyword '${statement.declaration.keyword}' requires output zone`);
     }
 
     // Check target function validity
-    if (!statement.target.function || statement.target.function.trim() === "") {
-      errors.push("Target function is required");
+    if (!statement.target.function || statement.target.function.trim() === '') {
+      errors.push('Target function is required');
     }
 
     return errors;
   }
 
   getKeywordDescription(keyword: string): string {
-    return this.KEYWORD_SPECS[keyword]?.description || "Unknown keyword";
+    return this.KEYWORD_SPECS[keyword]?.description || 'Unknown keyword';
   }
 
   getSupportedKeywords(): string[] {
@@ -318,14 +306,11 @@ export class CamoStatementParser {
 
     // Check for statement start
     const firstToken = tokens[current];
-    if (
-      firstToken.type !== TokenType.NEWLINE &&
-      firstToken.type !== TokenType.HIERARCHICAL
-    ) {
+    if (firstToken.type !== TokenType.NEWLINE && firstToken.type !== TokenType.HIERARCHICAL) {
       return { statement: null, nextIndex: current };
     }
 
-    const operator = firstToken.value as "::" | ":^:";
+    const operator = firstToken.value as '::' | ':^:';
     const line = firstToken.line;
     const column = firstToken.column;
     current++;
@@ -354,10 +339,7 @@ export class CamoStatementParser {
 
     // Parse optional effect zone
     let effect: any = null;
-    if (
-      current < tokens.length &&
-      tokens[current].type === TokenType.OPERATOR
-    ) {
+    if (current < tokens.length && tokens[current].type === TokenType.OPERATOR) {
       const effectResult = this.parseEffect(tokens, current);
       if (effectResult.success) {
         effect = effectResult.data;
@@ -381,22 +363,22 @@ export class CamoStatementParser {
 
     // Collect raw text
     const rawTokens = tokens.slice(startIndex, current);
-    const raw = rawTokens.map((t) => t.value).join("");
+    const raw = rawTokens.map(t => t.value).join('');
 
     // Create statement
     const statement: ParsedStatement = {
-      type: "statement",
+      type: 'statement',
       line,
       column,
       operator,
       declaration: {
-        type: operator === "::" ? "newline" : "hierarchical",
-        keyword: declaration.data?.keyword || "unknown",
+        type: operator === '::' ? 'newline' : 'hierarchical',
+        keyword: declaration.data?.keyword || 'unknown',
         variable: declaration.data?.variable,
         modifiers: declaration.data?.modifiers || [],
       },
       target: {
-        function: target.data?.function || "unknown",
+        function: target.data?.function || 'unknown',
         selector: target.data?.selector,
       },
       effect,
@@ -419,13 +401,10 @@ export class CamoStatementParser {
     const errors: string[] = [];
 
     // Parse keyword
-    if (
-      current >= tokens.length ||
-      tokens[current].type !== TokenType.IDENTIFIER
-    ) {
+    if (current >= tokens.length || tokens[current].type !== TokenType.IDENTIFIER) {
       return {
         success: false,
-        errors: ["Expected keyword after statement operator"],
+        errors: ['Expected keyword after statement operator'],
         nextIndex: current,
         data: null,
       };
@@ -437,10 +416,7 @@ export class CamoStatementParser {
     // Parse optional variable
     let variable: string | undefined;
     current = this.skipWhitespace(tokens, current);
-    if (
-      current < tokens.length &&
-      tokens[current].type === TokenType.VARIABLE_BLOCK
-    ) {
+    if (current < tokens.length && tokens[current].type === TokenType.VARIABLE_BLOCK) {
       variable = tokens[current].value;
       current++;
     }
@@ -449,10 +425,7 @@ export class CamoStatementParser {
     const modifiers: string[] = [];
     while (current < tokens.length) {
       current = this.skipWhitespace(tokens, current);
-      if (
-        current < tokens.length &&
-        tokens[current].type === TokenType.IDENTIFIER
-      ) {
+      if (current < tokens.length && tokens[current].type === TokenType.IDENTIFIER) {
         modifiers.push(tokens[current].value);
         current++;
       } else {
@@ -473,10 +446,7 @@ export class CamoStatementParser {
     const errors: string[] = [];
 
     // Expect relation operator
-    if (
-      current >= tokens.length ||
-      tokens[current].type !== TokenType.RELATION
-    ) {
+    if (current >= tokens.length || tokens[current].type !== TokenType.RELATION) {
       return {
         success: false,
         errors: ["Expected '//' relation operator before target"],
@@ -488,10 +458,7 @@ export class CamoStatementParser {
 
     // Parse function
     current = this.skipWhitespace(tokens, current);
-    if (
-      current >= tokens.length ||
-      tokens[current].type !== TokenType.IDENTIFIER
-    ) {
+    if (current >= tokens.length || tokens[current].type !== TokenType.IDENTIFIER) {
       return {
         success: false,
         errors: ["Expected target function after '//'"],
@@ -506,10 +473,7 @@ export class CamoStatementParser {
     // Parse optional selector
     let selector: string | undefined;
     current = this.skipWhitespace(tokens, current);
-    if (
-      current < tokens.length &&
-      tokens[current].type === TokenType.VARIABLE_BLOCK
-    ) {
+    if (current < tokens.length && tokens[current].type === TokenType.VARIABLE_BLOCK) {
       selector = tokens[current].value;
       current++;
     }
@@ -527,19 +491,13 @@ export class CamoStatementParser {
     const errors: string[] = [];
 
     // Skip operator
-    if (
-      current < tokens.length &&
-      tokens[current].type === TokenType.OPERATOR
-    ) {
+    if (current < tokens.length && tokens[current].type === TokenType.OPERATOR) {
       current++;
     }
 
     // Parse action
     current = this.skipWhitespace(tokens, current);
-    if (
-      current >= tokens.length ||
-      tokens[current].type !== TokenType.ACTION_BLOCK
-    ) {
+    if (current >= tokens.length || tokens[current].type !== TokenType.ACTION_BLOCK) {
       return {
         success: false,
         errors: ["Expected action block after '%' operator"],
@@ -554,15 +512,12 @@ export class CamoStatementParser {
     // Parse optional parameters
     const parameters = new Map<string, any>();
     current = this.skipWhitespace(tokens, current);
-    if (
-      current < tokens.length &&
-      tokens[current].type === TokenType.OPTION_BLOCK
-    ) {
+    if (current < tokens.length && tokens[current].type === TokenType.OPTION_BLOCK) {
       const paramString = tokens[current].value;
       // Parse parameters like "intensity=80, duration=500"
-      const paramPairs = paramString.split(",");
+      const paramPairs = paramString.split(',');
       for (const pair of paramPairs) {
-        const [key, value] = pair.split("=").map((s) => s.trim());
+        const [key, value] = pair.split('=').map(s => s.trim());
         if (key && value) {
           parameters.set(key, this.parseValue(value));
         }
@@ -589,10 +544,7 @@ export class CamoStatementParser {
 
     // Parse outcome
     current = this.skipWhitespace(tokens, current);
-    if (
-      current >= tokens.length ||
-      tokens[current].type !== TokenType.ACTION_BLOCK
-    ) {
+    if (current >= tokens.length || tokens[current].type !== TokenType.ACTION_BLOCK) {
       return {
         success: false,
         errors: ["Expected outcome block after '->' trigger"],
@@ -614,23 +566,20 @@ export class CamoStatementParser {
 
   private parseValue(value: string): any {
     // Boolean
-    if (value === "true") return true;
-    if (value === "false") return false;
+    if (value === 'true') return true;
+    if (value === 'false') return false;
 
     // Number
     if (/^\d+$/.test(value)) return parseInt(value, 10);
     if (/^\d+\.\d+$/.test(value)) return parseFloat(value);
 
     // String (remove quotes if present)
-    return value.replace(/^["']|["']$/g, "");
+    return value.replace(/^["']|["']$/g, '');
   }
 
   private skipWhitespace(tokens: Token[], startIndex: number): number {
     let current = startIndex;
-    while (
-      current < tokens.length &&
-      tokens[current].type === TokenType.WHITESPACE
-    ) {
+    while (current < tokens.length && tokens[current].type === TokenType.WHITESPACE) {
       current++;
     }
     return current;
@@ -641,25 +590,22 @@ export class CamoStatementParser {
     startIndex: number,
     errors: string[]
   ): ParsedStatement {
-    const firstToken = tokens[startIndex] || { line: 1, column: 1, value: "" };
-    const rawTokens = tokens.slice(
-      startIndex,
-      Math.min(startIndex + 10, tokens.length)
-    );
-    const raw = rawTokens.map((t) => t.value).join("");
+    const firstToken = tokens[startIndex] || { line: 1, column: 1, value: '' };
+    const rawTokens = tokens.slice(startIndex, Math.min(startIndex + 10, tokens.length));
+    const raw = rawTokens.map(t => t.value).join('');
 
     return {
-      type: "statement",
+      type: 'statement',
       line: firstToken.line,
       column: firstToken.column,
-      operator: "::" as "::" | ":^:",
+      operator: '::' as '::' | ':^:',
       declaration: {
-        type: "newline",
-        keyword: "invalid",
+        type: 'newline',
+        keyword: 'invalid',
         modifiers: [],
       },
       target: {
-        function: "unknown",
+        function: 'unknown',
       },
       raw,
       valid: false,
@@ -687,7 +633,7 @@ export class CamoASTBuilder {
 
   buildFromTokens(tokens: Token[]): CamoAST {
     const root: CamoAST = {
-      type: "root",
+      type: 'root',
       statements: [],
     };
 
@@ -702,10 +648,7 @@ export class CamoASTBuilder {
         continue;
       }
 
-      const { statement, nextIndex } = this.statementParser.parseStatement(
-        tokens,
-        current
-      );
+      const { statement, nextIndex } = this.statementParser.parseStatement(tokens, current);
 
       if (statement) {
         const astNode = this.convertToASTNode(statement);
@@ -724,13 +667,13 @@ export class CamoASTBuilder {
 
   private convertToASTNode(statement: ParsedStatement): CamoASTNode {
     const node: CamoASTNode = {
-      type: "statement",
+      type: 'statement',
       operator: statement.operator,
       keyword: statement.declaration.keyword,
       variable: statement.declaration.variable,
       function: statement.target.function,
       children: [],
-      depth: statement.operator === "::" ? 0 : 1,
+      depth: statement.operator === '::' ? 0 : 1,
       line: statement.line,
       column: statement.column,
       startIndex: 0, // Will be set by tokenizer if needed
@@ -764,12 +707,12 @@ export class CamoASTBuilder {
     const stack: CamoASTNode[] = [];
 
     for (const statement of ast.statements) {
-      if (statement.operator === "::") {
+      if (statement.operator === '::') {
         // Root level statement
         stack.length = 0; // Clear stack
         stack.push(statement);
         statement.depth = 0;
-      } else if (statement.operator === ":^:") {
+      } else if (statement.operator === ':^:') {
         // Hierarchical statement
         if (stack.length > 0) {
           const parent = stack[stack.length - 1];
@@ -819,10 +762,7 @@ export class CamoMetaDataParser {
       const trimmed = line.trim();
 
       // Skip empty lines and non-metadata lines
-      if (
-        !trimmed ||
-        (!trimmed.startsWith("::") && !trimmed.startsWith(":^:"))
-      ) {
+      if (!trimmed || (!trimmed.startsWith('::') && !trimmed.startsWith(':^:'))) {
         continue;
       }
 
@@ -863,9 +803,7 @@ export class CamoMetaDataParser {
     for (const statement of ast.statements) {
       if (statement.keyword) {
         if (!this.grammar.validateKeyword(statement.keyword)) {
-          errors.push(
-            `Unknown keyword: ${statement.keyword} at line ${statement.line}`
-          );
+          errors.push(`Unknown keyword: ${statement.keyword} at line ${statement.line}`);
         }
       }
     }
@@ -914,7 +852,7 @@ export class CamoMetaDataParser {
     errors: string[];
   } {
     const tokens = this.tokenizer.tokenize(input);
-    const statements = this.parseMetaData(input.split("\n"));
+    const statements = this.parseMetaData(input.split('\n'));
     const ast = this.buildAST(input);
     const validation = this.validate(input);
 

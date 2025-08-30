@@ -30,8 +30,8 @@ export interface ParsedInstruction {
 }
 
 export interface SecuritySettings {
-  defaultEncryption: "AES-GCM" | "AES-CBC";
-  defaultHash: "SHA-256" | "SHA-512";
+  defaultEncryption: 'AES-GCM' | 'AES-CBC';
+  defaultHash: 'SHA-256' | 'SHA-512';
   keyDerivationIterations: number;
   enableSecurityAudit: boolean;
 }
@@ -42,8 +42,8 @@ export class CamoSecurityIntegration {
 
   constructor(settings?: Partial<SecuritySettings>) {
     this.settings = {
-      defaultEncryption: "AES-GCM",
-      defaultHash: "SHA-256",
+      defaultEncryption: 'AES-GCM',
+      defaultHash: 'SHA-256',
       keyDerivationIterations: 100000,
       enableSecurityAudit: true,
       ...settings,
@@ -58,12 +58,11 @@ export class CamoSecurityIntegration {
     parameters: Record<string, string | number | boolean>
   ): Promise<SecureContent> {
     try {
-      const algorithm =
-        (parameters.algorithm as string) || this.settings.defaultEncryption;
+      const algorithm = (parameters.algorithm as string) || this.settings.defaultEncryption;
       const password = parameters.password as string;
 
       if (!password) {
-        throw new Error("Password required for encryption");
+        throw new Error('Password required for encryption');
       }
 
       // Generate salt and IV
@@ -77,16 +76,10 @@ export class CamoSecurityIntegration {
       const encoder = new TextEncoder();
       const data = encoder.encode(content);
 
-      const encrypted = await crypto.subtle.encrypt(
-        { name: algorithm, iv },
-        key,
-        data
-      );
+      const encrypted = await crypto.subtle.encrypt({ name: algorithm, iv }, key, data);
 
       // Combine salt + iv + encrypted data for storage
-      const combined = new Uint8Array(
-        salt.length + iv.length + encrypted.byteLength
-      );
+      const combined = new Uint8Array(salt.length + iv.length + encrypted.byteLength);
       combined.set(salt, 0);
       combined.set(iv, salt.length);
       combined.set(new Uint8Array(encrypted), salt.length + iv.length);
@@ -98,7 +91,7 @@ export class CamoSecurityIntegration {
       this.clearSensitiveData(password);
 
       return {
-        content: "[ENCRYPTED]",
+        content: '[ENCRYPTED]',
         encrypted: encryptedBase64,
         metadata: {
           algorithm,
@@ -108,10 +101,9 @@ export class CamoSecurityIntegration {
         },
       };
     } catch (error) {
-      console.error("CAMO Security: Encryption failed:", error);
+      console.error('CAMO Security: Encryption failed:', error);
       throw new Error(
-        "Encryption failed: " +
-          (error instanceof Error ? error.message : "Unknown error")
+        'Encryption failed: ' + (error instanceof Error ? error.message : 'Unknown error')
       );
     }
   }
@@ -126,9 +118,7 @@ export class CamoSecurityIntegration {
   ): Promise<string> {
     try {
       // Decode base64
-      const combined = Uint8Array.from(atob(encryptedContent), (c) =>
-        c.charCodeAt(0)
-      );
+      const combined = Uint8Array.from(atob(encryptedContent), c => c.charCodeAt(0));
 
       // Extract salt, IV, and encrypted data
       const salt = combined.slice(0, 16);
@@ -153,8 +143,8 @@ export class CamoSecurityIntegration {
 
       return content;
     } catch (error) {
-      console.error("CAMO Security: Decryption failed:", error);
-      throw new Error("Decryption failed: Invalid password or corrupted data");
+      console.error('CAMO Security: Decryption failed:', error);
+      throw new Error('Decryption failed: Invalid password or corrupted data');
     }
   }
 
@@ -166,8 +156,7 @@ export class CamoSecurityIntegration {
     parameters: Record<string, string | number | boolean>
   ): Promise<SecureContent> {
     try {
-      const algorithm =
-        (parameters.algorithm as string) || this.settings.defaultHash;
+      const algorithm = (parameters.algorithm as string) || this.settings.defaultHash;
       const salt = (parameters.salt as string) || this.generateSalt();
 
       const encoder = new TextEncoder();
@@ -175,9 +164,7 @@ export class CamoSecurityIntegration {
 
       const hashBuffer = await crypto.subtle.digest(algorithm, data);
       const hashArray = Array.from(new Uint8Array(hashBuffer));
-      const hashHex = hashArray
-        .map((b) => b.toString(16).padStart(2, "0"))
-        .join("");
+      const hashHex = hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
 
       return {
         content,
@@ -189,10 +176,9 @@ export class CamoSecurityIntegration {
         },
       };
     } catch (error) {
-      console.error("CAMO Security: Hashing failed:", error);
+      console.error('CAMO Security: Hashing failed:', error);
       throw new Error(
-        "Hashing failed: " +
-          (error instanceof Error ? error.message : "Unknown error")
+        'Hashing failed: ' + (error instanceof Error ? error.message : 'Unknown error')
       );
     }
   }
@@ -209,40 +195,37 @@ export class CamoSecurityIntegration {
       // This is a simplified implementation that generates a new key pair
       const keyPair = await crypto.subtle.generateKey(
         {
-          name: "ECDSA",
-          namedCurve: "P-256",
+          name: 'ECDSA',
+          namedCurve: 'P-256',
         },
         true,
-        ["sign", "verify"]
+        ['sign', 'verify']
       );
 
       const encoder = new TextEncoder();
       const data = encoder.encode(content);
 
       const signature = await crypto.subtle.sign(
-        { name: "ECDSA", hash: "SHA-256" },
+        { name: 'ECDSA', hash: 'SHA-256' },
         keyPair.privateKey,
         data
       );
 
       const signatureArray = Array.from(new Uint8Array(signature));
-      const signatureHex = signatureArray
-        .map((b) => b.toString(16).padStart(2, "0"))
-        .join("");
+      const signatureHex = signatureArray.map(b => b.toString(16).padStart(2, '0')).join('');
 
       return {
         content,
         signature: signatureHex,
         metadata: {
-          algorithm: "ECDSA",
+          algorithm: 'ECDSA',
           timestamp: Date.now(),
         },
       };
     } catch (error) {
-      console.error("CAMO Security: Signing failed:", error);
+      console.error('CAMO Security: Signing failed:', error);
       throw new Error(
-        "Signing failed: " +
-          (error instanceof Error ? error.message : "Unknown error")
+        'Signing failed: ' + (error instanceof Error ? error.message : 'Unknown error')
       );
     }
   }
@@ -257,24 +240,24 @@ export class CamoSecurityIntegration {
   ): Promise<CryptoKey> {
     const encoder = new TextEncoder();
     const passwordKey = await crypto.subtle.importKey(
-      "raw",
+      'raw',
       encoder.encode(password),
-      "PBKDF2",
+      'PBKDF2',
       false,
-      ["deriveBits", "deriveKey"]
+      ['deriveBits', 'deriveKey']
     );
 
     return crypto.subtle.deriveKey(
       {
-        name: "PBKDF2",
+        name: 'PBKDF2',
         salt,
         iterations: this.settings.keyDerivationIterations,
-        hash: "SHA-256",
+        hash: 'SHA-256',
       },
       passwordKey,
       { name: algorithm, length: 256 },
       false,
-      ["encrypt", "decrypt"]
+      ['encrypt', 'decrypt']
     );
   }
 
@@ -308,30 +291,23 @@ export class CamoSecurityIntegration {
     instruction: ParsedInstruction
   ): Promise<SecureContent | undefined> {
     if (this.settings.enableSecurityAudit) {
-      console.log(
-        `CAMO Security: Processing ${instruction.action.type} instruction`
-      );
+      console.log(`CAMO Security: Processing ${instruction.action.type} instruction`);
     }
 
     try {
       switch (instruction.action.type) {
-        case "encrypt":
+        case 'encrypt':
           return await this.encrypt(content, instruction.action.parameters);
-        case "hash":
+        case 'hash':
           return await this.hash(content, instruction.action.parameters);
-        case "sign":
+        case 'sign':
           return await this.sign(content, instruction.action.parameters);
         default:
-          console.warn(
-            `CAMO Security: Unknown security operation: ${instruction.action.type}`
-          );
+          console.warn(`CAMO Security: Unknown security operation: ${instruction.action.type}`);
           return undefined;
       }
     } catch (error) {
-      console.error(
-        `CAMO Security: Failed to process ${instruction.action.type}:`,
-        error
-      );
+      console.error(`CAMO Security: Failed to process ${instruction.action.type}:`, error);
       throw error;
     }
   }
@@ -341,9 +317,9 @@ export class CamoSecurityIntegration {
    */
   static isSupported(): boolean {
     return (
-      typeof crypto !== "undefined" &&
-      typeof crypto.subtle !== "undefined" &&
-      typeof crypto.getRandomValues === "function"
+      typeof crypto !== 'undefined' &&
+      typeof crypto.subtle !== 'undefined' &&
+      typeof crypto.getRandomValues === 'function'
     );
   }
 
@@ -356,9 +332,52 @@ export class CamoSecurityIntegration {
     supported: boolean;
   } {
     return {
-      encryption: ["AES-GCM", "AES-CBC"],
-      hashing: ["SHA-256", "SHA-512"],
+      encryption: ['AES-GCM', 'AES-CBC'],
+      hashing: ['SHA-256', 'SHA-512'],
       supported: CamoSecurityIntegration.isSupported(),
+    };
+  }
+
+  /**
+   * Sanitize user input to prevent XSS attacks
+   */
+  private sanitizeInput(input: string): string {
+    // Basic HTML entity encoding
+    return input
+      .replace(/&/g, '&amp;')
+      .replace(/</g, '&lt;')
+      .replace(/>/g, '&gt;')
+      .replace(/"/g, '&quot;')
+      .replace(/'/g, '&#x27;')
+      .replace(/\//g, '&#x2F;');
+  }
+
+  /**
+   * Validate and sanitize metadata input
+   */
+  validateMetadata(metadata: string[]): { valid: boolean; sanitized: string[]; errors: string[] } {
+    const errors: string[] = [];
+    const sanitized: string[] = [];
+
+    for (const line of metadata) {
+      if (line.length > 1000) {
+        errors.push(`Metadata line too long: ${line.length} characters`);
+        continue;
+      }
+
+      // Check for potentially dangerous patterns
+      if (/<script|javascript:|data:|vbscript:/i.test(line)) {
+        errors.push('Potentially dangerous content detected');
+        continue;
+      }
+
+      sanitized.push(this.sanitizeInput(line));
+    }
+
+    return {
+      valid: errors.length === 0,
+      sanitized,
+      errors,
     };
   }
 }

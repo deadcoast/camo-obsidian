@@ -19,43 +19,43 @@ export class CamoSyntaxHighlighter {
   private readonly highlightingRules: SyntaxHighlighting = {
     operators: {
       pattern: /(::|:\^:|\/\/|%|->)/g,
-      class: "camo-operator",
+      class: 'camo-operator',
       priority: 1,
     },
     keywords: {
       pattern:
         /\b(set|apply|remove|toggle|protect|encrypt|decrypt|authenticate|audit|reveal|hide|mask|redact|select|filter|transform|link|navigate|group|coordinate|store|retrieve|reset|snapshot|save|load|track|IF|ELSE|WHEN|WHILE)\b/g,
-      class: "camo-keyword",
+      class: 'camo-keyword',
       priority: 2,
     },
     actions: {
       pattern: /\{([^}]+)\}/g,
-      class: "camo-action",
+      class: 'camo-action',
       priority: 3,
     },
     variables: {
       pattern: /\[([^\]]+)\]/g,
-      class: "camo-variable",
+      class: 'camo-variable',
       priority: 3,
     },
     parameters: {
       pattern: /\(([^)]+)\)/g,
-      class: "camo-parameter",
+      class: 'camo-parameter',
       priority: 4,
     },
     strings: {
       pattern: /"([^"]+)"|'([^']+)'/g,
-      class: "camo-string",
+      class: 'camo-string',
       priority: 5,
     },
     numbers: {
       pattern: /\b\d+(\.\d+)?(px|%|em|rem|s|ms)?\b/g,
-      class: "camo-number",
+      class: 'camo-number',
       priority: 5,
     },
     comments: {
       pattern: /\/\*.*?\*\/|\/\/.*$/gm,
-      class: "camo-comment",
+      class: 'camo-comment',
       priority: 0,
     },
   };
@@ -86,7 +86,7 @@ export class CamoSyntaxHighlighter {
 
         // Check if this range overlaps with any already applied highlights
         const overlaps = appliedHighlights.some(
-          (applied) => start < applied.end && end > applied.start
+          applied => start < applied.end && end > applied.start
         );
 
         if (!overlaps) {
@@ -226,13 +226,13 @@ export class CamoSyntaxHighlighter {
    * Highlight camoMetaData lines in a container
    */
   highlightMetaDataLines(container: HTMLElement): void {
-    const textContent = container.textContent || "";
-    const lines = textContent.split("\n");
+    const textContent = container.textContent || '';
+    const lines = textContent.split('\n');
     let hasMetaData = false;
 
-    const highlightedLines = lines.map((line) => {
+    const highlightedLines = lines.map(line => {
       const trimmedLine = line.trim();
-      if (trimmedLine.startsWith("::") || trimmedLine.startsWith(":^:")) {
+      if (trimmedLine.startsWith('::') || trimmedLine.startsWith(':^:')) {
         hasMetaData = true;
         return this.highlight(line);
       }
@@ -240,8 +240,8 @@ export class CamoSyntaxHighlighter {
     });
 
     if (hasMetaData) {
-      container.innerHTML = highlightedLines.join("\n");
-      container.addClass("camo-metadata-highlight");
+      container.innerHTML = highlightedLines.join('\n');
+      container.addClass('camo-metadata-highlight');
     }
   }
 
@@ -249,8 +249,8 @@ export class CamoSyntaxHighlighter {
    * Create a highlighted preview of camoMetaData
    */
   createHighlightedPreview(metaDataText: string): HTMLElement {
-    const previewEl = document.createElement("div");
-    previewEl.className = "camo-metadata-preview";
+    const previewEl = document.createElement('div');
+    previewEl.className = 'camo-metadata-preview';
     previewEl.innerHTML = this.highlight(metaDataText);
     return previewEl;
   }
@@ -258,12 +258,9 @@ export class CamoSyntaxHighlighter {
   /**
    * Validate syntax and provide error highlighting
    */
-  highlightWithErrors(
-    text: string,
-    errors: Array<{ line: number; message: string }>
-  ): string {
-    const lines = text.split("\n");
-    const errorLines = new Set(errors.map((e) => e.line));
+  highlightWithErrors(text: string, errors: Array<{ line: number; message: string }>): string {
+    const lines = text.split('\n');
+    const errorLines = new Set(errors.map(e => e.line));
 
     const highlightedLines = lines.map((line, index) => {
       const lineNumber = index + 1;
@@ -276,10 +273,11 @@ export class CamoSyntaxHighlighter {
       return highlightedLine;
     });
 
-    return highlightedLines.join("\n");
+    return highlightedLines.join('\n');
   }
 }
 
 // Legacy export for compatibility
-export const CAMO_SYNTAX_HIGHLIGHTING: SyntaxHighlighting =
-  new CamoSyntaxHighlighter()["highlightingRules"];
+export const CAMO_SYNTAX_HIGHLIGHTING: SyntaxHighlighting = new CamoSyntaxHighlighter()[
+  'highlightingRules'
+];

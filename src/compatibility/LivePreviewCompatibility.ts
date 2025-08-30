@@ -1,8 +1,4 @@
-import type {
-  Editor,
-  EditorPosition,
-  MarkdownPostProcessorContext,
-} from "obsidian";
+import type { Editor, EditorPosition, MarkdownPostProcessorContext } from 'obsidian';
 
 export class LivePreviewCompatibility {
   private currentEditingBlock: string | null = null;
@@ -12,29 +8,26 @@ export class LivePreviewCompatibility {
    * Handle partial rendering in Live Preview
    * Live Preview only renders visible portions - must handle incremental updates
    */
-  handlePartialRender(
-    el: HTMLElement,
-    ctx: MarkdownPostProcessorContext
-  ): void {
+  handlePartialRender(el: HTMLElement, ctx: MarkdownPostProcessorContext): void {
     // Check if this block is currently being edited
-    const blockId = el.getAttribute("data-camo-id");
+    const blockId = el.getAttribute('data-camo-id');
     if (this.currentEditingBlock === blockId) {
       // Skip reprocessing for block currently being edited
       return;
     }
 
     // Add Live Preview specific classes for styling
-    el.addClass("camo-live-preview");
+    el.addClass('camo-live-preview');
 
     // Ensure block is marked for incremental updates
-    el.setAttribute("data-live-preview", "true");
+    el.setAttribute('data-live-preview', 'true');
 
     // Handle partial content updates
     const sectionInfo = ctx.getSectionInfo(el);
     if (sectionInfo) {
       // Store section info for incremental updates
-      el.setAttribute("data-section-start", sectionInfo.lineStart.toString());
-      el.setAttribute("data-section-end", sectionInfo.lineEnd.toString());
+      el.setAttribute('data-section-start', sectionInfo.lineStart.toString());
+      el.setAttribute('data-section-end', sectionInfo.lineEnd.toString());
     }
   }
 
@@ -64,7 +57,7 @@ export class LivePreviewCompatibility {
         }
       }
     } catch (error) {
-      console.warn("CAMO: Error tracking cursor position:", error);
+      console.warn('CAMO: Error tracking cursor position:', error);
     }
   }
 
@@ -80,28 +73,19 @@ export class LivePreviewCompatibility {
     let processed = source;
 
     // Highlight preset triggers
-    processed = processed.replace(
-      /```(camo-[a-z0-9-]+)/g,
-      "```$1 <!-- CAMO Preset: $1 -->"
-    );
+    processed = processed.replace(/```(camo-[a-z0-9-]+)/g, '```$1 <!-- CAMO Preset: $1 -->');
 
     // Highlight base camo blocks
-    processed = processed.replace(
-      /```camo\b/g,
-      "```camo <!-- CAMO Base Block -->"
-    );
+    processed = processed.replace(/```camo\b/g, '```camo <!-- CAMO Base Block -->');
 
     // Highlight camoMetaData syntax
     processed = processed.replace(
       /^(::|\s*::\^:)\s*(.+)$/gm,
-      "$1 $2 <!-- camoMetaData instruction -->"
+      '$1 $2 <!-- camoMetaData instruction -->'
     );
 
     // Highlight flag syntax
-    processed = processed.replace(
-      /^--([a-z-]+)(:.*)?$/gm,
-      "--$1$2 <!-- CAMO flag -->"
-    );
+    processed = processed.replace(/^--([a-z-]+)(:.*)?$/gm, '--$1$2 <!-- CAMO flag -->');
 
     return processed;
   }
@@ -109,10 +93,7 @@ export class LivePreviewCompatibility {
   /**
    * Find CAMO block at the given cursor position
    */
-  private findBlockAtPosition(
-    editor: Editor,
-    cursor: EditorPosition
-  ): string | null {
+  private findBlockAtPosition(editor: Editor, cursor: EditorPosition): string | null {
     try {
       // Get line content at cursor
       const line = editor.getLine(cursor.line);
@@ -120,7 +101,7 @@ export class LivePreviewCompatibility {
       // Check if cursor is in a CAMO block by scanning backwards for opening
       let startLine = cursor.line;
       let foundStart = false;
-      let blockType = "";
+      let blockType = '';
 
       // Scan backwards to find block start
       while (startLine >= 0 && !foundStart) {
@@ -143,7 +124,7 @@ export class LivePreviewCompatibility {
 
       while (endLine < totalLines && !foundEnd) {
         const lineContent = editor.getLine(endLine);
-        if (lineContent.trim() === "```" && endLine > startLine) {
+        if (lineContent.trim() === '```' && endLine > startLine) {
           foundEnd = true;
           break;
         }
@@ -155,7 +136,7 @@ export class LivePreviewCompatibility {
       // Generate block ID from position and type
       return `${blockType}-${startLine}-${endLine}`;
     } catch (error) {
-      console.warn("CAMO: Error finding block at position:", error);
+      console.warn('CAMO: Error finding block at position:', error);
       return null;
     }
   }
@@ -165,9 +146,9 @@ export class LivePreviewCompatibility {
    */
   private setEditingState(blockId: string): void {
     const elements = document.querySelectorAll(`[data-camo-id*="${blockId}"]`);
-    elements.forEach((el) => {
-      el.addClass("camo-editing");
-      el.setAttribute("data-editing", "true");
+    elements.forEach(el => {
+      el.addClass('camo-editing');
+      el.setAttribute('data-editing', 'true');
     });
   }
 
@@ -176,9 +157,9 @@ export class LivePreviewCompatibility {
    */
   private clearEditingState(blockId: string): void {
     const elements = document.querySelectorAll(`[data-camo-id*="${blockId}"]`);
-    elements.forEach((el) => {
-      el.removeClass("camo-editing");
-      el.removeAttribute("data-editing");
+    elements.forEach(el => {
+      el.removeClass('camo-editing');
+      el.removeAttribute('data-editing');
     });
   }
 

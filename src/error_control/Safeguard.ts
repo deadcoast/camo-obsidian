@@ -29,52 +29,37 @@ export class CamoSafeguard {
 
   private tryPreset(container: HTMLElement): boolean {
     // If a preset class is already applied, treat as successful fallback
-    const hasPreset = Array.from(container.classList).some((c) =>
-      c.startsWith("camo-preset-")
-    );
+    const hasPreset = Array.from(container.classList).some(c => c.startsWith('camo-preset-'));
     return hasPreset;
   }
 
-  private tryDefaultPreset(
-    container: HTMLElement,
-    defaultPresetId?: string
-  ): boolean {
+  private tryDefaultPreset(container: HTMLElement, defaultPresetId?: string): boolean {
     if (!defaultPresetId) return false;
-    const hasPreset = Array.from(container.classList).some((c) =>
-      c.startsWith("camo-preset-")
-    );
+    const hasPreset = Array.from(container.classList).some(c => c.startsWith('camo-preset-'));
     if (hasPreset) return false;
     container.classList.add(`camo-preset-${defaultPresetId}`);
     return true;
   }
 
   private tryMinimalStyle(container: HTMLElement): boolean {
-    if (container.classList.contains("camo-fallback-minimal")) return true;
-    container.classList.add("camo-fallback-minimal");
+    if (container.classList.contains('camo-fallback-minimal')) return true;
+    container.classList.add('camo-fallback-minimal');
     // Ensure content is visible
-    const content = container.querySelector(
-      ".camo-content"
-    ) as HTMLElement | null;
+    const content = container.querySelector('.camo-content') as HTMLElement | null;
     if (content) {
-      content.style.removeProperty("display");
-      content.style.removeProperty("opacity");
+      content.style.removeProperty('display');
+      content.style.removeProperty('opacity');
     }
     return true;
   }
 
   private renderPlaintext(container: HTMLElement): boolean {
     // Remove concealment classes and make content visible
-    container.classList.remove(
-      "camo-trigger-click",
-      "camo-trigger-hover",
-      "camo-trigger-timer"
-    );
-    const content = container.querySelector(
-      ".camo-content"
-    ) as HTMLElement | null;
+    container.classList.remove('camo-trigger-click', 'camo-trigger-hover', 'camo-trigger-timer');
+    const content = container.querySelector('.camo-content') as HTMLElement | null;
     if (content) {
-      content.style.display = "block";
-      content.style.opacity = "1";
+      content.style.display = 'block';
+      content.style.opacity = '1';
     }
     return true;
   }

@@ -1,18 +1,18 @@
 deployment:
   repository:
     structure:
-      - main.js         # Compiled plugin
-      - manifest.json   # Plugin manifest
-      - styles.css      # Plugin styles
-      - README.md       # Documentation
+      - main.js # Compiled plugin
+      - manifest.json # Plugin manifest
+      - styles.css # Plugin styles
+      - README.md # Documentation
 
   manifest:
-    id: "camo-codeblock"
-    name: "CAMO - Camouflage for Codeblocks"
-    author: "Your Name"
-    description: "Hide and stylize your codeblocks with presets and custom effects"
-    version: "1.0.0"
-    minAppVersion: "0.15.0"
+    id: 'camo-codeblock'
+    name: 'CAMO - Camouflage for Codeblocks'
+    author: 'Your Name'
+    description: 'Hide and stylize your codeblocks with presets and custom effects'
+    version: '1.0.0'
+    minAppVersion: '0.15.0'
     isDesktopOnly: false
 
   release_process:

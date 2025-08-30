@@ -1,56 +1,67 @@
-# Codebase Audit
+# Codebase Audit Tasklist
 
-## 1. Front (High-Level Architecture & Design)
+## For Frontend/UI (Priority: Medium)
 
-- Project structure: How modules, folders, and packages are organized.
-- Architecture choices: Whether the system follows patterns (MVC, layered architecture, microservices, etc.) consistently.
-- Dependencies: How third-party libraries, frameworks, and APIs are integrated.
-- Documentation & onboarding: Readability of README, setup instructions, configuration files.
+- [ ] Type Safety Implementation
+  - [ ] Replace all `any` types with proper interfaces
+  - [ ] Add index signatures to dynamic object access
+  - [ ] Implement strict null checks throughout
 
-## 2. Middle (Core Logic & Implementation)
+- [ ] Component Architecture
+  - [ ] Standardize Modal and Settings component patterns
+  - [ ] Add proper props validation for React-like components
+  - [ ] Implement consistent error boundaries
 
-- Code quality: Consistency of style, naming, formatting, and readability.
-- Patterns & practices: Use of SOLID principles, DRY/KISS, modularity, single responsibility.
-- Correctness: Whether logic does what it’s supposed to do, handling of edge cases.
-- Testing: Coverage, reliability, unit vs. integration tests, mocks/fakes.
-- Security: Input validation, sanitization, authentication/authorization, secrets management.
+### For Backend/Core Logic (Priority: High)
 
-## 3. Back (Low-Level Details & Runtime Concerns)
+- [ ] Critical Type Safety Fixes
+  - [ ] Fix `camoIRExecutor.ts` - replace 13 `any` types
+  - [ ] Fix `camoMetaData.ts` - replace 6 `any` types
+  - [ ] Fix `GrammarEngine.ts` - add index signatures for KEYWORD_SPECS
+  - [ ] Fix `MetaDataParser.ts` - add proper type guards
 
-- Performance: Algorithmic complexity, memory usage, database queries, caching.
-- Error handling: Robustness of exception management and logging.
-- Infrastructure/config: CI/CD pipelines, deployment scripts, Dockerfiles, environment variables.
-- Legacy/tech debt: Identifying brittle areas, outdated libraries, and upgrade paths.
+- [ ] Security Hardening
+  - [ ] Implement input sanitization for all user inputs
+  - [ ] Add secure token storage for GitHub integration
+  - [ ] Implement XSS protection in metadata processing
+  - [ ] Add content security policy validation
 
-## 4. Cross-Cutting Concerns
+- [ ] Testing Implementation
+  - [ ] Set up Jest testing framework
+  - [ ] Add unit tests for core parsing logic (target: 80% coverage)
+  - [ ] Add integration tests for plugin lifecycle
+  - [ ] Add property-based testing for grammar engine
 
-- Maintainability: Is the codebase easy to extend or modify?
-- Consistency: Across languages, frameworks, and modules.
-- Compliance: Licensing, coding standards, security audits.
-- Team workflows: How pull requests, branches, and versioning are handled.
+### For Cross-cutting Concerns (Priority: Low)
 
-## 5. Summary
+- [ ] Documentation Standardization
+  - [ ] Remove outdated `src/README.md`
+  - [ ] Add JSDoc comments to all public APIs (68 classes identified)
+  - [ ] Create automated API documentation generation
+  - [ ] Standardize markdown heading styles in docs
 
-- Frontend: Well-structured, modular, and maintainable.
-- Middleware: Solid implementation with good test coverage.
-- Backend: Robust with proper error handling and performance considerations.
-- Cross-cutting: Consistent and maintainable across the codebase.
+- [ ] Build & Infrastructure
+  - [ ] Fix `tsconfig.json` include/exclude conflicts
+  - [ ] Add proper ESBuild optimization flags
+  - [ ] Implement automated dependency updates
+  - [ ] Add bundle size monitoring and alerts
 
-## Tasklist
+- [ ] Code Quality
+  - [ ] Add ESLint configuration with strict rules
+  - [ ] Add Prettier for consistent formatting
+  - [ ] Implement pre-commit hooks for quality gates
+  - [ ] Add automated code review checklist
 
-- [ ] For frontend:
-  - [ ] Implement proper type safety with TypeScript interfaces
-  - [ ] Add more detailed documentation for complex components
+### For Maintainability (Priority: Medium)
 
-- [ ] For backend:
-  - [ ] Implement proper type safety with TypeScript interfaces
-  - [ ] Add more detailed documentation for complex components
+- [ ] Architecture Refinement
+  - [ ] Document plugin architecture patterns
+  - [ ] Create extension developer guide
+  - [ ] Add module dependency graphs
+  - [ ] Implement automated architecture compliance checks
 
-- [ ] For cross-cutting concerns
-  -
-
-- [ ] For maintainability
-  -
-
-- [ ] For consistency
-  -
+- [ ] Performance Monitoring
+  - [ ] Add performance metrics collection
+  - [ ] Implement bundle size budgets
+  - [ ] Add automated performance regression testing
+  - [ ] Create performance dashboard

@@ -5,7 +5,7 @@
  * Based on specifications in Docs/3_camoIR.md
  */
 
-import { CamoAST, ParsedStatement } from "./camoMetaData";
+import { CamoAST, ParsedStatement } from './camoMetaData';
 
 export interface CamoIR {
   version: string;
@@ -15,7 +15,7 @@ export interface CamoIR {
 
 export interface IRStatement {
   id: string;
-  type: "visual" | "security" | "interaction" | "layout" | "state";
+  type: 'visual' | 'security' | 'interaction' | 'layout' | 'state';
   operation: string;
   target: IRTarget;
   parameters: IRParameters;
@@ -25,7 +25,7 @@ export interface IRStatement {
 
 export interface IRTarget {
   selector: string;
-  scope: "block" | "content" | "element";
+  scope: 'block' | 'content' | 'element';
   pattern?: string;
 }
 
@@ -34,7 +34,7 @@ export interface IRParameters {
 }
 
 export interface IRCondition {
-  type: "IF" | "ELSE" | "WHILE" | "WHEN";
+  type: 'IF' | 'ELSE' | 'WHILE' | 'WHEN';
   expression: string;
   operator: string;
   value: string | number | boolean | null;
@@ -85,19 +85,19 @@ export interface PerformanceMetrics {
 
 export class CamoIRExecutor {
   private readonly executionPipeline = [
-    "parse", // Tokenize camoMetaData syntax
-    "validate", // Check syntax validity
-    "transform", // Convert to IR
-    "optimize", // Remove redundant operations
-    "execute", // Apply to DOM via Obsidian API
+    'parse', // Tokenize camoMetaData syntax
+    'validate', // Check syntax validity
+    'transform', // Convert to IR
+    'optimize', // Remove redundant operations
+    'execute', // Apply to DOM via Obsidian API
   ];
 
   private readonly operationPriority = {
-    1: "visual", // Background, colors, blur
-    2: "layout", // Sizing, positioning
-    3: "animation", // Transitions, effects
-    4: "interaction", // Click, hover handlers
-    5: "state", // Persistence operations
+    1: 'visual', // Background, colors, blur
+    2: 'layout', // Sizing, positioning
+    3: 'animation', // Transitions, effects
+    4: 'interaction', // Click, hover handlers
+    5: 'state', // Persistence operations
   };
 
   private optimizer: CamoIROptimizer;
@@ -111,10 +111,7 @@ export class CamoIRExecutor {
   /**
    * Execute camoIR pipeline
    */
-  async execute(
-    ast: CamoAST,
-    context: ExecutionContext
-  ): Promise<ExecutionResult> {
+  async execute(ast: CamoAST, context: ExecutionContext): Promise<ExecutionResult> {
     const startTime = performance.now();
 
     try {
@@ -144,9 +141,7 @@ export class CamoIRExecutor {
       return {
         success: false,
         operations: [],
-        errors: [
-          error instanceof Error ? error.message : "Unknown execution error",
-        ],
+        errors: [error instanceof Error ? error.message : 'Unknown execution error'],
         performance: {
           parseTime: 0,
           executeTime: 0,
@@ -171,12 +166,12 @@ export class CamoIRExecutor {
     }
 
     return {
-      version: "1.0.0",
+      version: '1.0.0',
       statements,
       metadata: {
         blockId: context.blockId,
         created: Date.now(),
-        version: "1.0.0",
+        version: '1.0.0',
         optimized: false,
       },
     };
@@ -194,7 +189,7 @@ export class CamoIRExecutor {
       operation: statement.declaration.keyword,
       target: {
         selector: statement.target.function,
-        scope: "block",
+        scope: 'block',
       },
       parameters: this.transformParameters(statement.effect.parameters),
       conditions: this.transformConditions(statement),
@@ -205,16 +200,11 @@ export class CamoIRExecutor {
   /**
    * Execute IR statements
    */
-  private async executeIR(
-    ir: CamoIR,
-    context: ExecutionContext
-  ): Promise<OperationResult[]> {
+  private async executeIR(ir: CamoIR, context: ExecutionContext): Promise<OperationResult[]> {
     const results: OperationResult[] = [];
 
     // Sort by priority
-    const sortedStatements = [...ir.statements].sort(
-      (a, b) => a.priority - b.priority
-    );
+    const sortedStatements = [...ir.statements].sort((a, b) => a.priority - b.priority);
 
     for (const statement of sortedStatements) {
       try {
@@ -235,7 +225,7 @@ export class CamoIRExecutor {
         results.push({
           statementId: statement.id,
           success: false,
-          error: error instanceof Error ? error.message : "Unknown error",
+          error: error instanceof Error ? error.message : 'Unknown error',
           effects: [],
         });
       }
@@ -254,27 +244,19 @@ export class CamoIRExecutor {
     const effects: AppliedEffect[] = [];
 
     switch (statement.type) {
-      case "visual":
-        effects.push(
-          ...(await this.executeVisualOperation(statement, context))
-        );
+      case 'visual':
+        effects.push(...(await this.executeVisualOperation(statement, context)));
         break;
-      case "security":
-        effects.push(
-          ...(await this.executeSecurityOperation(statement, context))
-        );
+      case 'security':
+        effects.push(...(await this.executeSecurityOperation(statement, context)));
         break;
-      case "interaction":
-        effects.push(
-          ...(await this.executeInteractionOperation(statement, context))
-        );
+      case 'interaction':
+        effects.push(...(await this.executeInteractionOperation(statement, context)));
         break;
-      case "layout":
-        effects.push(
-          ...(await this.executeLayoutOperation(statement, context))
-        );
+      case 'layout':
+        effects.push(...(await this.executeLayoutOperation(statement, context)));
         break;
-      case "state":
+      case 'state':
         effects.push(...(await this.executeStateOperation(statement, context)));
         break;
     }
@@ -296,19 +278,19 @@ export class CamoIRExecutor {
     const effects: AppliedEffect[] = [];
 
     switch (statement.operation) {
-      case "set":
-        if (statement.target.selector.includes("blur")) {
+      case 'set':
+        if (statement.target.selector.includes('blur')) {
           const intensity = statement.parameters.intensity || 40;
           context.element.style.filter = `blur(${intensity}px)`;
           effects.push({
-            type: "css",
-            target: "filter",
+            type: 'css',
+            target: 'filter',
             value: `blur(${intensity}px)`,
             timestamp: Date.now(),
           });
         }
         break;
-      case "apply":
+      case 'apply':
         // Apply visual effects
         break;
     }
@@ -320,8 +302,8 @@ export class CamoIRExecutor {
    * Execute security operations
    */
   private async executeSecurityOperation(
-    statement: IRStatement,
-    context: ExecutionContext
+    _statement: IRStatement,
+    _context: ExecutionContext
   ): Promise<AppliedEffect[]> {
     // TODO: Implement security operations
     return [];
@@ -331,8 +313,8 @@ export class CamoIRExecutor {
    * Execute interaction operations
    */
   private async executeInteractionOperation(
-    statement: IRStatement,
-    context: ExecutionContext
+    _statement: IRStatement,
+    _context: ExecutionContext
   ): Promise<AppliedEffect[]> {
     // TODO: Implement interaction operations
     return [];
@@ -342,8 +324,8 @@ export class CamoIRExecutor {
    * Execute layout operations
    */
   private async executeLayoutOperation(
-    statement: IRStatement,
-    context: ExecutionContext
+    _statement: IRStatement,
+    _context: ExecutionContext
   ): Promise<AppliedEffect[]> {
     // TODO: Implement layout operations
     return [];
@@ -353,31 +335,29 @@ export class CamoIRExecutor {
    * Execute state operations
    */
   private async executeStateOperation(
-    statement: IRStatement,
-    context: ExecutionContext
+    _statement: IRStatement,
+    _context: ExecutionContext
   ): Promise<AppliedEffect[]> {
     // TODO: Implement state operations
     return [];
   }
 
   // Helper methods
-  private determineStatementType(
-    statement: ParsedStatement
-  ): IRStatement["type"] {
+  private determineStatementType(statement: ParsedStatement): IRStatement['type'] {
     const keyword = statement.declaration.keyword;
 
-    if (["set", "apply", "remove"].includes(keyword)) {
-      return "visual";
-    } else if (["protect", "encrypt", "authenticate"].includes(keyword)) {
-      return "security";
-    } else if (["reveal", "hide", "toggle"].includes(keyword)) {
-      return "interaction";
+    if (['set', 'apply', 'remove'].includes(keyword)) {
+      return 'visual';
+    } else if (['protect', 'encrypt', 'authenticate'].includes(keyword)) {
+      return 'security';
+    } else if (['reveal', 'hide', 'toggle'].includes(keyword)) {
+      return 'interaction';
     } else {
-      return "state";
+      return 'state';
     }
   }
 
-  private transformParameters(params: Map<string, any>): IRParameters {
+  private transformParameters(params: Map<string, string | number | boolean | null>): IRParameters {
     const result: IRParameters = {};
     params.forEach((value, key) => {
       result[key] = value;
@@ -385,22 +365,22 @@ export class CamoIRExecutor {
     return result;
   }
 
-  private transformConditions(statement: ParsedStatement): IRCondition[] {
+  private transformConditions(_statement: ParsedStatement): IRCondition[] {
     // TODO: Parse conditions from statement
     return [];
   }
 
-  private getPriority(type: IRStatement["type"]): number {
+  private getPriority(type: IRStatement['type']): number {
     switch (type) {
-      case "visual":
+      case 'visual':
         return 1;
-      case "layout":
+      case 'layout':
         return 2;
-      case "interaction":
+      case 'interaction':
         return 4;
-      case "security":
+      case 'security':
         return 3;
-      case "state":
+      case 'state':
         return 5;
       default:
         return 10;
@@ -408,7 +388,7 @@ export class CamoIRExecutor {
   }
 
   private generateStatementId(): string {
-    return "stmt_" + Math.random().toString(36).substr(2, 9);
+    return 'stmt_' + Math.random().toString(36).substr(2, 9);
   }
 }
 
@@ -436,7 +416,7 @@ export class CamoIROptimizer {
   private removeUnusedStatements(ir: CamoIR): CamoIR {
     // Remove statements with no effect
     const activeStatements = ir.statements.filter(
-      (stmt) => stmt.parameters && Object.keys(stmt.parameters).length > 0
+      stmt => stmt.parameters && Object.keys(stmt.parameters).length > 0
     );
 
     return { ...ir, statements: activeStatements };
@@ -449,9 +429,7 @@ export class CamoIROptimizer {
 
   private reorderForPerformance(ir: CamoIR): CamoIR {
     // Reorder statements by priority and dependency
-    const reordered = [...ir.statements].sort(
-      (a, b) => a.priority - b.priority
-    );
+    const reordered = [...ir.statements].sort((a, b) => a.priority - b.priority);
     return { ...ir, statements: reordered };
   }
 }
@@ -460,17 +438,14 @@ export class CamoIROptimizer {
  * Conditional execution handler
  */
 export class ConditionalExecutor {
-  async evaluate(
-    conditions: IRCondition[],
-    context: ExecutionContext
-  ): Promise<boolean> {
+  async evaluate(conditions: IRCondition[], context: ExecutionContext): Promise<boolean> {
     if (conditions.length === 0) {
       return true;
     }
 
     for (const condition of conditions) {
       const result = await this.evaluateCondition(condition, context);
-      if (!result && condition.type === "IF") {
+      if (!result && condition.type === 'IF') {
         return false;
       }
     }
@@ -486,112 +461,118 @@ export class ConditionalExecutor {
 
     try {
       switch (expression) {
-        case "hover":
+        case 'hover':
           return this.evaluateHoverCondition(context);
 
-        case "click":
+        case 'click':
           return this.evaluateClickCondition(context);
 
-        case "time":
+        case 'time':
           return this.evaluateTimeCondition(operator, value);
 
-        case "theme":
+        case 'theme':
           return this.evaluateThemeCondition(operator, value);
 
-        case "viewport":
+        case 'viewport':
           return this.evaluateViewportCondition(operator, value);
 
-        case "user.role":
+        case 'user.role':
           return this.evaluateUserRoleCondition(operator, value, context);
 
-        case "user.authenticated":
+        case 'user.authenticated':
           return this.evaluateAuthenticationCondition(context);
 
-        case "content.length":
+        case 'content.length':
           return this.evaluateContentLengthCondition(operator, value, context);
 
-        case "state.revealed":
+        case 'state.revealed':
           return this.evaluateRevealedStateCondition(context);
 
         default:
-          return this.evaluateCustomCondition(
-            expression,
-            operator,
-            value,
-            context
-          );
+          return this.evaluateCustomCondition(expression, operator, value, context);
       }
     } catch (error) {
-      console.error("Condition evaluation error:", error);
+      // Condition evaluation error
       return false;
     }
   }
 
   private evaluateHoverCondition(context: ExecutionContext): boolean {
-    return context.element.matches(":hover");
+    return context.element.matches(':hover');
   }
 
   private evaluateClickCondition(context: ExecutionContext): boolean {
-    return context.state.get("lastClickTime")
-      ? Date.now() - context.state.get("lastClickTime") < 1000
-      : false;
+    const lastClickTime = context.state.get('lastClickTime');
+    return lastClickTime ? Date.now() - Number(lastClickTime) < 1000 : false;
   }
 
   private evaluateTimeCondition(
     operator: string,
-    value: string | number
+    value: string | number | boolean | null
   ): boolean {
+    if (value === null || value === undefined) return false;
     const now = new Date();
-    const compareTime = new Date(value);
+    const compareTime = new Date(String(value));
 
     switch (operator) {
-      case ">":
-      case "after":
+      case '>':
+      case 'after':
         return now > compareTime;
-      case "<":
-      case "before":
+      case '<':
+      case 'before':
         return now < compareTime;
-      case "=":
-      case "equals":
+      case '=':
+      case 'equals':
         return Math.abs(now.getTime() - compareTime.getTime()) < 60000; // Within 1 minute
       default:
         return false;
     }
   }
 
-  private evaluateThemeCondition(operator: string, value: string): boolean {
-    const isDark = document.body.classList.contains("theme-dark");
-    const currentTheme = isDark ? "dark" : "light";
+  private evaluateThemeCondition(
+    operator: string,
+    value: string | number | boolean | null
+  ): boolean {
+    if (value === null || value === undefined) return false;
+    // const stringValue = String(value);
+    const isDark = document.body.classList.contains('theme-dark');
+    const currentTheme = isDark ? 'dark' : 'light';
 
     switch (operator) {
-      case "=":
-      case "equals":
-        return currentTheme === value;
-      case "!=":
-      case "not":
-        return currentTheme !== value;
+      case '=':
+      case 'equals':
+        return currentTheme === String(value);
+      case '!=':
+      case 'not':
+        return currentTheme !== String(value);
       default:
         return false;
     }
   }
 
-  private evaluateViewportCondition(operator: string, value: number): boolean {
+  private evaluateViewportCondition(
+    operator: string,
+    value: string | number | boolean | null
+  ): boolean {
+    if (value === null || value === undefined) return false;
+    const numValue = Number(value);
+    if (isNaN(numValue)) return false;
     const viewport = {
       width: window.innerWidth,
       height: window.innerHeight,
     };
 
-    if (typeof value === "object") {
-      const { width, height } = value;
+    if (typeof value === 'object' && value !== null) {
+      const { width, height } = value as { width: number; height: number };
 
       switch (operator) {
-        case ">":
+        case '>':
           return viewport.width > width && viewport.height > height;
-        case "<":
+        case '<':
           return viewport.width < width && viewport.height < height;
-        case ">=":
+        case '>=':
           return viewport.width >= width && viewport.height >= height;
-        case "<=":
+        case '<=':
           return viewport.width <= width && viewport.height <= height;
         default:
           return false;
@@ -606,16 +587,16 @@ export class ConditionalExecutor {
     value: string | number | boolean | null,
     context: ExecutionContext
   ): boolean {
-    const userRole = context.variables.get("user.role") || "public";
+    const userRole = context.variables.get('user.role') || 'public';
 
     switch (operator) {
-      case "=":
-      case "equals":
+      case '=':
+      case 'equals':
         return userRole === value;
-      case "!=":
-      case "not":
+      case '!=':
+      case 'not':
         return userRole !== value;
-      case "in":
+      case 'in':
         return Array.isArray(value) && value.includes(userRole);
       default:
         return false;
@@ -623,7 +604,7 @@ export class ConditionalExecutor {
   }
 
   private evaluateAuthenticationCondition(context: ExecutionContext): boolean {
-    return context.variables.get("user.authenticated") === true;
+    return context.variables.get('user.authenticated') === true;
   }
 
   private evaluateContentLengthCondition(
@@ -631,19 +612,19 @@ export class ConditionalExecutor {
     value: string | number | boolean | null,
     context: ExecutionContext
   ): boolean {
-    const contentLength = context.variables.get("content.length") || 0;
+    const contentLength = Number(context.variables.get('content.length')) || 0;
 
     switch (operator) {
-      case ">":
-        return contentLength > value;
-      case "<":
-        return contentLength < value;
-      case ">=":
-        return contentLength >= value;
-      case "<=":
-        return contentLength <= value;
-      case "=":
-      case "equals":
+      case '>':
+        return contentLength > Number(value);
+      case '<':
+        return contentLength < Number(value);
+      case '>=':
+        return contentLength >= Number(value);
+      case '<=':
+        return contentLength <= Number(value);
+      case '=':
+      case 'equals':
         return contentLength === value;
       default:
         return false;
@@ -651,7 +632,7 @@ export class ConditionalExecutor {
   }
 
   private evaluateRevealedStateCondition(context: ExecutionContext): boolean {
-    return context.element.classList.contains("camo-revealed");
+    return context.element.classList.contains('camo-revealed');
   }
 
   private evaluateCustomCondition(
@@ -660,37 +641,36 @@ export class ConditionalExecutor {
     value: string | number | boolean | null,
     context: ExecutionContext
   ): boolean {
-    const contextValue =
-      context.variables.get(expression) || context.state.get(expression);
+    const contextValue = context.variables.get(expression) || context.state.get(expression);
 
     if (contextValue === undefined) {
       return false;
     }
 
     switch (operator) {
-      case "=":
-      case "equals":
+      case '=':
+      case 'equals':
         return contextValue === value;
-      case "!=":
-      case "not":
+      case '!=':
+      case 'not':
         return contextValue !== value;
-      case ">":
-        return contextValue > value;
-      case "<":
-        return contextValue < value;
-      case ">=":
-        return contextValue >= value;
-      case "<=":
-        return contextValue <= value;
-      case "contains":
+      case '>':
+        return Number(contextValue) > Number(value);
+      case '<':
+        return Number(contextValue) < Number(value);
+      case '>=':
+        return Number(contextValue) >= Number(value);
+      case '<=':
+        return Number(contextValue) <= Number(value);
+      case 'contains':
         return String(contextValue).includes(String(value));
-      case "startsWith":
+      case 'startsWith':
         return String(contextValue).startsWith(String(value));
-      case "endsWith":
+      case 'endsWith':
         return String(contextValue).endsWith(String(value));
-      case "matches":
+      case 'matches':
         try {
-          return new RegExp(value).test(String(contextValue));
+          return new RegExp(String(value)).test(String(contextValue));
         } catch {
           return false;
         }

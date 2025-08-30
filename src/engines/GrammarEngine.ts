@@ -10,15 +10,15 @@
  * - Performance optimization for large grammar processing
  */
 
-import { CamoAST, CamoASTNode } from "../modules/AST";
-import { Token, TokenType } from "../modules/MetaDataParser";
+import { CamoAST, CamoASTNode } from '../modules/AST';
+import { Token, TokenType } from '../modules/MetaDataParser';
 
 // EBNF Grammar Rule Definitions
 export interface GrammarRule {
   name: string;
   pattern: string;
   precedence: number;
-  associativity: "left" | "right" | "none";
+  associativity: 'left' | 'right' | 'none';
   required: boolean;
   description: string;
 }
@@ -33,7 +33,7 @@ export interface GrammarValidationResult {
 
 // Grammar error types
 export interface GrammarError {
-  type: "syntax" | "semantic" | "precedence" | "missing" | "unexpected";
+  type: 'syntax' | 'semantic' | 'precedence' | 'missing' | 'unexpected';
   message: string;
   position: {
     line: number;
@@ -44,11 +44,11 @@ export interface GrammarError {
   rule?: string;
   expected?: string[];
   actual?: string;
-  severity: "error" | "warning" | "info";
+  severity: 'error' | 'warning' | 'info';
 }
 
 export interface GrammarWarning extends GrammarError {
-  severity: "warning";
+  severity: 'warning';
 }
 
 export interface GrammarSuggestion {
@@ -99,89 +99,89 @@ export class CamoGrammarEngine {
   private readonly GRAMMAR_RULES: Record<string, GrammarRule> = {
     // Top-level productions
     statement: {
-      name: "statement",
+      name: 'statement',
       pattern:
-        "(newline | hierarchical), ws*, declaration, ws*, relation, ws*, target, [ws*, operator, ws*, effect], [ws*, trigger, ws*, output]",
+        '(newline | hierarchical), ws*, declaration, ws*, relation, ws*, target, [ws*, operator, ws*, effect], [ws*, trigger, ws*, output]',
       precedence: 1,
-      associativity: "none",
+      associativity: 'none',
       required: true,
-      description: "Complete camoMetaData statement",
+      description: 'Complete camoMetaData statement',
     },
 
     // Statement operators
     newline: {
-      name: "newline",
-      pattern: "::",
+      name: 'newline',
+      pattern: '::',
       precedence: 10,
-      associativity: "none",
+      associativity: 'none',
       required: true,
-      description: "Root-level statement operator",
+      description: 'Root-level statement operator',
     },
     hierarchical: {
-      name: "hierarchical",
-      pattern: ":^:",
+      name: 'hierarchical',
+      pattern: ':^:',
       precedence: 10,
-      associativity: "none",
+      associativity: 'none',
       required: true,
-      description: "Hierarchical statement operator",
+      description: 'Hierarchical statement operator',
     },
     relation: {
-      name: "relation",
-      pattern: "//",
+      name: 'relation',
+      pattern: '//',
       precedence: 8,
-      associativity: "left",
+      associativity: 'left',
       required: true,
-      description: "Declaration-target relation separator",
+      description: 'Declaration-target relation separator',
     },
     operator: {
-      name: "operator",
-      pattern: "%",
+      name: 'operator',
+      pattern: '%',
       precedence: 6,
-      associativity: "left",
+      associativity: 'left',
       required: false,
-      description: "Effect parameter operator",
+      description: 'Effect parameter operator',
     },
     trigger: {
-      name: "trigger",
-      pattern: "->",
+      name: 'trigger',
+      pattern: '->',
       precedence: 4,
-      associativity: "left",
+      associativity: 'left',
       required: false,
-      description: "Output trigger operator",
+      description: 'Output trigger operator',
     },
 
     // Zone productions
     declaration: {
-      name: "declaration",
-      pattern: "keyword, [variable], {ws+, modifier}",
+      name: 'declaration',
+      pattern: 'keyword, [variable], {ws+, modifier}',
       precedence: 7,
-      associativity: "none",
+      associativity: 'none',
       required: true,
-      description: "Statement declaration with keyword and modifiers",
+      description: 'Statement declaration with keyword and modifiers',
     },
     target: {
-      name: "target",
-      pattern: "function, [selector]",
+      name: 'target',
+      pattern: 'function, [selector]',
       precedence: 7,
-      associativity: "none",
+      associativity: 'none',
       required: true,
-      description: "Target function with optional selector",
+      description: 'Target function with optional selector',
     },
     effect: {
-      name: "effect",
-      pattern: "action, [parameters]",
+      name: 'effect',
+      pattern: 'action, [parameters]',
       precedence: 5,
-      associativity: "none",
+      associativity: 'none',
       required: false,
-      description: "Effect action with optional parameters",
+      description: 'Effect action with optional parameters',
     },
     output: {
-      name: "output",
-      pattern: "outcome, [callback]",
+      name: 'output',
+      pattern: 'outcome, [callback]',
       precedence: 3,
-      associativity: "none",
+      associativity: 'none',
       required: false,
-      description: "Output outcome with optional callback",
+      description: 'Output outcome with optional callback',
     },
   };
 
@@ -239,56 +239,53 @@ export class CamoGrammarEngine {
   };
 
   // Keyword specifications for semantic validation
-  private readonly KEYWORD_SPECS: Record<
-    string,
-    { zones: string[]; category: string }
-  > = {
+  private readonly KEYWORD_SPECS: Record<string, { zones: string[]; category: string }> = {
     // Visual operations
-    set: { zones: ["declaration", "target", "effect"], category: "visual" },
-    apply: { zones: ["declaration", "target", "effect"], category: "visual" },
-    blur: { zones: ["declaration", "target"], category: "visual" },
-    hide: { zones: ["declaration", "target"], category: "visual" },
-    reveal: { zones: ["declaration", "target"], category: "visual" },
-    mask: { zones: ["declaration", "target", "effect"], category: "visual" },
-    redact: { zones: ["declaration", "target"], category: "visual" },
+    set: { zones: ['declaration', 'target', 'effect'], category: 'visual' },
+    apply: { zones: ['declaration', 'target', 'effect'], category: 'visual' },
+    blur: { zones: ['declaration', 'target'], category: 'visual' },
+    hide: { zones: ['declaration', 'target'], category: 'visual' },
+    reveal: { zones: ['declaration', 'target'], category: 'visual' },
+    mask: { zones: ['declaration', 'target', 'effect'], category: 'visual' },
+    redact: { zones: ['declaration', 'target'], category: 'visual' },
 
     // Layout operations
-    resize: { zones: ["declaration", "target", "effect"], category: "layout" },
+    resize: { zones: ['declaration', 'target', 'effect'], category: 'layout' },
     position: {
-      zones: ["declaration", "target", "effect"],
-      category: "layout",
+      zones: ['declaration', 'target', 'effect'],
+      category: 'layout',
     },
 
     // Animation operations
     animate: {
-      zones: ["declaration", "target", "effect"],
-      category: "animation",
+      zones: ['declaration', 'target', 'effect'],
+      category: 'animation',
     },
     transition: {
-      zones: ["declaration", "target", "effect"],
-      category: "animation",
+      zones: ['declaration', 'target', 'effect'],
+      category: 'animation',
     },
 
     // Interaction operations
     click: {
-      zones: ["declaration", "target", "effect"],
-      category: "interaction",
+      zones: ['declaration', 'target', 'effect'],
+      category: 'interaction',
     },
     hover: {
-      zones: ["declaration", "target", "effect"],
-      category: "interaction",
+      zones: ['declaration', 'target', 'effect'],
+      category: 'interaction',
     },
 
     // State operations
-    store: { zones: ["declaration", "target", "output"], category: "state" },
-    retrieve: { zones: ["declaration", "target", "output"], category: "state" },
+    store: { zones: ['declaration', 'target', 'output'], category: 'state' },
+    retrieve: { zones: ['declaration', 'target', 'output'], category: 'state' },
     protect: {
-      zones: ["declaration", "target", "effect", "output"],
-      category: "state",
+      zones: ['declaration', 'target', 'effect', 'output'],
+      category: 'state',
     },
     coordinate: {
-      zones: ["declaration", "target", "effect"],
-      category: "state",
+      zones: ['declaration', 'target', 'effect'],
+      category: 'state',
     },
   };
 
@@ -333,7 +330,7 @@ export class CamoGrammarEngine {
     // Add EOF token
     tokens.push({
       type: TokenType.EOF,
-      value: "",
+      value: '',
       start: context.position,
       end: context.position,
       line: context.line,
@@ -368,18 +365,13 @@ export class CamoGrammarEngine {
     const suggestions: GrammarSuggestion[] = [];
 
     // Build AST with grammar validation
-    const ast = this.buildASTWithValidation(
-      context,
-      errors,
-      warnings,
-      suggestions
-    );
+    const ast = this.buildASTWithValidation(context, errors, warnings, suggestions);
 
     // Perform semantic validation
     this.performSemanticValidation(ast, errors, warnings, suggestions);
 
     const validation: GrammarValidationResult = {
-      valid: errors.filter((e) => e.severity === "error").length === 0,
+      valid: errors.filter(e => e.severity === 'error').length === 0,
       errors,
       warnings,
       suggestions,
@@ -405,10 +397,10 @@ export class CamoGrammarEngine {
         valid: false,
         errors: [
           {
-            type: "syntax",
+            type: 'syntax',
             message: `Grammar validation failed: ${error.message}`,
             position: { line: 1, column: 1, start: 0, end: input.length },
-            severity: "error",
+            severity: 'error',
           },
         ],
         warnings: [],
@@ -435,14 +427,14 @@ export class CamoGrammarEngine {
    * Check if keyword requires specific zones
    */
   getRequiredZones(keyword: string): string[] {
-    return this.KEYWORD_SPECS[keyword]?.zones || ["declaration", "target"];
+    return this.KEYWORD_SPECS[keyword]?.zones || ['declaration', 'target'];
   }
 
   /**
    * Get keyword category
    */
   getKeywordCategory(keyword: string): string {
-    return this.KEYWORD_SPECS[keyword]?.category || "unknown";
+    return this.KEYWORD_SPECS[keyword]?.category || 'unknown';
   }
 
   /**
@@ -484,9 +476,7 @@ export class CamoGrammarEngine {
 
         return {
           type: config.type,
-          value: this.shouldUseCapturedValue(config.type)
-            ? capturedValue
-            : value,
+          value: this.shouldUseCapturedValue(config.type) ? capturedValue : value,
           start: context.position,
           end: context.position + value.length,
           line: context.line,
@@ -520,10 +510,10 @@ export class CamoGrammarEngine {
   private buildASTWithValidation(
     context: ParserContext,
     errors: GrammarError[],
-    warnings: GrammarWarning[],
-    suggestions: GrammarSuggestion[]
+    _warnings: GrammarWarning[],
+    _suggestions: GrammarSuggestion[]
   ): CamoAST {
-    const ast: CamoAST = { type: "root", statements: [] };
+    const ast: CamoAST = { type: 'root', statements: [] };
 
     while (
       context.position < context.tokens.length &&
@@ -533,8 +523,8 @@ export class CamoGrammarEngine {
         const statement = this.parseStatementWithValidation(
           context,
           errors,
-          warnings,
-          suggestions
+          _warnings,
+          _suggestions
         );
         if (statement) {
           ast.statements.push(statement);
@@ -542,10 +532,10 @@ export class CamoGrammarEngine {
         }
       } catch (error) {
         errors.push({
-          type: "syntax",
+          type: 'syntax',
           message: `Failed to parse statement: ${error.message}`,
           position: this.getTokenPosition(context.tokens[context.position]),
-          severity: "error",
+          severity: 'error',
         });
         this.skipToNextStatement(context);
       }
@@ -557,8 +547,8 @@ export class CamoGrammarEngine {
   private parseStatementWithValidation(
     context: ParserContext,
     errors: GrammarError[],
-    warnings: GrammarWarning[],
-    suggestions: GrammarSuggestion[]
+    _warnings: GrammarWarning[],
+    _suggestions: GrammarSuggestion[]
   ): CamoASTNode | null {
     this.skipWhitespace(context);
 
@@ -566,32 +556,29 @@ export class CamoGrammarEngine {
 
     const firstToken = context.tokens[context.position];
 
-    if (
-      firstToken.type !== TokenType.NEWLINE &&
-      firstToken.type !== TokenType.HIERARCHICAL
-    ) {
+    if (firstToken.type !== TokenType.NEWLINE && firstToken.type !== TokenType.HIERARCHICAL) {
       if (context.strict) {
         errors.push({
-          type: "syntax",
+          type: 'syntax',
           message: "Statement must start with '::' or ':^:'",
           position: this.getTokenPosition(firstToken),
-          expected: ["::", ":^:"],
+          expected: ['::', ':^:'],
           actual: firstToken.value,
-          severity: "error",
+          severity: 'error',
         });
       }
       return null;
     }
 
-    const operator = firstToken.value as "::" | ":^:";
+    const operator = firstToken.value as '::' | ':^:';
     context.position++;
 
     const statement: CamoASTNode = {
-      type: "statement",
+      type: 'statement',
       operator,
       startIndex: context.position - 1,
       endIndex: context.position,
-      depth: operator === "::" ? 0 : 1,
+      depth: operator === '::' ? 0 : 1,
       line: firstToken.line,
       column: firstToken.column,
       children: [],
@@ -613,14 +600,14 @@ export class CamoGrammarEngine {
 
   private performSemanticValidation(
     ast: CamoAST,
-    errors: GrammarError[],
+    _errors: GrammarError[],
     warnings: GrammarWarning[],
-    suggestions: GrammarSuggestion[]
+    _suggestions: GrammarSuggestion[]
   ): void {
     for (const statement of ast.statements) {
       if (statement.keyword && !this.KEYWORD_SPECS[statement.keyword]) {
         warnings.push({
-          type: "semantic",
+          type: 'semantic',
           message: `Unknown keyword '${statement.keyword}'`,
           position: {
             line: statement.line,
@@ -628,7 +615,7 @@ export class CamoGrammarEngine {
             start: 0,
             end: 0,
           },
-          severity: "warning",
+          severity: 'warning',
         });
       }
     }
@@ -667,23 +654,18 @@ export class CamoGrammarEngine {
     };
   }
 
-  private needsLookahead(
-    tokenName: string,
-    context: TokenizationContext
-  ): boolean {
-    return tokenName === "COMMENT" || tokenName === "RELATION";
+  private needsLookahead(tokenName: string, _context: TokenizationContext): boolean {
+    return tokenName === 'COMMENT' || tokenName === 'RELATION';
   }
 
   private validateWithLookahead(
     tokenName: string,
     remaining: string,
-    context: TokenizationContext
+    _context: TokenizationContext
   ): boolean {
-    if (tokenName === "RELATION") {
+    if (tokenName === 'RELATION') {
       const nextChar = remaining.charAt(2);
-      return (
-        nextChar === " " || nextChar === "\t" || /[a-zA-Z_]/.test(nextChar)
-      );
+      return nextChar === ' ' || nextChar === '\t' || /[a-zA-Z_]/.test(nextChar);
     }
     return true;
   }

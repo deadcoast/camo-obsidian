@@ -23,7 +23,7 @@ class SimpleLRU<K, V> extends Map<K, V> {
     return this;
   }
 }
-import { CamoAST } from "./AST";
+import { CamoAST } from './AST';
 
 export interface CachedEffect {
   effect: RenderedEffect;

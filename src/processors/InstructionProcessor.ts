@@ -1,6 +1,6 @@
-import { Plugin } from "obsidian";
-import { CamoAST, CamoASTNode } from "../modules/AST";
-import { CamoStateManager } from "../modules/StateManager";
+import { Plugin } from 'obsidian';
+import { CamoAST, CamoASTNode } from '../modules/AST';
+import { CamoStateManager } from '../modules/StateManager';
 
 interface ExecutionContext {
   blockId: string;
@@ -19,10 +19,7 @@ interface ExecutionResult {
 }
 
 interface EffectHandler {
-  apply: (
-    target: HTMLElement,
-    params: Record<string, unknown>
-  ) => Promise<StatementResult>;
+  apply: (target: HTMLElement, params: Record<string, unknown>) => Promise<StatementResult>;
 }
 
 export class CamoInstructionProcessor {
@@ -35,10 +32,7 @@ export class CamoInstructionProcessor {
     this.state = new CamoStateManager(plugin);
   }
 
-  async execute(
-    ast: CamoAST,
-    context: ExecutionContext
-  ): Promise<ExecutionResult> {
+  async execute(ast: CamoAST, context: ExecutionContext): Promise<ExecutionResult> {
     const results: StatementResult[] = [];
 
     for (const statement of ast.statements) {
@@ -69,23 +63,15 @@ export class CamoInstructionProcessor {
     console.error(`Error executing statement:`, error);
   }
 
-  private resolveTarget(
-    target: string,
-    context: ExecutionContext
-  ): HTMLElement {
+  private resolveTarget(target: string, context: ExecutionContext): HTMLElement {
     return context.block;
   }
 
-  private prepareParameters(
-    parameters: Record<string, unknown>
-  ): Record<string, unknown> {
+  private prepareParameters(parameters: Record<string, unknown>): Record<string, unknown> {
     return parameters || {};
   }
 
-  private evaluateCondition(
-    condition: string,
-    context: ExecutionContext
-  ): boolean {
+  private evaluateCondition(condition: string, context: ExecutionContext): boolean {
     // Simple condition evaluation
     return true;
   }
@@ -95,26 +81,23 @@ export class CamoInstructionProcessor {
     context: ExecutionContext
   ): Promise<StatementResult> {
     // 1. Resolve target content
-    const target = this.resolveTarget("", context);
+    const target = this.resolveTarget('', context);
 
     // 2. Prepare effect parameters
     const params = this.prepareParameters(statement.parameters || {});
 
     // 3. Check conditions
-    if (
-      statement.condition &&
-      !this.evaluateCondition(statement.condition, context)
-    ) {
-      return { skipped: true, applied: false, info: "Condition not met" };
+    if (statement.condition && !this.evaluateCondition(statement.condition, context)) {
+      return { skipped: true, applied: false, info: 'Condition not met' };
     }
 
     // 4. Apply effect
-    const effect = this.effects.get("default");
+    const effect = this.effects.get('default');
     if (!effect) {
       return {
         skipped: false,
         applied: false,
-        info: "No effect handler found",
+        info: 'No effect handler found',
       };
     }
 

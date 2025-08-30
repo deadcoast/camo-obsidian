@@ -23,8 +23,8 @@ export class CamoOptimizer {
   initialize() {
     // Setup intersection observer for lazy rendering
     this.observer = new IntersectionObserver(
-      (entries) => {
-        entries.forEach((entry) => {
+      entries => {
+        entries.forEach(entry => {
           if (entry.isIntersecting) {
             this.renderBlock(entry.target as HTMLElement);
           } else {
@@ -33,7 +33,7 @@ export class CamoOptimizer {
         });
       },
       {
-        rootMargin: "100px", // Start rendering 100px before visible
+        rootMargin: '100px', // Start rendering 100px before visible
       }
     );
   }
@@ -71,11 +71,7 @@ export class CamoOptimizer {
           performance?: Performance & { memory?: { usedJSHeapSize?: number } };
         }
       ).performance;
-      if (
-        perfObj &&
-        perfObj.memory &&
-        typeof perfObj.memory.usedJSHeapSize === "number"
-      ) {
+      if (perfObj && perfObj.memory && typeof perfObj.memory.usedJSHeapSize === 'number') {
         // Expose via cssInjectionTimeMs slot to avoid expanding interface too much
         metrics.cssInjectionTimeMs = perfObj.memory.usedJSHeapSize;
       }
@@ -88,7 +84,7 @@ export class CamoOptimizer {
   private renderBlock(_el: HTMLElement) {
     // Add animation-enable class when entering viewport
     try {
-      _el.classList.add("camo-animate");
+      _el.classList.add('camo-animate');
     } catch {
       // Ignore errors
     }
@@ -96,7 +92,7 @@ export class CamoOptimizer {
   private unrenderBlock(_el: HTMLElement) {
     // Remove animation when out of view to save CPU
     try {
-      _el.classList.remove("camo-animate");
+      _el.classList.remove('camo-animate');
     } catch {
       // Ignore errors
     }

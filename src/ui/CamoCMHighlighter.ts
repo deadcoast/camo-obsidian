@@ -1,12 +1,7 @@
-import type { Extension } from "@codemirror/state";
-import { RangeSetBuilder } from "@codemirror/state";
-import {
-  Decoration,
-  EditorView,
-  ViewPlugin,
-  ViewUpdate,
-} from "@codemirror/view";
-import { CAMO_SYNTAX_HIGHLIGHTING } from "../core/camoSyntaxHighlighting";
+import type { Extension } from '@codemirror/state';
+import { RangeSetBuilder } from '@codemirror/state';
+import { Decoration, EditorView, ViewPlugin, ViewUpdate } from '@codemirror/view';
+import { CAMO_SYNTAX_HIGHLIGHTING } from '../core/camoSyntaxHighlighting';
 
 const decoFor = (cls: string) => Decoration.mark({ class: cls });
 
@@ -32,8 +27,8 @@ export function createCamoSyntaxHighlightExtension(): Extension {
       CAMO_SYNTAX_HIGHLIGHTING.actions.pattern.source,
       CAMO_SYNTAX_HIGHLIGHTING.variables.pattern.source,
       CAMO_SYNTAX_HIGHLIGHTING.parameters.pattern.source,
-    ].join("|"),
-    "g"
+    ].join('|'),
+    'g'
   );
 
   return ViewPlugin.fromClass(
@@ -73,6 +68,6 @@ export function createCamoSyntaxHighlightExtension(): Extension {
         return builder.finish();
       }
     },
-    { decorations: (v) => v.decorations }
+    { decorations: v => v.decorations }
   );
 }

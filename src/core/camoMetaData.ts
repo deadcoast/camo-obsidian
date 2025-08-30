@@ -7,7 +7,7 @@
 
 export interface ParsedStatement {
   declaration: {
-    type: "newline" | "hierarchical";
+    type: 'newline' | 'hierarchical';
     keyword: string;
     variable: string;
     modifiers: string[];
@@ -18,7 +18,7 @@ export interface ParsedStatement {
   };
   effect: {
     action: string;
-    parameters: Map<string, any>;
+    parameters: Map<string, string | number | boolean | null>;
     trigger?: string;
   };
   output: {
@@ -33,7 +33,7 @@ export interface ParsedStatement {
 }
 
 export interface CamoAST {
-  type: "root";
+  type: 'root';
   statements: ParsedStatement[];
 }
 
@@ -45,39 +45,39 @@ export interface MetaDataContext {
 
 export class CamoMetaDataParser {
   private readonly OPERATORS = {
-    NEWLINE: "::",
-    HIERARCHICAL: ":^:",
-    RELATION: "//",
-    MODIFIER: "%",
-    TRIGGER: "->",
-    ACTION_OPEN: "{",
-    ACTION_CLOSE: "}",
-    VAR_OPEN: "[",
-    VAR_CLOSE: "]",
-    OPTION_OPEN: "(",
-    OPTION_CLOSE: ")",
+    NEWLINE: '::',
+    HIERARCHICAL: ':^:',
+    RELATION: '//',
+    MODIFIER: '%',
+    TRIGGER: '->',
+    ACTION_OPEN: '{',
+    ACTION_CLOSE: '}',
+    VAR_OPEN: '[',
+    VAR_CLOSE: ']',
+    OPTION_OPEN: '(',
+    OPTION_CLOSE: ')',
   };
 
   private readonly KEYWORDS = {
     // Visual Operations
-    set: "Modify visual property",
-    apply: "Apply effect or filter",
-    remove: "Remove effect or property",
+    set: 'Modify visual property',
+    apply: 'Apply effect or filter',
+    remove: 'Remove effect or property',
 
     // Security Operations
-    protect: "Apply security measure",
-    encrypt: "Encrypt content",
-    authenticate: "Require authentication",
+    protect: 'Apply security measure',
+    encrypt: 'Encrypt content',
+    authenticate: 'Require authentication',
 
     // Display Control
-    reveal: "Set reveal conditions",
-    hide: "Set hiding conditions",
-    toggle: "Define toggle behavior",
+    reveal: 'Set reveal conditions',
+    hide: 'Set hiding conditions',
+    toggle: 'Define toggle behavior',
 
     // Navigation
-    link: "Connect to other blocks",
-    navigate: "Define navigation paths",
-    group: "Group related blocks",
+    link: 'Connect to other blocks',
+    navigate: 'Define navigation paths',
+    group: 'Group related blocks',
   };
 
   /**
@@ -85,7 +85,7 @@ export class CamoMetaDataParser {
    */
   parse(metaDataLines: string[]): CamoAST {
     const ast: CamoAST = {
-      type: "root",
+      type: 'root',
       statements: [],
     };
 
@@ -133,7 +133,7 @@ export class CamoMetaDataParser {
    */
   private parseLine(line: string, lineNumber: number): ParsedStatement | null {
     const trimmed = line.trim();
-    if (!trimmed.startsWith("::") && !trimmed.startsWith(":^:")) {
+    if (!trimmed.startsWith('::') && !trimmed.startsWith(':^:')) {
       return null;
     }
 
@@ -143,22 +143,20 @@ export class CamoMetaDataParser {
     const match = trimmed.match(pattern);
 
     if (!match) {
-      console.warn(
-        `Invalid camoMetaData syntax at line ${lineNumber}: ${line}`
-      );
+      console.warn(`Invalid camoMetaData syntax at line ${lineNumber}: ${line}`);
       return null;
     }
 
     return {
       declaration: {
-        type: match[1] === "::" ? "newline" : "hierarchical",
+        type: match[1] === '::' ? 'newline' : 'hierarchical',
         keyword: match[2],
         variable: match[3],
         modifiers: [],
       },
       target: {
         function: match[4].trim(),
-        operator: "%",
+        operator: '%',
       },
       effect: {
         action: match[5],
@@ -182,7 +180,7 @@ export class CamoMetaDataParser {
   private calculateDepth(line: string): number {
     let depth = 0;
     for (let i = 0; i < line.length; i++) {
-      if (line[i] === " ") {
+      if (line[i] === ' ') {
         depth++;
       } else {
         break;
@@ -194,13 +192,13 @@ export class CamoMetaDataParser {
   /**
    * Parse parameters from parameter string
    */
-  private parseParameters(paramStr: string): Map<string, any> {
-    const params = new Map<string, any>();
+  private parseParameters(paramStr: string): Map<string, string | number | boolean | null> {
+    const params = new Map<string, string | number | boolean | null>();
 
     // Simple parameter parsing - can be enhanced
-    const parts = paramStr.split(",");
+    const parts = paramStr.split(',');
     for (const part of parts) {
-      const [key, value] = part.split(":").map((s) => s.trim());
+      const [key, value] = part.split(':').map(s => s.trim());
       if (key && value) {
         params.set(key, this.parseValue(value));
       }
@@ -222,8 +220,8 @@ export class CamoMetaDataParser {
     }
 
     // Try boolean
-    if (value === "true") return true;
-    if (value === "false") return false;
+    if (value === 'true') return true;
+    if (value === 'false') return false;
 
     // Return as string
     return value;
@@ -238,7 +236,7 @@ export class CamoMetaDataParser {
     depth: number
   ): void {
     // Handle :^: references to parent statements
-    if (statement.declaration.type === "hierarchical" && depth > 0) {
+    if (statement.declaration.type === 'hierarchical' && depth > 0) {
       const parent = parentStack[depth - 1];
       if (parent) {
         statement.parent = parent;
@@ -278,13 +276,12 @@ export class CamoMetaDataParser {
 
   private isValidSyntax(line: string): boolean {
     const trimmed = line.trim();
-    if (!trimmed.startsWith("::") && !trimmed.startsWith(":^:")) {
+    if (!trimmed.startsWith('::') && !trimmed.startsWith(':^:')) {
       return true; // Not a camoMetaData line
     }
 
     // Basic pattern check
-    const pattern =
-      /^(::|\^:)\s+\w+\[[^\]]*\]\s*\/\/.*%.*\{[^}]+\}.*->\s*\{[^}]+\}/;
+    const pattern = /^(::|\^:)\s+\w+\[[^\]]*\]\s*\/\/.*%.*\{[^}]+\}.*->\s*\{[^}]+\}/;
     return pattern.test(trimmed);
   }
 
@@ -304,10 +301,7 @@ export class CamoMetaDataProcessor {
   /**
    * Process camoMetaData and apply effects to element
    */
-  async process(
-    metaDataLines: string[],
-    context: MetaDataContext
-  ): Promise<ProcessingResult> {
+  async process(metaDataLines: string[], context: MetaDataContext): Promise<ProcessingResult> {
     // Validate syntax first
     const validation = this.parser.validateSyntax(metaDataLines);
     if (!validation.valid) {
@@ -344,13 +338,13 @@ export class CamoMetaDataProcessor {
   ): Promise<StatementResult> {
     try {
       switch (statement.declaration.keyword) {
-        case "set":
+        case 'set':
           return await this.executeSet(statement, context);
-        case "apply":
+        case 'apply':
           return await this.executeApply(statement, context);
-        case "protect":
+        case 'protect':
           return await this.executeProtect(statement, context);
-        case "reveal":
+        case 'reveal':
           return await this.executeReveal(statement, context);
         default:
           return {
@@ -361,7 +355,7 @@ export class CamoMetaDataProcessor {
     } catch (error) {
       return {
         success: false,
-        error: error instanceof Error ? error.message : "Unknown error",
+        error: error instanceof Error ? error.message : 'Unknown error',
       };
     }
   }
@@ -375,19 +369,19 @@ export class CamoMetaDataProcessor {
 
     // Apply CSS properties based on the set command
     switch (variable) {
-      case "blur": {
-        const intensity = parameters.get("intensity") || 40;
+      case 'blur': {
+        const intensity = parameters.get('intensity') || 40;
         context.element.style.filter = `blur(${intensity}px)`;
         break;
       }
-      case "opacity": {
-        const opacity = parameters.get("value") || 0.5;
+      case 'opacity': {
+        const opacity = parameters.get('value') || 0.5;
         context.element.style.opacity = opacity.toString();
         break;
       }
-      case "background": {
-        const color = parameters.get("color") || "#000000";
-        context.element.style.backgroundColor = color;
+      case 'background': {
+        const color = parameters.get('color') || '#000000';
+        context.element.style.backgroundColor = String(color);
         break;
       }
     }

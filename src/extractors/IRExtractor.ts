@@ -10,19 +10,19 @@
  * - Performance optimization for large ASTs
  */
 
-import { CamoIR, IRCondition, IRStatement } from "../core/camoIRExecutor";
-import { CamoAST, CamoASTNode } from "../modules/AST";
+import { CamoIR, IRCondition, IRStatement } from '../core/camoIRExecutor';
+import { CamoAST, CamoASTNode } from '../modules/AST';
 
 // Operation priority buckets (from Docs/3_camoIR.md)
 export type OperationBucket = 1 | 2 | 3 | 4 | 5;
 
 // Normalized selector structure
 export interface NormalizedSelector {
-  type: "content" | "text" | "paragraph" | "line" | "element" | "pattern";
+  type: 'content' | 'text' | 'paragraph' | 'line' | 'element' | 'pattern';
   pattern: string;
   index?: number | [number, number]; // For range selections like paragraph[1-3]
   modifier?: string;
-  scope: "block" | "content" | "element";
+  scope: 'block' | 'content' | 'element';
 }
 
 // Enhanced IR instruction format
@@ -83,110 +83,109 @@ export class CamoIRExtractor {
     // Visual operations (bucket 1)
     set: {
       bucket: 1,
-      requiredZones: ["declaration", "target", "effect"],
-      description: "Set visual property or style",
+      requiredZones: ['declaration', 'target', 'effect'],
+      description: 'Set visual property or style',
     },
     apply: {
       bucket: 1,
-      requiredZones: ["declaration", "target", "effect"],
-      description: "Apply visual effect",
+      requiredZones: ['declaration', 'target', 'effect'],
+      description: 'Apply visual effect',
     },
     blur: {
       bucket: 1,
-      requiredZones: ["declaration", "target"],
-      description: "Apply blur effect",
+      requiredZones: ['declaration', 'target'],
+      description: 'Apply blur effect',
     },
     hide: {
       bucket: 1,
-      requiredZones: ["declaration", "target"],
-      description: "Hide content",
+      requiredZones: ['declaration', 'target'],
+      description: 'Hide content',
     },
     reveal: {
       bucket: 1,
-      requiredZones: ["declaration", "target"],
-      description: "Reveal content",
+      requiredZones: ['declaration', 'target'],
+      description: 'Reveal content',
     },
     mask: {
       bucket: 1,
-      requiredZones: ["declaration", "target", "effect"],
-      description: "Mask content with pattern",
+      requiredZones: ['declaration', 'target', 'effect'],
+      description: 'Mask content with pattern',
     },
     redact: {
       bucket: 1,
-      requiredZones: ["declaration", "target"],
-      description: "Redact sensitive information",
+      requiredZones: ['declaration', 'target'],
+      description: 'Redact sensitive information',
     },
 
     // Layout operations (bucket 2)
     resize: {
       bucket: 2,
-      requiredZones: ["declaration", "target", "effect"],
-      description: "Resize element",
+      requiredZones: ['declaration', 'target', 'effect'],
+      description: 'Resize element',
     },
     position: {
       bucket: 2,
-      requiredZones: ["declaration", "target", "effect"],
-      description: "Position element",
+      requiredZones: ['declaration', 'target', 'effect'],
+      description: 'Position element',
     },
 
     // Animation operations (bucket 3)
     animate: {
       bucket: 3,
-      requiredZones: ["declaration", "target", "effect"],
-      description: "Animate element",
+      requiredZones: ['declaration', 'target', 'effect'],
+      description: 'Animate element',
     },
     transition: {
       bucket: 3,
-      requiredZones: ["declaration", "target", "effect"],
-      description: "Apply transition",
+      requiredZones: ['declaration', 'target', 'effect'],
+      description: 'Apply transition',
     },
 
     // Interaction operations (bucket 4)
     click: {
       bucket: 4,
-      requiredZones: ["declaration", "target", "effect"],
-      description: "Click interaction",
+      requiredZones: ['declaration', 'target', 'effect'],
+      description: 'Click interaction',
     },
     hover: {
       bucket: 4,
-      requiredZones: ["declaration", "target", "effect"],
-      description: "Hover interaction",
+      requiredZones: ['declaration', 'target', 'effect'],
+      description: 'Hover interaction',
     },
 
     // State operations (bucket 5)
     store: {
       bucket: 5,
-      requiredZones: ["declaration", "target", "output"],
-      description: "Store state or data",
+      requiredZones: ['declaration', 'target', 'output'],
+      description: 'Store state or data',
     },
     retrieve: {
       bucket: 5,
-      requiredZones: ["declaration", "target", "output"],
-      description: "Retrieve stored data",
+      requiredZones: ['declaration', 'target', 'output'],
+      description: 'Retrieve stored data',
     },
     protect: {
       bucket: 5,
-      requiredZones: ["declaration", "target", "effect", "output"],
-      description: "Apply security protection",
+      requiredZones: ['declaration', 'target', 'effect', 'output'],
+      description: 'Apply security protection',
     },
     coordinate: {
       bucket: 5,
-      requiredZones: ["declaration", "target", "effect"],
-      description: "Coordinate with other blocks",
+      requiredZones: ['declaration', 'target', 'effect'],
+      description: 'Coordinate with other blocks',
     },
   };
 
   // Target function to selector type mapping
-  private readonly TARGET_MAPPING: Record<string, NormalizedSelector["type"]> =
-    {
-      content: "content",
-      text: "text",
-      paragraph: "paragraph",
-      line: "line",
-      pattern: "pattern",
-      element: "element",
-      all: "content", // Default mapping
-    };
+  private readonly TARGET_MAPPING: Record<string, NormalizedSelector['type']> = {
+    content: 'content',
+    text: 'text',
+    paragraph: 'paragraph',
+    line: 'line',
+    pattern: 'pattern',
+    element: 'element',
+    all: 'content', // Default mapping
+  };
 
   /**
    * Transform AST to IR instructions
@@ -221,15 +220,9 @@ export class CamoIRExtractor {
           instructions.push(result.instruction);
           stats.totalInstructions++;
           stats.operationDistribution[result.instruction.bucket]++;
-          stats.hierarchicalDepth = Math.max(
-            stats.hierarchicalDepth,
-            context.depth
-          );
+          stats.hierarchicalDepth = Math.max(stats.hierarchicalDepth, context.depth);
 
-          if (
-            result.instruction.conditions &&
-            result.instruction.conditions.length > 0
-          ) {
+          if (result.instruction.conditions && result.instruction.conditions.length > 0) {
             stats.conditionalBranches++;
           }
         }
@@ -275,14 +268,12 @@ export class CamoIRExtractor {
       const instructionId = this.generateInstructionId(node, context);
 
       // Determine operation bucket
-      const bucket = this.getOperationBucket(node.keyword || "set");
+      const bucket = this.getOperationBucket(node.keyword || 'set');
 
       // Normalize target selector
       const target = this.normalizeSelector(node, context);
       if (!target) {
-        errors.push(
-          `Failed to normalize target for statement at line ${node.line}`
-        );
+        errors.push(`Failed to normalize target for statement at line ${node.line}`);
         return { instruction: null, errors, warnings };
       }
 
@@ -325,16 +316,14 @@ export class CamoIRExtractor {
           line: node.line,
           column: node.column,
           operator: node.operator,
-          keyword: node.keyword || "unknown",
+          keyword: node.keyword || 'unknown',
           original: this.reconstructOriginal(node),
         },
       };
 
       return { instruction, errors, warnings };
     } catch (error) {
-      errors.push(
-        `Failed to transform statement at line ${node.line}: ${error.message}`
-      );
+      errors.push(`Failed to transform statement at line ${node.line}: ${error.message}`);
       return { instruction: null, errors, warnings };
     }
   }
@@ -358,15 +347,11 @@ export class CamoIRExtractor {
       } else {
         // Check required zones
         const spec = this.KEYWORD_SPECS[node.keyword];
-        if (spec.requiredZones.includes("effect") && !node.action) {
-          errors.push(
-            `Keyword '${node.keyword}' requires effect zone at line ${node.line}`
-          );
+        if (spec.requiredZones.includes('effect') && !node.action) {
+          errors.push(`Keyword '${node.keyword}' requires effect zone at line ${node.line}`);
         }
-        if (spec.requiredZones.includes("output") && !node.outcome) {
-          errors.push(
-            `Keyword '${node.keyword}' requires output zone at line ${node.line}`
-          );
+        if (spec.requiredZones.includes('output') && !node.outcome) {
+          errors.push(`Keyword '${node.keyword}' requires output zone at line ${node.line}`);
         }
       }
     }
@@ -402,7 +387,7 @@ export class CamoIRExtractor {
     if (!func) return null;
 
     // Determine selector type
-    const type = this.TARGET_MAPPING[func] || "content";
+    const type = this.TARGET_MAPPING[func] || 'content';
 
     // Parse variable for additional selector information
     let pattern = func;
@@ -416,7 +401,7 @@ export class CamoIRExtractor {
         index = parseInt(variable, 10);
       } else if (/^\d+-\d+$/.test(variable)) {
         // Range index: paragraph[1-3]
-        const [start, end] = variable.split("-").map(Number);
+        const [start, end] = variable.split('-').map(Number);
         index = [start, end];
       } else {
         // Named selector: text[sensitive]
@@ -441,47 +426,42 @@ export class CamoIRExtractor {
    * Determine selector scope based on type and context
    */
   private determineScope(
-    type: NormalizedSelector["type"],
+    type: NormalizedSelector['type'],
     context: TransformContext
-  ): "block" | "content" | "element" {
+  ): 'block' | 'content' | 'element' {
     // Inherit scope from parent if narrower
     if (context.parentTarget) {
-      if (context.parentTarget.scope === "element") {
-        return "element";
+      if (context.parentTarget.scope === 'element') {
+        return 'element';
       }
-      if (context.parentTarget.scope === "content" && type !== "content") {
-        return "content";
+      if (context.parentTarget.scope === 'content' && type !== 'content') {
+        return 'content';
       }
     }
 
     // Default scope based on type
     switch (type) {
-      case "content":
-        return "block";
-      case "text":
-      case "paragraph":
-      case "line":
-        return "content";
-      case "element":
-      case "pattern":
-        return "element";
+      case 'content':
+        return 'block';
+      case 'text':
+      case 'paragraph':
+      case 'line':
+        return 'content';
+      case 'element':
+      case 'pattern':
+        return 'element';
       default:
-        return "content";
+        return 'content';
     }
   }
 
   /**
    * Extract effect parameters from AST node
    */
-  private extractEffect(
-    node: CamoASTNode
-  ): CamoIRInstruction["effect"] | undefined {
+  private extractEffect(node: CamoASTNode): CamoIRInstruction['effect'] | undefined {
     if (!node.action) return undefined;
 
-    const type =
-      typeof node.action === "string"
-        ? node.action
-        : node.action.name || "unknown";
+    const type = typeof node.action === 'string' ? node.action : node.action.name || 'unknown';
     const params: Record<string, string | number | boolean> = {};
 
     // Extract parameters from node.parameters
@@ -500,10 +480,7 @@ export class CamoIRExtractor {
   /**
    * Extract conditions from AST node
    */
-  private extractConditions(
-    node: CamoASTNode,
-    context: TransformContext
-  ): IRCondition[] {
+  private extractConditions(node: CamoASTNode, context: TransformContext): IRCondition[] {
     const conditions: IRCondition[] = [];
 
     // Inherit parent conditions
@@ -512,15 +489,15 @@ export class CamoIRExtractor {
     }
 
     // Extract node-specific conditions
-    if (node.operator === ":^:") {
+    if (node.operator === ':^:') {
       // Hierarchical nodes might have conditional logic
-      if (node.keyword && node.keyword.startsWith("IF{")) {
+      if (node.keyword && node.keyword.startsWith('IF{')) {
         const conditionMatch = node.keyword.match(/IF\{([^}]+)\}/);
         if (conditionMatch) {
           conditions.push({
-            type: "IF",
+            type: 'IF',
             expression: conditionMatch[1],
-            operator: "equals",
+            operator: 'equals',
             value: true,
           });
         }
@@ -533,11 +510,8 @@ export class CamoIRExtractor {
   /**
    * Generate stable instruction ID
    */
-  private generateInstructionId(
-    node: CamoASTNode,
-    context: TransformContext
-  ): string {
-    const keyword = node.keyword || "unknown";
+  private generateInstructionId(node: CamoASTNode, context: TransformContext): string {
+    const keyword = node.keyword || 'unknown';
     const line = node.line;
     const blockId = context.blockId;
 
@@ -548,14 +522,14 @@ export class CamoIRExtractor {
    * Normalize parameter value to appropriate type
    */
   private normalizeParameterValue(value: any): string | number | boolean {
-    if (typeof value === "boolean") return value;
-    if (typeof value === "number") return value;
+    if (typeof value === 'boolean') return value;
+    if (typeof value === 'number') return value;
 
     const str = String(value);
 
     // Try boolean conversion
-    if (str === "true") return true;
-    if (str === "false") return false;
+    if (str === 'true') return true;
+    if (str === 'false') return false;
 
     // Try number conversion
     if (/^\d+$/.test(str)) return parseInt(str, 10);
@@ -579,52 +553,46 @@ export class CamoIRExtractor {
     }
 
     if (node.function) {
-      parts.push("//", node.function);
+      parts.push('//', node.function);
     }
 
     if (node.action) {
-      const action =
-        typeof node.action === "string" ? node.action : node.action.name;
-      parts.push("%", `{${action}}`);
+      const action = typeof node.action === 'string' ? node.action : node.action.name;
+      parts.push('%', `{${action}}`);
     }
 
     if (node.outcome) {
-      parts.push("->", `{${node.outcome}}`);
+      parts.push('->', `{${node.outcome}}`);
     }
 
-    return parts.join(" ");
+    return parts.join(' ');
   }
 
   /**
    * Convert IR instructions to legacy CamoIR format for compatibility
    */
-  convertToLegacyIR(
-    instructions: CamoIRInstruction[],
-    blockId: string
-  ): CamoIR {
-    const statements: IRStatement[] = instructions.map(
-      (instruction, index) => ({
-        id: instruction.id,
-        type: this.bucketToType(instruction.bucket),
-        operation: instruction.effect?.type || instruction.metadata.keyword,
-        target: {
-          selector: this.selectorToString(instruction.target),
-          scope: instruction.target.scope,
-          pattern: instruction.target.pattern,
-        },
-        parameters: instruction.effect?.params || {},
-        conditions: instruction.conditions || [],
-        priority: instruction.bucket,
-      })
-    );
+  convertToLegacyIR(instructions: CamoIRInstruction[], blockId: string): CamoIR {
+    const statements: IRStatement[] = instructions.map((instruction, index) => ({
+      id: instruction.id,
+      type: this.bucketToType(instruction.bucket),
+      operation: instruction.effect?.type || instruction.metadata.keyword,
+      target: {
+        selector: this.selectorToString(instruction.target),
+        scope: instruction.target.scope,
+        pattern: instruction.target.pattern,
+      },
+      parameters: instruction.effect?.params || {},
+      conditions: instruction.conditions || [],
+      priority: instruction.bucket,
+    }));
 
     return {
-      version: "1.0.0",
+      version: '1.0.0',
       statements,
       metadata: {
         blockId,
         created: Date.now(),
-        version: "1.0.0",
+        version: '1.0.0',
         optimized: false,
       },
     };
@@ -633,20 +601,20 @@ export class CamoIRExtractor {
   /**
    * Convert operation bucket to legacy type
    */
-  private bucketToType(bucket: OperationBucket): IRStatement["type"] {
+  private bucketToType(bucket: OperationBucket): IRStatement['type'] {
     switch (bucket) {
       case 1:
-        return "visual";
+        return 'visual';
       case 2:
-        return "layout";
+        return 'layout';
       case 3:
-        return "visual"; // Animation maps to visual
+        return 'visual'; // Animation maps to visual
       case 4:
-        return "interaction";
+        return 'interaction';
       case 5:
-        return "state";
+        return 'state';
       default:
-        return "visual";
+        return 'visual';
     }
   }
 
@@ -686,9 +654,7 @@ export class CamoIRExtractor {
   /**
    * Get operation distribution statistics
    */
-  getOperationStats(
-    instructions: CamoIRInstruction[]
-  ): Record<OperationBucket, number> {
+  getOperationStats(instructions: CamoIRInstruction[]): Record<OperationBucket, number> {
     const stats: Record<OperationBucket, number> = {
       1: 0,
       2: 0,
@@ -697,7 +663,7 @@ export class CamoIRExtractor {
       5: 0,
     };
 
-    instructions.forEach((instruction) => {
+    instructions.forEach(instruction => {
       stats[instruction.bucket]++;
     });
 

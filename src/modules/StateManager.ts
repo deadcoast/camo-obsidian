@@ -25,7 +25,7 @@ export interface GlobalState {
 }
 
 export interface UserPreferences {
-  defaultRevealBehavior: "click" | "hover" | "never";
+  defaultRevealBehavior: 'click' | 'hover' | 'never';
   animationsEnabled: boolean;
   performanceMode: boolean;
   autoSaveInterval: number;
@@ -55,10 +55,10 @@ export class CamoStateManager {
     saveData: (data: any) => Promise<void>;
   };
   private saveQueue: Set<string> = new Set();
-  private saveTimeout: NodeJS.Timeout | null = null;
+  private saveTimeout: number | null = null;
   private readonly SAVE_DEBOUNCE_MS = 1000;
   private readonly MAX_BLOCK_HISTORY = 1000;
-  private readonly STATE_VERSION = "1.0.0";
+  private readonly STATE_VERSION = '1.0.0';
 
   constructor(plugin: {
     app: {
@@ -102,7 +102,7 @@ export class CamoStateManager {
         this.migrateStateIfNeeded();
       }
     } catch (error) {
-      console.error("Failed to load CAMO state:", error);
+      console.error('Failed to load CAMO state:', error);
       this.state = this.getDefaultState();
     }
   }
@@ -116,7 +116,7 @@ export class CamoStateManager {
       data.camoState = this.state;
       await this.plugin.saveData(data);
     } catch (error) {
-      console.error("Failed to save CAMO state:", error);
+      console.error('Failed to save CAMO state:', error);
     }
   }
 
@@ -127,7 +127,7 @@ export class CamoStateManager {
     return {
       blocks: {},
       userPreferences: {
-        defaultRevealBehavior: "click",
+        defaultRevealBehavior: 'click',
         animationsEnabled: true,
         performanceMode: false,
         autoSaveInterval: 5000,
@@ -205,9 +205,7 @@ export class CamoStateManager {
   removeEffectFromBlock(blockId: string, effectId: string): void {
     const state = this.getBlockState(blockId);
     if (state) {
-      const effectsApplied = state.effectsApplied.filter(
-        (id) => id !== effectId
-      );
+      const effectsApplied = state.effectsApplied.filter(id => id !== effectId);
       this.setBlockState(blockId, { effectsApplied });
     }
   }
@@ -229,7 +227,7 @@ export class CamoStateManager {
       ...this.state.userPreferences,
       ...updates,
     };
-    this.queueSave("preferences");
+    this.queueSave('preferences');
   }
 
   /**
@@ -244,7 +242,7 @@ export class CamoStateManager {
    */
   recordError(error: string): void {
     this.state.sessionData.errorsEncountered.push(error);
-    this.queueSave("session");
+    this.queueSave('session');
   }
 
   /**
@@ -252,14 +250,14 @@ export class CamoStateManager {
    */
   incrementBlocksProcessed(): void {
     this.state.sessionData.blocksProcessed++;
-    this.queueSave("session");
+    this.queueSave('session');
   }
 
   /**
    * Get all blocks matching criteria
    */
   getBlocksBy(criteria: Partial<BlockState>): BlockState[] {
-    return Object.values(this.state.blocks).filter((block) => {
+    return Object.values(this.state.blocks).filter(block => {
       return Object.entries(criteria).every(([key, value]) => {
         return block[key as keyof BlockState] === value;
       });
@@ -285,7 +283,7 @@ export class CamoStateManager {
    */
   clearAllBlocks(): void {
     this.state.blocks = {};
-    this.queueSave("clear");
+    this.queueSave('clear');
   }
 
   /**
@@ -301,12 +299,12 @@ export class CamoStateManager {
       }
     });
 
-    blocksToRemove.forEach((blockId) => {
+    blocksToRemove.forEach(blockId => {
       delete this.state.blocks[blockId];
     });
 
     if (blocksToRemove.length > 0) {
-      this.queueSave("cleanup");
+      this.queueSave('cleanup');
     }
   }
 
@@ -323,7 +321,7 @@ export class CamoStateManager {
       const toKeep = blockEntries.slice(0, this.MAX_BLOCK_HISTORY);
       this.state.blocks = Object.fromEntries(toKeep);
 
-      this.queueSave("limit");
+      this.queueSave('limit');
     }
   }
 
@@ -349,7 +347,7 @@ export class CamoStateManager {
 
       return false;
     } catch (error) {
-      console.error("Failed to import state:", error);
+      console.error('Failed to import state:', error);
       return false;
     }
   }
@@ -359,11 +357,12 @@ export class CamoStateManager {
    */
   private validateState(state: unknown): state is GlobalState {
     return (
-      typeof state === "object" &&
-      typeof state.blocks === "object" &&
-      typeof state.userPreferences === "object" &&
-      typeof state.sessionData === "object" &&
-      typeof state.version === "string"
+      state !== null &&
+      typeof state === 'object' &&
+      typeof (state as any).blocks === 'object' &&
+      typeof (state as any).userPreferences === 'object' &&
+      typeof (state as any).sessionData === 'object' &&
+      typeof (state as any).version === 'string'
     );
   }
 
@@ -388,11 +387,14 @@ export class CamoStateManager {
    * Setup periodic cleanup
    */
   private setupPeriodicCleanup(): void {
-    setInterval(() => {
-      this.cleanupOldBlocks();
-      this.cleanupProcessorCache();
-      this.enforceBlockLimit();
-    }, 60 * 60 * 1000); // Every hour
+    setInterval(
+      () => {
+        this.cleanupOldBlocks();
+        this.cleanupProcessorCache();
+        this.enforceBlockLimit();
+      },
+      60 * 60 * 1000
+    ); // Every hour
   }
 
   /**
@@ -402,7 +404,7 @@ export class CamoStateManager {
     if (this.state.version !== this.STATE_VERSION) {
       // Perform migration logic here if needed
       this.state.version = this.STATE_VERSION;
-      this.queueSave("migration");
+      this.queueSave('migration');
     }
   }
 
@@ -410,12 +412,7 @@ export class CamoStateManager {
    * Generate unique session ID
    */
   private generateSessionId(): string {
-    return (
-      "session_" +
-      Date.now().toString(36) +
-      "_" +
-      Math.random().toString(36).substr(2, 9)
-    );
+    return 'session_' + Date.now().toString(36) + '_' + Math.random().toString(36).substr(2, 9);
   }
 
   /**
@@ -438,9 +435,8 @@ export class CamoStateManager {
 
     return {
       totalBlocks: blocks.length,
-      revealedBlocks: blocks.filter((b) => b.revealed).length,
-      blocksWithEffects: blocks.filter((b) => b.effectsApplied.length > 0)
-        .length,
+      revealedBlocks: blocks.filter(b => b.revealed).length,
+      blocksWithEffects: blocks.filter(b => b.effectsApplied.length > 0).length,
       sessionAge: Date.now() - this.state.sessionData.startTime,
     };
   }
@@ -451,8 +447,7 @@ export class CamoStateManager {
    * These methods handle caching for debounced processors to avoid
    * unnecessary re-processing of content that hasn't changed.
    */
-  private processorCache: Map<string, { hash: string; timestamp: number }> =
-    new Map();
+  private processorCache: Map<string, { hash: string; timestamp: number }> = new Map();
 
   /**
    * Check if cached content is valid

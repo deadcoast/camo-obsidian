@@ -8,7 +8,7 @@
 export interface CamoPreset {
   id: string;
   name: string;
-  category: "privacy" | "aesthetic" | "functional";
+  category: 'privacy' | 'aesthetic' | 'functional';
   description: string;
   baseStyle: CamoStyle;
   defaultMetadata: string[];
@@ -67,23 +67,23 @@ export class PresetProcessor {
    */
   private initializeDefaultPresets(): void {
     // Blackout Preset
-    this.presets.set("blackout", {
-      id: "blackout",
-      name: "Blackout",
-      category: "privacy",
-      description: "Complete content hiding with solid black overlay",
+    this.presets.set('blackout', {
+      id: 'blackout',
+      name: 'Blackout',
+      category: 'privacy',
+      description: 'Complete content hiding with solid black overlay',
       baseStyle: {
-        background: "#000000",
-        color: "transparent",
-        borderRadius: "4px",
-        padding: "1em",
+        background: '#000000',
+        color: 'transparent',
+        borderRadius: '4px',
+        padding: '1em',
       },
       defaultMetadata: [
-        ":: set[background] // content[all] % {color}(#000000) -> {visual[blackout]}",
-        ":: set[opacity] // text[all] % {value}(0) -> {text[hidden]}",
-        ":: set[reveal] // trigger[click] % {animation}(fade) -> {interaction[ready]}",
+        ':: set[background] // content[all] % {color}(#000000) -> {visual[blackout]}',
+        ':: set[opacity] // text[all] % {value}(0) -> {text[hidden]}',
+        ':: set[reveal] // trigger[click] % {animation}(fade) -> {interaction[ready]}',
       ],
-      cssClass: "camo-preset-blackout",
+      cssClass: 'camo-preset-blackout',
       styles: `
         .camo-preset-blackout {
           background: #000000 !important;
@@ -97,27 +97,27 @@ export class PresetProcessor {
           color: var(--text-normal) !important;
         }
       `,
-      flags: ["click", "hover"],
+      flags: ['click', 'hover'],
     });
 
     // Ghost Preset
-    this.presets.set("ghost", {
-      id: "ghost",
-      name: "Ghost",
-      category: "aesthetic",
-      description: "Semi-transparent overlay with blur effect",
+    this.presets.set('ghost', {
+      id: 'ghost',
+      name: 'Ghost',
+      category: 'aesthetic',
+      description: 'Semi-transparent overlay with blur effect',
       baseStyle: {
-        background: "rgba(255,255,255,0.85)",
-        color: "rgba(0,0,0,0.3)",
-        borderRadius: "4px",
-        padding: "1em",
+        background: 'rgba(255,255,255,0.85)',
+        color: 'rgba(0,0,0,0.3)',
+        borderRadius: '4px',
+        padding: '1em',
       },
       defaultMetadata: [
-        ":: set[background] // content[all] % {color}(rgba(255,255,255,0.85)) -> {visual[ghost]}",
-        ":: apply[blur] // backdrop % {amount}(4px) -> {filter[applied]}",
-        ":: set[reveal] // trigger[hover] % {animation}(smooth) -> {interaction[ready]}",
+        ':: set[background] // content[all] % {color}(rgba(255,255,255,0.85)) -> {visual[ghost]}',
+        ':: apply[blur] // backdrop % {amount}(4px) -> {filter[applied]}',
+        ':: set[reveal] // trigger[hover] % {animation}(smooth) -> {interaction[ready]}',
       ],
-      cssClass: "camo-preset-ghost",
+      cssClass: 'camo-preset-ghost',
       styles: `
         .camo-preset-ghost {
           background: rgba(255,255,255,0.85) !important;
@@ -132,28 +132,28 @@ export class PresetProcessor {
           backdrop-filter: none;
         }
       `,
-      flags: ["hover"],
+      flags: ['hover'],
     });
 
     // Blueprint Preset
-    this.presets.set("blueprint", {
-      id: "blueprint",
-      name: "Blueprint",
-      category: "aesthetic",
-      description: "Technical blueprint aesthetic with grid patterns",
+    this.presets.set('blueprint', {
+      id: 'blueprint',
+      name: 'Blueprint',
+      category: 'aesthetic',
+      description: 'Technical blueprint aesthetic with grid patterns',
       baseStyle: {
-        background: "#0D1F2D",
-        color: "#4FC3F7",
-        fontFamily: "var(--font-monospace)",
-        border: "2px solid #1E3A4C",
-        padding: "1em",
+        background: '#0D1F2D',
+        color: '#4FC3F7',
+        fontFamily: 'var(--font-monospace)',
+        border: '2px solid #1E3A4C',
+        padding: '1em',
       },
       defaultMetadata: [
-        ":: set[background] // content[all] % {color}(#0D1F2D) -> {visual[blueprint]}",
-        ":: apply[grid] // overlay % {spacing}(20px) -> {grid[applied]}",
-        ":: set[text] // color % {value}(#4FC3F7) -> {text[cyan]}",
+        ':: set[background] // content[all] % {color}(#0D1F2D) -> {visual[blueprint]}',
+        ':: apply[grid] // overlay % {spacing}(20px) -> {grid[applied]}',
+        ':: set[text] // color % {value}(#4FC3F7) -> {text[cyan]}',
       ],
-      cssClass: "camo-preset-blueprint",
+      cssClass: 'camo-preset-blueprint',
       styles: `
         .camo-preset-blueprint {
           background: #0D1F2D !important;
@@ -180,24 +180,24 @@ export class PresetProcessor {
     });
 
     // Modern95 Preset
-    this.presets.set("modern95", {
-      id: "modern95",
-      name: "Modern95",
-      category: "aesthetic",
-      description: "Retro terminal meets modern design",
+    this.presets.set('modern95', {
+      id: 'modern95',
+      name: 'Modern95',
+      category: 'aesthetic',
+      description: 'Retro terminal meets modern design',
       baseStyle: {
-        background: "#2B2B2B",
-        color: "#00FF41",
-        fontFamily: "var(--font-monospace)",
-        border: "2px solid #555555",
-        boxShadow: "inset 2px 2px 4px rgba(255,255,255,0.1)",
+        background: '#2B2B2B',
+        color: '#00FF41',
+        fontFamily: 'var(--font-monospace)',
+        border: '2px solid #555555',
+        boxShadow: 'inset 2px 2px 4px rgba(255,255,255,0.1)',
       },
       defaultMetadata: [
-        ":: set[background] // content[all] % {color}(#2B2B2B) -> {visual[terminal]}",
-        ":: set[text] // color % {value}(#00FF41) -> {text[green]}",
-        ":: apply[border] // style % {retro}(true) -> {aesthetic[90s]}",
+        ':: set[background] // content[all] % {color}(#2B2B2B) -> {visual[terminal]}',
+        ':: set[text] // color % {value}(#00FF41) -> {text[green]}',
+        ':: apply[border] // style % {retro}(true) -> {aesthetic[90s]}',
       ],
-      cssClass: "camo-preset-modern95",
+      cssClass: 'camo-preset-modern95',
       styles: `
         .camo-preset-modern95 {
           background: #2B2B2B !important;
@@ -211,23 +211,23 @@ export class PresetProcessor {
     });
 
     // Matrix Preset
-    this.presets.set("matrix", {
-      id: "matrix",
-      name: "Matrix",
-      category: "aesthetic",
-      description: "Digital rain effect with green cascading characters",
+    this.presets.set('matrix', {
+      id: 'matrix',
+      name: 'Matrix',
+      category: 'aesthetic',
+      description: 'Digital rain effect with green cascading characters',
       baseStyle: {
-        background: "#000000",
-        color: "#00FF00",
-        fontFamily: "var(--font-monospace)",
-        position: "relative",
+        background: '#000000',
+        color: '#00FF00',
+        fontFamily: 'var(--font-monospace)',
+        position: 'relative',
       },
       defaultMetadata: [
-        ":: set[background] // content[all] % {color}(#000000) -> {visual[matrix]}",
-        ":: apply[animation] // rain % {cascade}(true) -> {effect[active]}",
-        ":: set[reveal] // trigger[click] % {stop_animation}(true) -> {interaction[ready]}",
+        ':: set[background] // content[all] % {color}(#000000) -> {visual[matrix]}',
+        ':: apply[animation] // rain % {cascade}(true) -> {effect[active]}',
+        ':: set[reveal] // trigger[click] % {stop_animation}(true) -> {interaction[ready]}',
       ],
-      cssClass: "camo-preset-matrix",
+      cssClass: 'camo-preset-matrix',
       styles: `
         .camo-preset-matrix {
           background: #000000 !important;
@@ -237,27 +237,27 @@ export class PresetProcessor {
           overflow: hidden;
         }
       `,
-      flags: ["click"],
+      flags: ['click'],
     });
 
     // Classified Preset
-    this.presets.set("classified", {
-      id: "classified",
-      name: "Classified",
-      category: "privacy",
-      description: "Redacted document style with black bars",
+    this.presets.set('classified', {
+      id: 'classified',
+      name: 'Classified',
+      category: 'privacy',
+      description: 'Redacted document style with black bars',
       baseStyle: {
-        background: "#F5F5DC",
-        color: "#000000",
-        fontFamily: "Courier New, monospace",
-        position: "relative",
+        background: '#F5F5DC',
+        color: '#000000',
+        fontFamily: 'Courier New, monospace',
+        position: 'relative',
       },
       defaultMetadata: [
-        ":: set[background] // content[all] % {color}(#F5F5DC) -> {visual[document]}",
-        ":: apply[redaction] // bars % {random}(true) -> {pattern[applied]}",
-        ":: add[watermark] // stamp % {text}(CLASSIFIED) -> {security[marked]}",
+        ':: set[background] // content[all] % {color}(#F5F5DC) -> {visual[document]}',
+        ':: apply[redaction] // bars % {random}(true) -> {pattern[applied]}',
+        ':: add[watermark] // stamp % {text}(CLASSIFIED) -> {security[marked]}',
       ],
-      cssClass: "camo-preset-classified",
+      cssClass: 'camo-preset-classified',
       styles: `
         .camo-preset-classified {
           background: #F5F5DC !important;
@@ -278,7 +278,7 @@ export class PresetProcessor {
           z-index: 1;
         }
       `,
-      flags: ["redact"],
+      flags: ['redact'],
     });
   }
 
@@ -293,29 +293,21 @@ export class PresetProcessor {
    * Get all available presets
    */
   getAllPresets(): CamoPreset[] {
-    return [
-      ...Array.from(this.presets.values()),
-      ...Array.from(this.customPresets.values()),
-    ];
+    return [...Array.from(this.presets.values()), ...Array.from(this.customPresets.values())];
   }
 
   /**
    * Get all preset IDs
    */
   getAllPresetIds(): string[] {
-    return [
-      ...Array.from(this.presets.keys()),
-      ...Array.from(this.customPresets.keys()),
-    ];
+    return [...Array.from(this.presets.keys()), ...Array.from(this.customPresets.keys())];
   }
 
   /**
    * Get presets by category
    */
-  getPresetsByCategory(category: CamoPreset["category"]): CamoPreset[] {
-    return this.getAllPresets().filter(
-      (preset) => preset.category === category
-    );
+  getPresetsByCategory(category: CamoPreset['category']): CamoPreset[] {
+    return this.getAllPresets().filter(preset => preset.category === category);
   }
 
   /**
@@ -360,11 +352,7 @@ export class PresetProcessor {
   /**
    * Apply preset configuration to an element
    */
-  applyPreset(
-    element: HTMLElement,
-    presetId: string,
-    overrides?: Partial<CamoStyle>
-  ): boolean {
+  applyPreset(element: HTMLElement, presetId: string, overrides?: Partial<CamoStyle>): boolean {
     const preset = this.getPreset(presetId);
     if (!preset) {
       console.warn(`Preset not found: ${presetId}`);
@@ -391,32 +379,23 @@ export class PresetProcessor {
    */
   getAllPresetStyles(): string {
     return this.getAllPresets()
-      .map((preset) => preset.styles)
-      .join("\n");
+      .map(preset => preset.styles)
+      .join('\n');
   }
 
   /**
    * Validate preset structure
    */
   validatePreset(preset: unknown): preset is CamoPreset {
-    const required = [
-      "id",
-      "name",
-      "category",
-      "baseStyle",
-      "cssClass",
-      "styles",
-    ];
-    return required.every(
-      (field) => preset && typeof preset === "object" && field in preset
-    );
+    const required = ['id', 'name', 'category', 'baseStyle', 'cssClass', 'styles'];
+    return required.every(field => preset && typeof preset === 'object' && field in preset);
   }
 
   /**
    * Convert camelCase to kebab-case for CSS properties
    */
   private camelToKebab(str: string): string {
-    return str.replace(/([a-z0-9])([A-Z])/g, "$1-$2").toLowerCase();
+    return str.replace(/([a-z0-9])([A-Z])/g, '$1-$2').toLowerCase();
   }
 
   /**
@@ -467,7 +446,7 @@ export class PresetProcessor {
       }
       return false;
     } catch (error) {
-      console.error("Failed to import preset:", error);
+      console.error('Failed to import preset:', error);
       return false;
     }
   }

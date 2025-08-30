@@ -1,12 +1,6 @@
 export interface Suggestion {
   text: string;
-  type:
-    | "keyword"
-    | "function"
-    | "action"
-    | "parameter"
-    | "variable"
-    | "outcome";
+  type: 'keyword' | 'function' | 'action' | 'parameter' | 'variable' | 'outcome';
   description?: string;
   insertText?: string;
   detail?: string;
@@ -61,89 +55,83 @@ export enum CompletionItemKind {
 export class CamoAutocomplete {
   private readonly keywordSuggestions: CompletionItem[] = [
     {
-      label: "set",
+      label: 'set',
       kind: CompletionItemKind.Keyword,
-      insertText:
-        "set[${1:property}] // ${2:target} % ${3:action} -> ${4:outcome}",
-      documentation:
-        "Set a visual property (background, color, opacity, blur, etc.)",
-      detail: "Visual property modifier",
+      insertText: 'set[${1:property}] // ${2:target} % ${3:action} -> ${4:outcome}',
+      documentation: 'Set a visual property (background, color, opacity, blur, etc.)',
+      detail: 'Visual property modifier',
     },
     {
-      label: "apply",
+      label: 'apply',
       kind: CompletionItemKind.Keyword,
-      insertText:
-        "apply[${1:effect}] // ${2:target} % ${3:parameters} -> ${4:outcome}",
-      documentation: "Apply an effect or transformation",
-      detail: "Effect applicator",
+      insertText: 'apply[${1:effect}] // ${2:target} % ${3:parameters} -> ${4:outcome}',
+      documentation: 'Apply an effect or transformation',
+      detail: 'Effect applicator',
     },
     {
-      label: "protect",
+      label: 'protect',
       kind: CompletionItemKind.Keyword,
-      insertText:
-        "protect[${1:type}] // ${2:target} % ${3:method} -> ${4:outcome}",
-      documentation: "Apply security protection measures",
-      detail: "Security operation",
+      insertText: 'protect[${1:type}] // ${2:target} % ${3:method} -> ${4:outcome}',
+      documentation: 'Apply security protection measures',
+      detail: 'Security operation',
     },
     {
-      label: "reveal",
+      label: 'reveal',
       kind: CompletionItemKind.Keyword,
-      insertText:
-        "reveal[${1:condition}] // ${2:target} % ${3:trigger} -> ${4:outcome}",
-      documentation: "Set reveal conditions and triggers",
-      detail: "Visibility control",
+      insertText: 'reveal[${1:condition}] // ${2:target} % ${3:trigger} -> ${4:outcome}',
+      documentation: 'Set reveal conditions and triggers',
+      detail: 'Visibility control',
     },
   ];
 
   private readonly functionSuggestions: CompletionItem[] = [
     {
-      label: "content[all]",
+      label: 'content[all]',
       kind: CompletionItemKind.Function,
-      insertText: "content[all]",
-      documentation: "Select all content in the block",
-      detail: "Content selector",
+      insertText: 'content[all]',
+      documentation: 'Select all content in the block',
+      detail: 'Content selector',
     },
     {
-      label: "content[lines:1-5]",
+      label: 'content[lines:1-5]',
       kind: CompletionItemKind.Function,
-      insertText: "content[lines:${1:1}-${2:5}]",
-      documentation: "Select specific line range",
-      detail: "Line range selector",
+      insertText: 'content[lines:${1:1}-${2:5}]',
+      documentation: 'Select specific line range',
+      detail: 'Line range selector',
     },
     {
-      label: "text[headers]",
+      label: 'text[headers]',
       kind: CompletionItemKind.Function,
-      insertText: "text[${1:headers}]",
-      documentation: "Select text elements of specific type",
-      detail: "Text selector",
+      insertText: 'text[${1:headers}]',
+      documentation: 'Select text elements of specific type',
+      detail: 'Text selector',
     },
   ];
 
   private readonly actionSuggestions: CompletionItem[] = [
     {
-      label: "{blur}",
+      label: '{blur}',
       kind: CompletionItemKind.Value,
-      insertText: "{blur}(${1:intensity})",
-      documentation: "Apply blur effect with specified intensity",
-      detail: "Visual effect",
+      insertText: '{blur}(${1:intensity})',
+      documentation: 'Apply blur effect with specified intensity',
+      detail: 'Visual effect',
     },
     {
-      label: "{fade}",
+      label: '{fade}',
       kind: CompletionItemKind.Value,
-      insertText: "{fade}(${1:opacity})",
-      documentation: "Apply fade effect with opacity control",
-      detail: "Visual effect",
+      insertText: '{fade}(${1:opacity})',
+      documentation: 'Apply fade effect with opacity control',
+      detail: 'Visual effect',
     },
   ];
 
   private readonly snippetSuggestions: CompletionItem[] = [
     {
-      label: "basic-blur",
+      label: 'basic-blur',
       kind: CompletionItemKind.Snippet,
-      insertText:
-        ":: set[blur] // content[all] % {intensity}(${1:60}) -> {visual[blurred]}",
-      documentation: "Basic blur effect on all content",
-      detail: "Complete statement",
+      insertText: ':: set[blur] // content[all] % {intensity}(${1:60}) -> {visual[blurred]}',
+      documentation: 'Basic blur effect on all content',
+      detail: 'Complete statement',
     },
   ];
 
@@ -154,18 +142,15 @@ export class CamoAutocomplete {
     const { currentLine, position, prefix } = context;
     const lineUpToCursor = currentLine.substring(0, position);
 
-    if (
-      this.isAfterOperator(lineUpToCursor, "::") ||
-      this.isAfterOperator(lineUpToCursor, ":^:")
-    ) {
+    if (this.isAfterOperator(lineUpToCursor, '::') || this.isAfterOperator(lineUpToCursor, ':^:')) {
       return this.filterSuggestions(this.keywordSuggestions, prefix);
     }
 
-    if (this.isAfterOperator(lineUpToCursor, "//")) {
+    if (this.isAfterOperator(lineUpToCursor, '//')) {
       return this.filterSuggestions(this.functionSuggestions, prefix);
     }
 
-    if (this.isInBraces(lineUpToCursor, "{", "}")) {
+    if (this.isInBraces(lineUpToCursor, '{', '}')) {
       return this.filterSuggestions(this.actionSuggestions, prefix);
     }
 
@@ -179,17 +164,13 @@ export class CamoAutocomplete {
     const lastOperatorIndex = text.lastIndexOf(operator);
     if (lastOperatorIndex === -1) return false;
 
-    const structuralOperators = ["::", ":^:", "//", "%", "->"];
+    const structuralOperators = ['::', ':^:', '//', '%', '->'];
     const afterOperator = text.substring(lastOperatorIndex + operator.length);
 
-    return !structuralOperators.some((op) => afterOperator.includes(op));
+    return !structuralOperators.some(op => afterOperator.includes(op));
   }
 
-  private isInBraces(
-    text: string,
-    openBrace: string,
-    closeBrace: string
-  ): boolean {
+  private isInBraces(text: string, openBrace: string, closeBrace: string): boolean {
     let braceCount = 0;
     let inBraces = false;
 
@@ -208,16 +189,13 @@ export class CamoAutocomplete {
     return inBraces && braceCount > 0;
   }
 
-  private filterSuggestions(
-    suggestions: CompletionItem[],
-    prefix: string
-  ): CompletionItem[] {
+  private filterSuggestions(suggestions: CompletionItem[], prefix: string): CompletionItem[] {
     if (!prefix.trim()) return suggestions;
 
     const lowerPrefix = prefix.toLowerCase();
     return suggestions
       .filter(
-        (suggestion) =>
+        suggestion =>
           suggestion.label.toLowerCase().includes(lowerPrefix) ||
           suggestion.filterText?.toLowerCase().includes(lowerPrefix)
       )

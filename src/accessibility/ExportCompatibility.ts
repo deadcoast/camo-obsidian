@@ -1,8 +1,8 @@
-export type ExportPolicy = "reveal" | "mask";
+export type ExportPolicy = 'reveal' | 'mask';
 
 export class ExportCompatibility {
-  getPrintStyles(policy: ExportPolicy = "reveal"): string {
-    if (policy === "mask") {
+  getPrintStyles(policy: ExportPolicy = 'reveal'): string {
+    if (policy === 'mask') {
       return `
       @media print {
         .camo-effect-redact .camo-content { color: transparent !important; background: repeating-linear-gradient(0deg, #000, #000 8px, transparent 8px, transparent 12px) !important; }
@@ -22,8 +22,8 @@ export class ExportCompatibility {
     `;
   }
 
-  getNoScriptStyles(policy: ExportPolicy = "reveal"): string {
-    if (policy === "mask") {
+  getNoScriptStyles(policy: ExportPolicy = 'reveal'): string {
+    if (policy === 'mask') {
       return `.camo-effect-redact .camo-content { color: transparent !important; background: repeating-linear-gradient(0deg, #000, #000 8px, transparent 8px, transparent 12px) !important; }`;
     }
     return `.camo-content { opacity: 1 !important; } .camo-effect-redact .camo-content { color: inherit !important; background: none !important; }`;
@@ -38,17 +38,15 @@ export class ExportCompatibility {
 
   // Basic HTML fallback for Obsidian Publish (no JS)
   publishFallbackHTML(block: { content: string }): string {
-    return `<div class="camo-publish-fallback"><pre>${this.escapeHtml(
-      block.content
-    )}</pre></div>`;
+    return `<div class="camo-publish-fallback"><pre>${this.escapeHtml(block.content)}</pre></div>`;
   }
 
   private escapeHtml(s: string): string {
     return s
-      .replace(/&/g, "&amp;")
-      .replace(/</g, "&lt;")
-      .replace(/>/g, "&gt;")
-      .replace(/"/g, "&quot;")
-      .replace(/'/g, "&#039;");
+      .replace(/&/g, '&amp;')
+      .replace(/</g, '&lt;')
+      .replace(/>/g, '&gt;')
+      .replace(/"/g, '&quot;')
+      .replace(/'/g, '&#039;');
   }
 }

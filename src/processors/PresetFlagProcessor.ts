@@ -1,4 +1,4 @@
-import { Plugin } from "obsidian";
+import { Plugin } from 'obsidian';
 
 interface Flag {
   name: string;
@@ -9,9 +9,9 @@ export class PresetFlagProcessor {
   private plugin: Plugin;
   // Enforce category chaining priority: visual → interaction → layout
   private readonly categoryOrder: Array<keyof PresetFlagCategories> = [
-    "visual",
-    "interaction",
-    "layout",
+    'visual',
+    'interaction',
+    'layout',
   ];
 
   constructor(plugin: Plugin) {
@@ -28,7 +28,7 @@ export class PresetFlagProcessor {
     };
 
     for (const flag of flags) {
-      const name = (flag.name || "").toLowerCase();
+      const name = (flag.name || '').toLowerCase();
       if (this.isVisual(name)) categories.visual.push(flag);
       else if (this.isInteraction(name)) categories.interaction.push(flag);
       else categories.layout.push(flag);
@@ -38,43 +38,43 @@ export class PresetFlagProcessor {
       for (const flag of categories[cat]) {
         switch (flag.name) {
           // Visual modifiers - add CSS classes
-          case "blur":
-            container.addClass("camo-mod-blur");
+          case 'blur':
+            container.addClass('camo-mod-blur');
             if (flag.value) {
-              container.style.setProperty("--blur-amount", flag.value);
+              container.style.setProperty('--blur-amount', flag.value);
             }
             break;
 
-          case "peek":
-            container.addClass("camo-mod-peek");
+          case 'peek':
+            container.addClass('camo-mod-peek');
             break;
 
-          case "flash":
-            container.addClass("camo-mod-flash");
+          case 'flash':
+            container.addClass('camo-mod-flash');
             break;
 
           // Interaction modifiers
-          case "hover":
-            container.addClass("camo-trigger-hover");
+          case 'hover':
+            container.addClass('camo-trigger-hover');
             break;
 
-          case "click":
-            container.addClass("camo-trigger-click");
+          case 'click':
+            container.addClass('camo-trigger-click');
             break;
 
-          case "timer":
-            container.addClass("camo-trigger-timer");
-            container.setAttribute("data-timer", flag.value || "5");
-            this.setupTimer(container, parseInt(flag.value || "5"));
+          case 'timer':
+            container.addClass('camo-trigger-timer');
+            container.setAttribute('data-timer', flag.value || '5');
+            this.setupTimer(container, parseInt(flag.value || '5'));
             break;
 
           // Layout modifiers
-          case "compact":
-            container.addClass("camo-layout-compact");
+          case 'compact':
+            container.addClass('camo-layout-compact');
             break;
 
-          case "wide":
-            container.addClass("camo-layout-wide");
+          case 'wide':
+            container.addClass('camo-layout-wide');
             break;
         }
       }
@@ -136,14 +136,14 @@ export class PresetFlagProcessor {
   }
 
   private isVisual(name: string): boolean {
-    return name === "blur" || name === "peek" || name === "flash";
+    return name === 'blur' || name === 'peek' || name === 'flash';
   }
   private isInteraction(name: string): boolean {
-    return name === "hover" || name === "click" || name === "timer";
+    return name === 'hover' || name === 'click' || name === 'timer';
   }
   private setupTimer(container: HTMLElement, seconds: number): void {
     const ms = (isNaN(seconds) ? 5 : seconds) * 1000;
-    window.setTimeout(() => container.classList.add("revealed"), ms);
+    window.setTimeout(() => container.classList.add('revealed'), ms);
   }
 }
 

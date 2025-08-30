@@ -9,7 +9,7 @@
  */
 
 // Re-export for convenience
-export type { CamoPreset } from "../processors/PresetProcessor";
+export type { CamoPreset } from '../processors/PresetProcessor';
 
 // Legacy interface for backward compatibility
 export interface Preset {
@@ -26,12 +26,12 @@ export interface Preset {
  * Core preset identifiers - these should match the IDs used in PresetProcessor
  */
 export const CORE_PRESET_IDS = [
-  "blackout",
-  "blueprint",
-  "modern95",
-  "ghost",
-  "matrix",
-  "classified",
+  'blackout',
+  'blueprint',
+  'modern95',
+  'ghost',
+  'matrix',
+  'classified',
 ] as const;
 
 export type CorePresetId = (typeof CORE_PRESET_IDS)[number];
@@ -40,9 +40,9 @@ export type CorePresetId = (typeof CORE_PRESET_IDS)[number];
  * Preset categories for organization
  */
 export const PRESET_CATEGORIES = {
-  PRIVACY: "privacy",
-  AESTHETIC: "aesthetic",
-  FUNCTIONAL: "functional",
+  PRIVACY: 'privacy',
+  AESTHETIC: 'aesthetic',
+  FUNCTIONAL: 'functional',
 } as const;
 
 /**
@@ -50,12 +50,12 @@ export const PRESET_CATEGORIES = {
  * Updated to use hyphenated format per Obsidian compliance
  */
 export const PRESET_TRIGGERS = {
-  blackout: "camo-blackout",
-  blueprint: "camo-blueprint",
-  modern95: "camo-modern95",
-  ghost: "camo-ghost",
-  matrix: "camo-matrix",
-  classified: "camo-classified",
+  blackout: 'camo-blackout',
+  blueprint: 'camo-blueprint',
+  modern95: 'camo-modern95',
+  ghost: 'camo-ghost',
+  matrix: 'camo-matrix',
+  classified: 'camo-classified',
 } as const;
 
 /**
@@ -69,9 +69,9 @@ export const CORE_PRESETS = {
 :: set[opacity] // text[all] % {value}(0) -> {text[hidden]}
 :: set[reveal] // trigger[click] % {animation}(fade) -> {interaction[ready]}`,
     style: {
-      background: "#000000",
-      color: "transparent",
-      cursor: "pointer",
+      background: '#000000',
+      color: 'transparent',
+      cursor: 'pointer',
     },
   },
   ghost: {
@@ -80,9 +80,9 @@ export const CORE_PRESETS = {
 :: apply[blur] // backdrop % {amount}(4px) -> {filter[applied]}
 :: set[reveal] // trigger[hover] % {animation}(smooth) -> {interaction[ready]}`,
     style: {
-      background: "rgba(255,255,255,0.85)",
-      backdropFilter: "blur(4px)",
-      color: "rgba(0,0,0,0.3)",
+      background: 'rgba(255,255,255,0.85)',
+      backdropFilter: 'blur(4px)',
+      color: 'rgba(0,0,0,0.3)',
     },
   },
   blueprint: {
@@ -91,9 +91,9 @@ export const CORE_PRESETS = {
 :: apply[grid] // overlay % {spacing}(20px) -> {grid[applied]}
 :: set[text] // color % {value}(#4FC3F7) -> {text[cyan]}`,
     style: {
-      background: "#0D1F2D",
-      color: "#4FC3F7",
-      fontFamily: "monospace",
+      background: '#0D1F2D',
+      color: '#4FC3F7',
+      fontFamily: 'monospace',
     },
   },
   modern95: {
@@ -102,9 +102,9 @@ export const CORE_PRESETS = {
 :: set[text] // color % {value}(#00FF41) -> {text[terminal]}
 :: apply[border] // style % {retro}(true) -> {visual[framed]}`,
     style: {
-      background: "#2B2B2B",
-      color: "#00FF41",
-      border: "2px solid #555555",
+      background: '#2B2B2B',
+      color: '#00FF41',
+      border: '2px solid #555555',
     },
   },
   matrix: {
@@ -113,9 +113,9 @@ export const CORE_PRESETS = {
 :: apply[animation] // rain % {cascade}(true) -> {effect[active]}
 :: set[reveal] // trigger[click] % {stop_animation}(true) -> {interaction[ready]}`,
     style: {
-      background: "#000000",
-      color: "#00FF00",
-      position: "relative",
+      background: '#000000',
+      color: '#00FF00',
+      position: 'relative',
     },
   },
   classified: {
@@ -124,9 +124,9 @@ export const CORE_PRESETS = {
 :: apply[redaction] // bars % {coverage}(partial) -> {secure[redacted]}
 :: set[reveal] // requirement % {authentication}(required) -> {access[gated]}`,
     style: {
-      background: "#F5F5DC",
-      color: "#000000",
-      fontFamily: "monospace",
+      background: '#F5F5DC',
+      color: '#000000',
+      fontFamily: 'monospace',
     },
   },
 } as const;

@@ -6,8 +6,8 @@ import {
   EditorSuggestContext,
   EditorSuggestTriggerInfo,
   TFile,
-} from "obsidian";
-import { CamoAutocomplete } from "../core/camoAutoComplete";
+} from 'obsidian';
+import { CamoAutocomplete } from '../core/camoAutoComplete';
 
 export class CamoMetaSuggest extends EditorSuggest<string> {
   private readonly ac = new CamoAutocomplete();
@@ -21,7 +21,7 @@ export class CamoMetaSuggest extends EditorSuggest<string> {
     editor: Editor,
     _file: TFile | null
   ): EditorSuggestTriggerInfo | null {
-    const line = editor.getLine(cursor.line) || "";
+    const line = editor.getLine(cursor.line) || '';
     const prefix = line.slice(0, cursor.ch);
     if (!prefix) return null;
     // Trigger inside camo blocks heuristically: line starts with :: or contains // or {
@@ -29,7 +29,7 @@ export class CamoMetaSuggest extends EditorSuggest<string> {
       return {
         start: {
           line: cursor.line,
-          ch: Math.max(0, prefix.lastIndexOf(" ") + 1),
+          ch: Math.max(0, prefix.lastIndexOf(' ') + 1),
         },
         end: cursor,
         query: prefix,
@@ -39,7 +39,7 @@ export class CamoMetaSuggest extends EditorSuggest<string> {
   }
 
   getSuggestions(context: EditorSuggestContext): string[] | Promise<string[]> {
-    const currentLine = context.editor.getLine(context.start.line) || "";
+    const currentLine = context.editor.getLine(context.start.line) || '';
     const list = this.ac.getSuggestions({
       line: context.start.line,
       column: context.start.ch,
@@ -47,11 +47,11 @@ export class CamoMetaSuggest extends EditorSuggest<string> {
       currentLine: currentLine,
       position: context.start.ch,
     });
-    return list.map((s) => s.label);
+    return list.map(s => s.label);
   }
 
   renderSuggestion(value: string, el: HTMLElement): void {
-    el.addClass("camo-suggest-item");
+    el.addClass('camo-suggest-item');
     el.setText(value);
   }
 

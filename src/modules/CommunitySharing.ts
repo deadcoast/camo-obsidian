@@ -8,16 +8,8 @@
  * - Obsidian-compliant UI using modals and commands
  */
 
-import {
-  App,
-  FuzzySuggestModal,
-  Modal,
-  Notice,
-  requestUrl,
-  Setting,
-  TFile,
-} from "obsidian";
-import type { CamoPreset } from "../processors/PresetProcessor";
+import { App, FuzzySuggestModal, Modal, Notice, requestUrl, Setting, TFile } from 'obsidian';
+import type { CamoPreset } from '../processors/PresetProcessor';
 
 export interface CommunityPreset extends CamoPreset {
   // Community-specific metadata
@@ -32,7 +24,7 @@ export interface CommunityPreset extends CamoPreset {
     rating: number;
     ratingCount: number;
     tags: string[];
-    category: "privacy" | "aesthetic" | "functional";
+    category: 'privacy' | 'aesthetic' | 'functional';
     created: string;
     updated: string;
     verified: boolean;
@@ -91,10 +83,10 @@ export class CommunitySharing {
 
       const response = await requestUrl({
         url: `https://api.github.com/search/repositories?q=${searchQuery}&page=${page}&per_page=${pageSize}`,
-        method: "GET",
+        method: 'GET',
         headers: {
-          Accept: "application/vnd.github.v3+json",
-          "User-Agent": "CAMO-Obsidian-Plugin",
+          Accept: 'application/vnd.github.v3+json',
+          'User-Agent': 'CAMO-Obsidian-Plugin',
         },
       });
 
@@ -112,8 +104,8 @@ export class CommunitySharing {
         pageSize,
       };
     } catch (error) {
-      console.error("CAMO Community: Failed to browse presets:", error);
-      new Notice("Failed to load community presets. Check your connection.");
+      console.error('CAMO Community: Failed to browse presets:', error);
+      new Notice('Failed to load community presets. Check your connection.');
       return {
         presets: [],
         totalCount: 0,
@@ -146,13 +138,11 @@ export class CommunitySharing {
       }
 
       const response = await requestUrl({
-        url: `https://api.github.com/search/repositories?q=${encodeURIComponent(
-          searchQuery
-        )}`,
-        method: "GET",
+        url: `https://api.github.com/search/repositories?q=${encodeURIComponent(searchQuery)}`,
+        method: 'GET',
         headers: {
-          Accept: "application/vnd.github.v3+json",
-          "User-Agent": "CAMO-Obsidian-Plugin",
+          Accept: 'application/vnd.github.v3+json',
+          'User-Agent': 'CAMO-Obsidian-Plugin',
         },
       });
 
@@ -161,15 +151,13 @@ export class CommunitySharing {
 
       // Apply rating filter
       if (filters?.minRating) {
-        presets = presets.filter(
-          (p) => p.community.rating >= filters.minRating!
-        );
+        presets = presets.filter(p => p.community.rating >= filters.minRating!);
       }
 
       return presets;
     } catch (error) {
-      console.error("CAMO Community: Search failed:", error);
-      new Notice("Search failed. Please try again.");
+      console.error('CAMO Community: Search failed:', error);
+      new Notice('Search failed. Please try again.');
       return [];
     }
   }
@@ -181,7 +169,7 @@ export class CommunitySharing {
     try {
       // Validate preset before installation
       if (!this.validatePreset(preset)) {
-        new Notice("Invalid preset format. Installation cancelled.");
+        new Notice('Invalid preset format. Installation cancelled.');
         return false;
       }
 
@@ -205,8 +193,8 @@ export class CommunitySharing {
       new Notice(`Preset "${preset.name}" installed successfully!`);
       return true;
     } catch (error) {
-      console.error("CAMO Community: Installation failed:", error);
-      new Notice("Failed to install preset. Please try again.");
+      console.error('CAMO Community: Installation failed:', error);
+      new Notice('Failed to install preset. Please try again.');
       return false;
     }
   }
@@ -216,60 +204,54 @@ export class CommunitySharing {
    */
   async sharePreset(preset: CamoPreset): Promise<string | null> {
     if (!this.settings.githubToken) {
-      new Notice(
-        "GitHub token required for sharing. Please configure in settings."
-      );
+      new Notice('GitHub token required for sharing. Please configure in settings.');
       return null;
     }
 
     try {
-      const shareModal = new PresetShareModal(
-        this.app,
-        preset,
-        async (metadata) => {
-          const communityPreset: CommunityPreset = {
-            id: preset.id,
-            name: preset.name,
-            cssClass: preset.cssClass,
-            category: preset.category,
-            description: preset.description,
-            baseStyle: preset.baseStyle,
-            defaultMetadata: preset.defaultMetadata,
-            styles: preset.styles,
-            flags: preset.flags,
-            animations: preset.animations,
-            community: {
-              author: metadata.author,
-              description: metadata.description,
-              version: metadata.version,
-              license: metadata.license,
-              url: "",
-              gistId: "",
-              downloadCount: 0,
-              rating: 0,
-              ratingCount: 0,
-              tags: metadata.tags,
-              category: metadata.category,
-              created: new Date().toISOString(),
-              updated: new Date().toISOString(),
-              verified: false,
-            },
-          };
+      const shareModal = new PresetShareModal(this.app, preset, async metadata => {
+        const communityPreset: CommunityPreset = {
+          id: preset.id,
+          name: preset.name,
+          cssClass: preset.cssClass,
+          category: preset.category,
+          description: preset.description,
+          baseStyle: preset.baseStyle,
+          defaultMetadata: preset.defaultMetadata,
+          styles: preset.styles,
+          flags: preset.flags,
+          animations: preset.animations,
+          community: {
+            author: metadata.author,
+            description: metadata.description,
+            version: metadata.version,
+            license: metadata.license,
+            url: '',
+            gistId: '',
+            downloadCount: 0,
+            rating: 0,
+            ratingCount: 0,
+            tags: metadata.tags,
+            category: metadata.category,
+            created: new Date().toISOString(),
+            updated: new Date().toISOString(),
+            verified: false,
+          },
+        };
 
-          const gistUrl = await this.createGist(communityPreset);
-          if (gistUrl) {
-            new Notice(`Preset shared successfully! URL: ${gistUrl}`);
-            return gistUrl;
-          }
-          return null;
+        const gistUrl = await this.createGist(communityPreset);
+        if (gistUrl) {
+          new Notice(`Preset shared successfully! URL: ${gistUrl}`);
+          return gistUrl;
         }
-      );
+        return null;
+      });
 
       shareModal.open();
       return null; // URL will be returned via modal callback
     } catch (error) {
-      console.error("CAMO Community: Sharing failed:", error);
-      new Notice("Failed to share preset. Please try again.");
+      console.error('CAMO Community: Sharing failed:', error);
+      new Notice('Failed to share preset. Please try again.');
       return null;
     }
   }
@@ -277,11 +259,7 @@ export class CommunitySharing {
   /**
    * Rate a community preset
    */
-  async ratePreset(
-    presetId: string,
-    rating: number,
-    comment?: string
-  ): Promise<boolean> {
+  async ratePreset(presetId: string, rating: number, comment?: string): Promise<boolean> {
     try {
       const userRating: PresetRating = {
         presetId,
@@ -295,9 +273,7 @@ export class CommunitySharing {
       const ratings = this.ratingsCache.get(presetId) || [];
 
       // Remove existing rating from this user (if any)
-      const filteredRatings = ratings.filter(
-        (r) => r.timestamp !== userRating.timestamp
-      );
+      const filteredRatings = ratings.filter(r => r.timestamp !== userRating.timestamp);
       filteredRatings.push(userRating);
 
       this.ratingsCache.set(presetId, filteredRatings);
@@ -306,17 +282,16 @@ export class CommunitySharing {
       const preset = this.presetCache.get(presetId);
       if (preset) {
         const avgRating =
-          filteredRatings.reduce((sum, r) => sum + r.rating, 0) /
-          filteredRatings.length;
+          filteredRatings.reduce((sum, r) => sum + r.rating, 0) / filteredRatings.length;
         preset.community.rating = Math.round(avgRating * 10) / 10;
         preset.community.ratingCount = filteredRatings.length;
       }
 
-      new Notice("Rating submitted successfully!");
+      new Notice('Rating submitted successfully!');
       return true;
     } catch (error) {
-      console.error("CAMO Community: Rating failed:", error);
-      new Notice("Failed to submit rating.");
+      console.error('CAMO Community: Rating failed:', error);
+      new Notice('Failed to submit rating.');
       return false;
     }
   }
@@ -338,17 +313,17 @@ export class CommunitySharing {
   // Private helper methods continue in next part...
 
   private buildGitHubSearchQuery(category?: string, tags?: string[]): string {
-    let query = "camo preset";
+    let query = 'camo preset';
 
     if (category) {
       query += ` ${category}`;
     }
 
     if (tags && tags.length > 0) {
-      query += ` ${tags.join(" ")}`;
+      query += ` ${tags.join(' ')}`;
     }
 
-    query += " in:name,description,readme";
+    query += ' in:name,description,readme';
     return encodeURIComponent(query);
   }
 
@@ -370,25 +345,21 @@ export class CommunitySharing {
     return presets;
   }
 
-  private async fetchPresetFromRepo(
-    repo: any
-  ): Promise<CommunityPreset | null> {
+  private async fetchPresetFromRepo(repo: any): Promise<CommunityPreset | null> {
     try {
       // Look for preset.json or similar files in the repository
       const response = await requestUrl({
         url: `https://api.github.com/repos/${repo.full_name}/contents`,
-        method: "GET",
+        method: 'GET',
         headers: {
-          Accept: "application/vnd.github.v3+json",
-          "User-Agent": "CAMO-Obsidian-Plugin",
+          Accept: 'application/vnd.github.v3+json',
+          'User-Agent': 'CAMO-Obsidian-Plugin',
         },
       });
 
       const files = response.json;
       const presetFile = files.find(
-        (file: any) =>
-          file.name.toLowerCase().includes("preset") &&
-          file.name.endsWith(".json")
+        (file: any) => file.name.toLowerCase().includes('preset') && file.name.endsWith('.json')
       );
 
       if (!presetFile) {
@@ -398,7 +369,7 @@ export class CommunitySharing {
       // Fetch the preset file content
       const contentResponse = await requestUrl({
         url: presetFile.download_url,
-        method: "GET",
+        method: 'GET',
       });
 
       const presetData = JSON.parse(contentResponse.text);
@@ -406,7 +377,7 @@ export class CommunitySharing {
       // Convert to CommunityPreset format
       return this.convertToCommunityPreset(presetData, repo);
     } catch (error) {
-      console.warn("Failed to fetch preset from repository:", error);
+      console.warn('Failed to fetch preset from repository:', error);
       return null;
     }
   }
@@ -416,28 +387,28 @@ export class CommunitySharing {
       id: data.id || repo.name,
       name: data.name || repo.name,
       cssClass: data.cssClass || `camo-${repo.name}`,
-      category: data.category || "functional",
-      description: data.description || repo.description || "",
-      baseStyle: data.baseStyle || { background: "#000", color: "#fff" },
+      category: data.category || 'functional',
+      description: data.description || repo.description || '',
+      baseStyle: data.baseStyle || { background: '#000', color: '#fff' },
       defaultMetadata: data.defaultMetadata || [],
-      styles: data.styles || "",
+      styles: data.styles || '',
       flags: data.flags || [],
       animations: data.animations,
       community: {
         author: repo.owner.login,
-        description: data.description || repo.description || "",
-        version: data.version || "1.0.0",
-        license: data.license || repo.license?.name || "MIT",
+        description: data.description || repo.description || '',
+        version: data.version || '1.0.0',
+        license: data.license || repo.license?.name || 'MIT',
         url: repo.html_url,
         gistId: repo.id.toString(),
         downloadCount: repo.stargazers_count || 0,
         rating: 0,
         ratingCount: 0,
         tags: data.tags || [],
-        category: data.category || "functional",
+        category: data.category || 'functional',
         created: repo.created_at,
         updated: repo.updated_at,
-        verified: repo.owner.type === "Organization", // Simple verification logic
+        verified: repo.owner.type === 'Organization', // Simple verification logic
       },
     };
   }
@@ -472,23 +443,23 @@ export class CommunitySharing {
     ];
 
     const contentToCheck = [
-      preset.defaultMetadata.join(" "),
+      preset.defaultMetadata.join(' '),
       preset.community.description,
       JSON.stringify(preset),
-    ].join(" ");
+    ].join(' ');
 
-    return suspiciousPatterns.some((pattern) => pattern.test(contentToCheck));
+    return suspiciousPatterns.some(pattern => pattern.test(contentToCheck));
   }
 
   private async confirmOverwrite(preset: CommunityPreset): Promise<boolean> {
-    return new Promise((resolve) => {
+    return new Promise(resolve => {
       const modal = new ConfirmOverwriteModal(this.app, preset, resolve);
       modal.open();
     });
   }
 
   private async savePresetToVault(preset: CommunityPreset): Promise<void> {
-    const presetsFolder = ".obsidian/plugins/camo/community-presets";
+    const presetsFolder = '.obsidian/plugins/camo/community-presets';
     const fileName = `${preset.id}.json`;
     const filePath = `${presetsFolder}/${fileName}`;
 
@@ -518,19 +489,19 @@ export class CommunitySharing {
           [`${preset.id}.json`]: {
             content: JSON.stringify(preset, null, 2),
           },
-          "README.md": {
+          'README.md': {
             content: this.generatePresetReadme(preset),
           },
         },
       };
 
       const response = await requestUrl({
-        url: "https://api.github.com/gists",
-        method: "POST",
+        url: 'https://api.github.com/gists',
+        method: 'POST',
         headers: {
-          "Content-Type": "application/json",
+          'Content-Type': 'application/json',
           Authorization: `token ${this.settings.githubToken}`,
-          "User-Agent": "CAMO-Obsidian-Plugin",
+          'User-Agent': 'CAMO-Obsidian-Plugin',
         },
         body: JSON.stringify(gistContent),
       });
@@ -544,7 +515,7 @@ export class CommunitySharing {
 
       throw new Error(`Gist creation failed: ${response.status}`);
     } catch (error) {
-      console.error("Failed to create gist:", error);
+      console.error('Failed to create gist:', error);
       return null;
     }
   }
@@ -563,11 +534,7 @@ Your content here
 
 ## Metadata
 
-${
-  preset.defaultMetadata.length > 0
-    ? preset.defaultMetadata.join(", ")
-    : "No metadata provided"
-}
+${preset.defaultMetadata.length > 0 ? preset.defaultMetadata.join(', ') : 'No metadata provided'}
 
 ## Details
 
@@ -575,7 +542,7 @@ ${
 - **Version**: ${preset.community.version}
 - **License**: ${preset.community.license}
 - **Category**: ${preset.community.category}
-- **Tags**: ${preset.community.tags.join(", ")}
+- **Tags**: ${preset.community.tags.join(', ')}
 
 ## Installation
 
@@ -612,21 +579,17 @@ class PresetShareModal extends Modal {
     version: string;
     license: string;
     tags: string[];
-    category: "privacy" | "aesthetic" | "functional";
+    category: 'privacy' | 'aesthetic' | 'functional';
   }) => Promise<string | null>;
 
-  private author = "";
-  private description = "";
-  private version = "1.0.0";
-  private license = "MIT";
-  private tags = "";
-  private category: "privacy" | "aesthetic" | "functional" = "functional";
+  private author = '';
+  private description = '';
+  private version = '1.0.0';
+  private license = 'MIT';
+  private tags = '';
+  private category: 'privacy' | 'aesthetic' | 'functional' = 'functional';
 
-  constructor(
-    app: App,
-    preset: CamoPreset,
-    onSubmit: (metadata: any) => Promise<string | null>
-  ) {
+  constructor(app: App, preset: CamoPreset, onSubmit: (metadata: any) => Promise<string | null>) {
     super(app);
     this.preset = preset;
     this.onSubmit = onSubmit;
@@ -638,78 +601,78 @@ class PresetShareModal extends Modal {
     contentEl.empty();
 
     new Setting(contentEl)
-      .setName("Author")
-      .setDesc("Your name or GitHub username")
-      .addText((text) => {
-        text.onChange((value) => {
+      .setName('Author')
+      .setDesc('Your name or GitHub username')
+      .addText(text => {
+        text.onChange(value => {
           this.author = value;
         });
       });
 
     new Setting(contentEl)
-      .setName("Description")
-      .setDesc("Brief description of what this preset does")
-      .addTextArea((text) => {
-        text.onChange((value) => {
+      .setName('Description')
+      .setDesc('Brief description of what this preset does')
+      .addTextArea(text => {
+        text.onChange(value => {
           this.description = value;
         });
       });
 
     new Setting(contentEl)
-      .setName("Version")
-      .setDesc("Semantic version (e.g., 1.0.0)")
-      .addText((text) => {
+      .setName('Version')
+      .setDesc('Semantic version (e.g., 1.0.0)')
+      .addText(text => {
         text.setValue(this.version);
-        text.onChange((value) => {
+        text.onChange(value => {
           this.version = value;
         });
       });
 
     new Setting(contentEl)
-      .setName("License")
-      .setDesc("License for your preset")
-      .addDropdown((dropdown) => {
+      .setName('License')
+      .setDesc('License for your preset')
+      .addDropdown(dropdown => {
         dropdown
-          .addOption("MIT", "MIT")
-          .addOption("Apache-2.0", "Apache 2.0")
-          .addOption("GPL-3.0", "GPL 3.0")
-          .addOption("CC0-1.0", "CC0 1.0")
+          .addOption('MIT', 'MIT')
+          .addOption('Apache-2.0', 'Apache 2.0')
+          .addOption('GPL-3.0', 'GPL 3.0')
+          .addOption('CC0-1.0', 'CC0 1.0')
           .setValue(this.license)
-          .onChange((value) => {
+          .onChange(value => {
             this.license = value;
           });
       });
 
     new Setting(contentEl)
-      .setName("Category")
-      .setDesc("Primary category for this preset")
-      .addDropdown((dropdown) => {
+      .setName('Category')
+      .setDesc('Primary category for this preset')
+      .addDropdown(dropdown => {
         dropdown
-          .addOption("privacy", "Privacy")
-          .addOption("aesthetic", "Aesthetic")
-          .addOption("functional", "Functional")
+          .addOption('privacy', 'Privacy')
+          .addOption('aesthetic', 'Aesthetic')
+          .addOption('functional', 'Functional')
           .setValue(this.category)
-          .onChange((value: "privacy" | "aesthetic" | "functional") => {
+          .onChange((value: 'privacy' | 'aesthetic' | 'functional') => {
             this.category = value;
           });
       });
 
     new Setting(contentEl)
-      .setName("Tags")
-      .setDesc("Comma-separated tags (e.g., blur, dark-mode, minimal)")
-      .addText((text) => {
-        text.onChange((value) => {
+      .setName('Tags')
+      .setDesc('Comma-separated tags (e.g., blur, dark-mode, minimal)')
+      .addText(text => {
+        text.onChange(value => {
           this.tags = value;
         });
       });
 
-    new Setting(contentEl).addButton((btn) =>
+    new Setting(contentEl).addButton(btn =>
       btn
-        .setButtonText("Share Preset")
+        .setButtonText('Share Preset')
         .setCta()
         .onClick(async () => {
           if (!this.author || !this.description) {
-            new Notice("Author and description are required.");
+            new Notice('Author and description are required.');
             return;
           }
 
@@ -719,8 +682,8 @@ class PresetShareModal extends Modal {
             version: this.version,
             license: this.license,
             tags: this.tags
-              .split(",")
-              .map((t) => t.trim())
+              .split(',')
+              .map(t => t.trim())
               .filter(Boolean),
             category: this.category,
           };
@@ -730,8 +693,8 @@ class PresetShareModal extends Modal {
         })
     );
 
-    new Setting(contentEl).addButton((btn) =>
-      btn.setButtonText("Cancel").onClick(() => {
+    new Setting(contentEl).addButton(btn =>
+      btn.setButtonText('Cancel').onClick(() => {
         this.close();
       })
     );
@@ -745,41 +708,37 @@ class ConfirmOverwriteModal extends Modal {
   private preset: CommunityPreset;
   private onConfirm: (confirmed: boolean) => void;
 
-  constructor(
-    app: App,
-    preset: CommunityPreset,
-    onConfirm: (confirmed: boolean) => void
-  ) {
+  constructor(app: App, preset: CommunityPreset, onConfirm: (confirmed: boolean) => void) {
     super(app);
     this.preset = preset;
     this.onConfirm = onConfirm;
-    this.setTitle("Preset Already Exists");
+    this.setTitle('Preset Already Exists');
   }
 
   onOpen() {
     const { contentEl } = this;
     contentEl.empty();
 
-    contentEl.createEl("p", {
+    contentEl.createEl('p', {
       text: `A preset named "${this.preset.name}" already exists. Do you want to overwrite it?`,
     });
 
     const buttonContainer = contentEl.createDiv({
-      cls: "modal-button-container",
+      cls: 'modal-button-container',
     });
 
     new Setting(buttonContainer)
-      .addButton((btn) =>
+      .addButton(btn =>
         btn
-          .setButtonText("Overwrite")
+          .setButtonText('Overwrite')
           .setWarning()
           .onClick(() => {
             this.close();
             this.onConfirm(true);
           })
       )
-      .addButton((btn) =>
-        btn.setButtonText("Cancel").onClick(() => {
+      .addButton(btn =>
+        btn.setButtonText('Cancel').onClick(() => {
           this.close();
           this.onConfirm(false);
         })
@@ -803,7 +762,7 @@ export class CommunityPresetBrowserModal extends FuzzySuggestModal<CommunityPres
     super(app);
     this.communitySharing = communitySharing;
     this.onInstall = onInstall;
-    this.setPlaceholder("Search community presets...");
+    this.setPlaceholder('Search community presets...');
     this.loadPresets();
   }
 
@@ -812,8 +771,8 @@ export class CommunityPresetBrowserModal extends FuzzySuggestModal<CommunityPres
       const result = await this.communitySharing.browse();
       this.presets = result.presets;
     } catch (error) {
-      console.error("Failed to load presets:", error);
-      new Notice("Failed to load community presets.");
+      console.error('Failed to load presets:', error);
+      new Notice('Failed to load community presets.');
     }
   }
 
@@ -827,30 +786,30 @@ export class CommunityPresetBrowserModal extends FuzzySuggestModal<CommunityPres
 
   renderSuggestion(match: { item: CommunityPreset }, el: HTMLElement) {
     const preset = match.item;
-    el.addClass("camo-preset-suggestion");
+    el.addClass('camo-preset-suggestion');
 
-    const titleEl = el.createDiv({ cls: "camo-preset-title" });
-    titleEl.createSpan({ text: preset.name, cls: "camo-preset-name" });
+    const titleEl = el.createDiv({ cls: 'camo-preset-title' });
+    titleEl.createSpan({ text: preset.name, cls: 'camo-preset-name' });
     titleEl.createSpan({
       text: `by ${preset.community.author}`,
-      cls: "camo-preset-author",
+      cls: 'camo-preset-author',
     });
 
-    const descEl = el.createDiv({ cls: "camo-preset-description" });
+    const descEl = el.createDiv({ cls: 'camo-preset-description' });
     descEl.textContent = preset.community.description;
 
-    const metaEl = el.createDiv({ cls: "camo-preset-meta" });
+    const metaEl = el.createDiv({ cls: 'camo-preset-meta' });
     metaEl.createSpan({
       text: `★ ${preset.community.rating}`,
-      cls: "camo-preset-rating",
+      cls: 'camo-preset-rating',
     });
     metaEl.createSpan({
       text: `${preset.community.downloadCount} downloads`,
-      cls: "camo-preset-downloads",
+      cls: 'camo-preset-downloads',
     });
     metaEl.createSpan({
       text: preset.community.category,
-      cls: "camo-preset-category",
+      cls: 'camo-preset-category',
     });
   }
 

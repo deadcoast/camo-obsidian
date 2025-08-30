@@ -28,10 +28,7 @@ export abstract class BaseEffectHandler {
   /**
    * Apply the effect to the target element
    */
-  abstract apply(
-    context: EffectContext,
-    parameters: Record<string, any>
-  ): Promise<EffectResult>;
+  abstract apply(context: EffectContext, parameters: Record<string, any>): Promise<EffectResult>;
 
   /**
    * Remove the effect from the target element
@@ -61,9 +58,7 @@ export abstract class BaseEffectHandler {
    * Generate unique effect ID
    */
   protected generateEffectId(): string {
-    return `${this.effectType}_${Date.now()}_${Math.random()
-      .toString(36)
-      .substr(2, 9)}`;
+    return `${this.effectType}_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
   }
 }
 
@@ -120,7 +115,7 @@ export class EffectHandlerRegistry {
     } catch (error) {
       return {
         success: false,
-        error: error instanceof Error ? error.message : "Unknown error",
+        error: error instanceof Error ? error.message : 'Unknown error',
       };
     }
   }
@@ -176,12 +171,12 @@ export class EffectHandlerRegistry {
 
     const results = await Promise.all(
       Array.from(blockEffects.entries()).map(async ([effectId, result]) => {
-        const handler = this.handlers.get(result.effectId?.split("_")[0] || "");
+        const handler = this.handlers.get(result.effectId?.split('_')[0] || '');
         return handler ? await handler.remove(context, effectId) : false;
       })
     );
 
-    if (results.every((success) => success)) {
+    if (results.every(success => success)) {
       this.appliedEffects.delete(context.blockId);
       return true;
     }

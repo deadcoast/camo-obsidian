@@ -1,4 +1,4 @@
-import { Platform, Plugin } from "obsidian";
+import { Platform, Plugin } from 'obsidian';
 
 export class MobileOptimization {
   private readonly plugin: Plugin;
@@ -23,26 +23,26 @@ export class MobileOptimization {
   // Touch gesture support
   setupTouchHandlers(block: HTMLElement): void {
     // Tap to reveal
-    block.addEventListener("click", () => {
-      const reveal = block.querySelector(".camo-reveal");
+    block.addEventListener('click', () => {
+      const reveal = block.querySelector('.camo-reveal');
       if (reveal) {
-        reveal.classList.add("camo-revealed");
+        reveal.classList.add('camo-revealed');
       }
     });
     // Long press for options
-    block.addEventListener("contextmenu", (e) => {
+    block.addEventListener('contextmenu', e => {
       e.preventDefault();
-      const options = block.querySelector(".camo-options");
+      const options = block.querySelector('.camo-options');
       if (options) {
-        options.classList.toggle("camo-options-visible");
+        options.classList.toggle('camo-options-visible');
       }
     });
     // Swipe to toggle
-    block.addEventListener("swipe", (e) => {
+    block.addEventListener('swipe', e => {
       e.preventDefault();
-      const toggle = block.querySelector(".camo-toggle");
+      const toggle = block.querySelector('.camo-toggle');
       if (toggle) {
-        toggle.classList.toggle("camo-toggled");
+        toggle.classList.toggle('camo-toggled');
       }
     });
   }

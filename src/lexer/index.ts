@@ -1,16 +1,16 @@
 export enum TokenKind {
-  NEWLINE = "NEWLINE",
-  HIERARCHICAL = "HIERARCHICAL",
-  RELATION = "RELATION",
-  OPERATOR = "OPERATOR",
-  TRIGGER = "TRIGGER",
-  ACTION_BLOCK = "ACTION_BLOCK",
-  VARIABLE_BLOCK = "VARIABLE_BLOCK",
-  OPTION_BLOCK = "OPTION_BLOCK",
-  IDENTIFIER = "IDENTIFIER",
-  STRING = "STRING",
-  NUMBER = "NUMBER",
-  WHITESPACE = "WHITESPACE",
+  NEWLINE = 'NEWLINE',
+  HIERARCHICAL = 'HIERARCHICAL',
+  RELATION = 'RELATION',
+  OPERATOR = 'OPERATOR',
+  TRIGGER = 'TRIGGER',
+  ACTION_BLOCK = 'ACTION_BLOCK',
+  VARIABLE_BLOCK = 'VARIABLE_BLOCK',
+  OPTION_BLOCK = 'OPTION_BLOCK',
+  IDENTIFIER = 'IDENTIFIER',
+  STRING = 'STRING',
+  NUMBER = 'NUMBER',
+  WHITESPACE = 'WHITESPACE',
 }
 
 export interface Token {
@@ -42,22 +42,22 @@ export class Tokenizer {
     let column = 1;
     let i = 0;
     const order: Array<keyof typeof this.TOKEN_PATTERNS> = [
-      "NEWLINE",
-      "HIERARCHICAL",
-      "RELATION",
-      "OPERATOR",
-      "TRIGGER",
-      "ACTION_BLOCK",
-      "VARIABLE_BLOCK",
-      "OPTION_BLOCK",
-      "IDENTIFIER",
-      "STRING",
-      "NUMBER",
-      "WHITESPACE",
+      'NEWLINE',
+      'HIERARCHICAL',
+      'RELATION',
+      'OPERATOR',
+      'TRIGGER',
+      'ACTION_BLOCK',
+      'VARIABLE_BLOCK',
+      'OPTION_BLOCK',
+      'IDENTIFIER',
+      'STRING',
+      'NUMBER',
+      'WHITESPACE',
     ];
 
     while (i < input.length) {
-      if (input[i] === "\n") {
+      if (input[i] === '\n') {
         line++;
         column = 1;
         i++;
@@ -71,7 +71,7 @@ export class Tokenizer {
         if (m && m.index === 0) {
           const value = (m[1] || m[2] || m[0]) as string;
           // Ignore whitespace tokens in output; still advance indices
-          if (k !== "WHITESPACE") {
+          if (k !== 'WHITESPACE') {
             tokens.push({ type: k as TokenKind, value, line, column });
           }
           i += m[0].length;
@@ -90,10 +90,9 @@ export class Tokenizer {
 
   // Helper to reconstruct raw source from token range (inclusive)
   reconstruct(tokens: Token[], startIndex: number, endIndex: number): string {
-    if (startIndex < 0 || endIndex < startIndex || endIndex >= tokens.length)
-      return "";
-    let buf = "";
-    for (let i = startIndex; i <= endIndex; i++) buf += tokens[i].value || "";
+    if (startIndex < 0 || endIndex < startIndex || endIndex >= tokens.length) return '';
+    let buf = '';
+    for (let i = startIndex; i <= endIndex; i++) buf += tokens[i].value || '';
     return buf;
   }
 }

@@ -57,15 +57,11 @@ export class VisualEffectsEngine {
   /**
    * Apply a visual effect to an element
    */
-  applyEffect(
-    element: HTMLElement,
-    effectType: string,
-    parameters: EffectParameters
-  ): void {
+  applyEffect(element: HTMLElement, effectType: string, parameters: EffectParameters): void {
     const effect = this.createEffect(effectType, parameters);
 
     // Add CSS classes
-    effect.cssClasses.forEach((className) => {
+    effect.cssClasses.forEach(className => {
       element.addClass(className);
     });
 
@@ -82,10 +78,10 @@ export class VisualEffectsEngine {
    * Remove effect from element
    */
   removeEffect(element: HTMLElement, effectId: string): void {
-    const effect = this.effectStack.find((e) => e.id === effectId);
+    const effect = this.effectStack.find(e => e.id === effectId);
     if (effect) {
       // Remove CSS classes
-      effect.cssClasses.forEach((className) => {
+      effect.cssClasses.forEach(className => {
         element.removeClass(className);
       });
 
@@ -95,17 +91,14 @@ export class VisualEffectsEngine {
       });
 
       // Remove from stack
-      this.effectStack = this.effectStack.filter((e) => e.id !== effectId);
+      this.effectStack = this.effectStack.filter(e => e.id !== effectId);
     }
   }
 
   /**
    * Create a visual effect configuration
    */
-  private createEffect(
-    type: string,
-    parameters: EffectParameters
-  ): VisualEffect {
+  private createEffect(type: string, parameters: EffectParameters): VisualEffect {
     const effect: VisualEffect = {
       id: this.generateEffectId(),
       type,
@@ -116,22 +109,22 @@ export class VisualEffectsEngine {
     };
 
     switch (type) {
-      case "blur":
+      case 'blur':
         this.configureBlurEffect(effect, parameters);
         break;
-      case "pixelate":
+      case 'pixelate':
         this.configurePixelateEffect(effect, parameters);
         break;
-      case "fade":
+      case 'fade':
         this.configureFadeEffect(effect, parameters);
         break;
-      case "redact":
+      case 'redact':
         this.configureRedactEffect(effect, parameters);
         break;
-      case "scramble":
+      case 'scramble':
         this.configureScrambleEffect(effect, parameters);
         break;
-      case "glitch":
+      case 'glitch':
         this.configureGlitchEffect(effect, parameters);
         break;
       default:
@@ -141,64 +134,43 @@ export class VisualEffectsEngine {
     return effect;
   }
 
-  private configureBlurEffect(
-    effect: VisualEffect,
-    params: EffectParameters
-  ): void {
+  private configureBlurEffect(effect: VisualEffect, params: EffectParameters): void {
     const intensity = params.intensity || 4;
-    effect.cssClasses.push("camo-effect-blur");
-    effect.cssProperties.set("--camo-blur-intensity", `${intensity}px`);
+    effect.cssClasses.push('camo-effect-blur');
+    effect.cssProperties.set('--camo-blur-intensity', `${intensity}px`);
   }
 
-  private configurePixelateEffect(
-    effect: VisualEffect,
-    params: EffectParameters
-  ): void {
-    effect.cssClasses.push("camo-effect-pixelate");
+  private configurePixelateEffect(effect: VisualEffect, params: EffectParameters): void {
+    effect.cssClasses.push('camo-effect-pixelate');
     if (params.intensity) {
-      effect.cssProperties.set("--pixelate-size", `${params.intensity}px`);
+      effect.cssProperties.set('--pixelate-size', `${params.intensity}px`);
     }
   }
 
-  private configureFadeEffect(
-    effect: VisualEffect,
-    params: EffectParameters
-  ): void {
+  private configureFadeEffect(effect: VisualEffect, params: EffectParameters): void {
     const intensity = params.intensity || 0.5;
-    effect.cssClasses.push("camo-effect-fade");
-    effect.cssProperties.set("--fade-opacity", intensity.toString());
+    effect.cssClasses.push('camo-effect-fade');
+    effect.cssProperties.set('--fade-opacity', intensity.toString());
   }
 
-  private configureRedactEffect(
-    effect: VisualEffect,
-    params: EffectParameters
-  ): void {
-    effect.cssClasses.push("camo-effect-redact");
+  private configureRedactEffect(effect: VisualEffect, params: EffectParameters): void {
+    effect.cssClasses.push('camo-effect-redact');
     if (params.color) {
-      effect.cssProperties.set("--redact-color", params.color);
+      effect.cssProperties.set('--redact-color', params.color);
     }
   }
 
-  private configureScrambleEffect(
-    effect: VisualEffect,
-    params: EffectParameters
-  ): void {
-    effect.cssClasses.push("camo-effect-scramble");
+  private configureScrambleEffect(effect: VisualEffect, params: EffectParameters): void {
+    effect.cssClasses.push('camo-effect-scramble');
     if (params.duration) {
-      effect.cssProperties.set("--scramble-duration", params.duration);
+      effect.cssProperties.set('--scramble-duration', params.duration);
     }
   }
 
-  private configureGlitchEffect(
-    effect: VisualEffect,
-    params: EffectParameters
-  ): void {
-    effect.cssClasses.push("camo-effect-glitch");
+  private configureGlitchEffect(effect: VisualEffect, params: EffectParameters): void {
+    effect.cssClasses.push('camo-effect-glitch');
     if (params.intensity) {
-      effect.cssProperties.set(
-        "--glitch-intensity",
-        params.intensity.toString()
-      );
+      effect.cssProperties.set('--glitch-intensity', params.intensity.toString());
     }
   }
 
@@ -206,8 +178,8 @@ export class VisualEffectsEngine {
    * Inject CSS styles for all effects
    */
   private injectStyles(): void {
-    this.styleElement = document.createElement("style");
-    this.styleElement.id = "camo-visual-effects";
+    this.styleElement = document.createElement('style');
+    this.styleElement.id = 'camo-visual-effects';
     this.styleElement.textContent = this.getEffectStyles();
     document.head.appendChild(this.styleElement);
   }
@@ -368,7 +340,7 @@ export class VisualEffectsEngine {
   }
 
   private generateEffectId(): string {
-    return "effect_" + Math.random().toString(36).substr(2, 9);
+    return 'effect_' + Math.random().toString(36).substr(2, 9);
   }
 
   /**
@@ -391,29 +363,29 @@ export class GaussianBlurFilter {
 
 export class PixelationFilter {
   apply(element: HTMLElement, size: number): void {
-    element.style.imageRendering = "pixelated";
+    element.style.imageRendering = 'pixelated';
     element.style.filter = `contrast(1000%) blur(${size}px) contrast(100%)`;
   }
 }
 
 export class GlitchEffect {
   apply(element: HTMLElement, intensity: number): void {
-    element.addClass("camo-effect-glitch");
-    element.style.setProperty("--glitch-intensity", intensity.toString());
+    element.addClass('camo-effect-glitch');
+    element.style.setProperty('--glitch-intensity', intensity.toString());
   }
 }
 
 export class RedactionOverlay {
-  apply(element: HTMLElement, color = "#000000"): void {
-    element.addClass("camo-effect-redact");
-    element.style.setProperty("--redact-color", color);
+  apply(element: HTMLElement, color = '#000000'): void {
+    element.addClass('camo-effect-redact');
+    element.style.setProperty('--redact-color', color);
   }
 }
 
 export class TextScrambler {
-  apply(element: HTMLElement, speed = "0.5s"): void {
-    element.addClass("camo-effect-scramble");
-    element.style.setProperty("--scramble-duration", speed);
+  apply(element: HTMLElement, speed = '0.5s'): void {
+    element.addClass('camo-effect-scramble');
+    element.style.setProperty('--scramble-duration', speed);
   }
 }
 
