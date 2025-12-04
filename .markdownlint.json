@@ -2,5 +2,9 @@
   "default": true,
   "MD032": false,
   "MD013": false,
-  "MD028": false
+  "MD028": false,
+  "MD009": {
+    "br_spaces": 2,
+    "strict": false
+  }
 }

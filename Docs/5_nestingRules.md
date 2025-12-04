@@ -110,3 +110,32 @@
  :: SAVE // FREQUENCY % ON_CHANGE -> DEBOUNCED 1000ms
  :: SAVE // BACKUP % ENABLED -> {versions[5]}
 ```
+
+## Hierarchy Reference Rules (Normative)
+
+```text
+1) Root statements begin with "::"; child statements begin with ":^:" and MUST logically reference their nearest valid ancestor context (keyword/variable/label/target scope).
+2) Sibling order is preserved; optimizer may consolidate equal-priority operations without changing observable outcomes.
+3) Parent effects apply before children; children refine or override within the same normalized target scope.
+4) Conditional branches: use ":^: IF{...}" followed by optional ":: ELSE" sibling branch; only one branch executes per evaluation cycle.
+5) Orphan ":^:" (no valid ancestor) and cyclic references are invalid and MUST be surfaced by the validator with line references.
+6) Cross-branch side effects are isolated; state writes occur only for the executed branch.
+7) Last-write-wins applies on identical normalized targets within the same priority bucket.
+```
+
+## Execution Order & Priority Notes
+
+```text
+Priority buckets (from Docs/3_camoIR.md operationPriority):
+  1) visual   2) layout   3) animation   4) interaction   5) state
+
+Evaluation contract:
+  - Visual/layout compose first to establish baseline presentation.
+  - Animation applies to the composed visual/layout.
+  - Interaction gates visibility or toggles states over time.
+  - State/security persist/authorize at the end of the cycle.
+
+Conflict resolution:
+  - Higher-priority buckets override lower ones only in their domain.
+  - Within the same bucket, last-write-wins after normalization.
+```

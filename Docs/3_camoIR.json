@@ -51,6 +51,16 @@
               "getBlockState",
               "cleanupOldStates"
             ]
+          },
+          "ir": {
+            "id": "camo-ir",
+            "type": "transform-layer",
+            "description": "Transforms AST to normalized IR instructions with buckets (visual→state)",
+            "functions": [
+              "transformASTtoIR",
+              "normalizeSelector",
+              "assignOperationBucket"
+            ]
           }
         }
       }
@@ -237,7 +247,13 @@
         "execution": {
           "order": ["declaration", "target", "effect", "outcome"],
           "scope": "block-local",
-          "errorHandling": "graceful-fallback"
+          "errorHandling": "graceful-fallback",
+          "hierarchy": {
+            "parentPrefix": "::",
+            "childPrefix": ":^:",
+            "conditionalPrefix": ":^: IF{...}",
+            "elsePrefix": ":: ELSE"
+          }
         }
       },
 
@@ -365,11 +381,12 @@
         "virtualScrolling": true,
         "cssOnlyEffects": true,
         "gpuAcceleration": true,
-        "caching": "content-hash"
+        "caching": "content-hash",
+        "selectorNormalization": true
       }
     },
 
-    "futureevelopment": {
+    "futureDevelopment": {
       "postLaunch": {
         "languageAgnostic": {
           "description": "Different languages can compile to CAMO IR",

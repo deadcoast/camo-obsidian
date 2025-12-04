@@ -37,6 +37,57 @@ class CamoIRExecutor {
 }
 ```
 
+### AST → IR Integration (Normative)
+
+```typescript
+// Inputs from parser phase (Docs/4_camoMetaData.md):
+interface CamoAST { statements: CamoASTNode[] }
+interface CamoASTNode {
+  type: 'statement' | 'declaration' | 'target' | 'effect' | 'output';
+  keyword?: string;            // e.g., set/protect/reveal
+  variable?: string;           // e.g., blur/background
+  function?: string;           // e.g., content/text/pattern
+  action?: ActionNode;         // e.g., {blur}
+  parameters?: ParameterNode[];// normalized key/values
+  outcome?: string;            // e.g., {visual[blurred]}
+  children?: CamoASTNode[];
+}
+
+// Normalized IR operation used downstream by optimizer/renderer
+type OperationBucket = 1 | 2 | 3 | 4 | 5; // visual→state
+
+interface CamoIRInstruction {
+  id: string;                         // stable per-line id
+  bucket: OperationBucket;            // from KEYWORD_SPECS.priorityBucket
+  target: NormalizedSelector;         // from selector normalization
+  effect?: {
+    type: string;                     // e.g., 'blur', 'redact'
+    params: Record<string, string | number | boolean>;
+  };
+  outcome?: string;                   // outcome symbol for debug/UX
+  conditions?: Condition[];           // optional evaluator predicates
+  children?: CamoIRInstruction[];     // hierarchical mapping
+}
+
+function transformASTtoIR(ast: CamoAST): CamoIRInstruction[] {
+  // 1) Validate required zones per KEYWORD_SPECS
+  // 2) Normalize targets (Docs/4 Selector Normalization)
+  // 3) Map keyword → bucket; effect/action → type/params
+  // 4) Extract conditions from ":^: IF{...}" nodes; pair with ELSE branch
+  // 5) Build hierarchical children chains preserving source order
+  return [];
+}
+```
+
+```text
+IR Transform Rules
+1) Bucket assignment is derived from KEYWORD_SPECS; missing bucket defaults to visual (1) for pure style ops.
+2) Children inherit parent target unless they specify a narrower selector; explicit overrides win.
+3) Conditional branches compile into mutually exclusive instruction sets guarded by Condition[].
+4) Optimizer consolidates identical (bucket,target,effect.type) by coalescing params and applying last-write-wins.
+5) Renderer consumes IR in bucket order (1→5), applying CSS classes/vars only.
+```
+
 ## 2. Conditional Logic Implementation
 
 ```typescript

@@ -1,0 +1,18 @@
+---
+description: Four Oath Mandatory Code Integration Standards.
+globs: **/*.ts,**/*.md,**/*.css
+alwaysApply: false
+---
+# THE OATHKEEPER
+
+I. _ACADIA_: `THOU SHALT NAY NEGLECT RESPONSIBILITY TO UPDATE DOCUMENTS`
+_ENSURE DOCUMENTATION STAYS RELEVANT AND UP TO DATE_
+- [Code_Documentation](./Docs/)
+- [TODO](./Docs/utility-docs/TODO)
+- [CHANGELOG](./Docs/utility-docs/CHANGELOG)
+
+II. _SLOTH_: `THY CODEBASE CHANGES MUST BE COMPLETE INTEGRATIONS` - PROHIBITED:{"snippets","placeholders","examples"}
+
+III. _GLUTTONY_: `THY MODULES BE SLIM, WELL ALLOCATED AND ORGANIZED` - Single Responsibility Principle utilizing modulated and adaptable, reusable codebase
+
+IV. _WRATH_: `THINE CODE MUST BE INTEGRATED SAFELY FOR FUTURE OATHKEEPERS` - ALWAYS check for code duplicates and similar existing integrations

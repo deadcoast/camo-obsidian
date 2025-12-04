@@ -1,7 +1,7 @@
 /**
  * Visual Effects Engine
  * Handles all visual transformations and effects for CAMO blocks
- * 
+ *
  * Based on specifications in Docs/7_systemArchitecture.md
  */
 
@@ -43,7 +43,7 @@ export class VisualEffectsEngine {
       blur: new GaussianBlurFilter(),
       pixelate: new PixelationFilter(),
       fade: new OpacityController(),
-      redact: new RedactionOverlay()
+      redact: new RedactionOverlay(),
     };
   }
 
@@ -57,13 +57,9 @@ export class VisualEffectsEngine {
   /**
    * Apply a visual effect to an element
    */
-  applyEffect(
-    element: HTMLElement,
-    effectType: string,
-    parameters: EffectParameters
-  ): void {
+  applyEffect(element: HTMLElement, effectType: string, parameters: EffectParameters): void {
     const effect = this.createEffect(effectType, parameters);
-    
+
     // Add CSS classes
     effect.cssClasses.forEach(className => {
       element.addClass(className);
@@ -109,7 +105,7 @@ export class VisualEffectsEngine {
       priority: this.getEffectPriority(type),
       parameters: new Map(Object.entries(parameters)),
       cssClasses: [],
-      cssProperties: new Map()
+      cssProperties: new Map(),
     };
 
     switch (type) {
@@ -256,17 +252,17 @@ export class VisualEffectsEngine {
       }
 
       @keyframes camo-scramble {
-        0%, 100% { 
-          transform: translateX(0); 
+        0%, 100% {
+          transform: translateX(0);
         }
-        25% { 
-          transform: translateX(-1px) scale(1.01); 
+        25% {
+          transform: translateX(-1px) scale(1.01);
         }
-        50% { 
-          transform: translateX(1px) scale(0.99); 
+        50% {
+          transform: translateX(1px) scale(0.99);
         }
-        75% { 
-          transform: translateX(-0.5px) scale(1.005); 
+        75% {
+          transform: translateX(-0.5px) scale(1.005);
         }
       }
 
@@ -278,19 +274,19 @@ export class VisualEffectsEngine {
 
       @keyframes camo-glitch {
         0%, 100% {
-          text-shadow: 
+          text-shadow:
             0.05em 0 0 rgba(255,0,0,0.75),
             -0.05em -0.025em 0 rgba(0,255,0,0.75),
             0.025em 0.05em 0 rgba(0,0,255,0.75);
         }
         14% {
-          text-shadow: 
+          text-shadow:
             0.05em 0 0 rgba(255,0,0,0.75),
             -0.05em -0.025em 0 rgba(0,255,0,0.75),
             0.025em 0.05em 0 rgba(0,0,255,0.75);
         }
         15% {
-          text-shadow: 
+          text-shadow:
             -0.05em -0.025em 0 rgba(255,0,0,0.75),
             0.025em 0.025em 0 rgba(0,255,0,0.75),
             -0.05em -0.05em 0 rgba(0,0,255,0.75);
@@ -333,12 +329,12 @@ export class VisualEffectsEngine {
 
   private getEffectPriority(type: string): number {
     const priorities: Record<string, number> = {
-      'blur': 1,
-      'pixelate': 1,
-      'fade': 2,
-      'redact': 3,
-      'scramble': 4,
-      'glitch': 5
+      blur: 1,
+      pixelate: 1,
+      fade: 2,
+      redact: 3,
+      scramble: 4,
+      glitch: 5,
     };
     return priorities[type] || 10;
   }
@@ -380,14 +376,14 @@ export class GlitchEffect {
 }
 
 export class RedactionOverlay {
-  apply(element: HTMLElement, color: string = '#000000'): void {
+  apply(element: HTMLElement, color = '#000000'): void {
     element.addClass('camo-effect-redact');
     element.style.setProperty('--redact-color', color);
   }
 }
 
 export class TextScrambler {
-  apply(element: HTMLElement, speed: string = '0.5s'): void {
+  apply(element: HTMLElement, speed = '0.5s'): void {
     element.addClass('camo-effect-scramble');
     element.style.setProperty('--scramble-duration', speed);
   }
